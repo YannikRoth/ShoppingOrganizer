@@ -5,11 +5,15 @@ import android.content.Context;
 import org.junit.Test;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 import ch.fhnw.shoppingorganizer.model.Globals;
 import ch.fhnw.shoppingorganizer.model.businessobject.Category;
 import ch.fhnw.shoppingorganizer.model.businessobject.ShoppingItem;
 import ch.fhnw.shoppingorganizer.model.businessobject.ShoppingItemBuilder;
+import ch.fhnw.shoppingorganizer.model.businessobject.ShoppingList;
+import ch.fhnw.shoppingorganizer.model.businessobject.ShoppingListBuilder;
 import ch.fhnw.shoppingorganizer.model.businessobject.ShoppingListItem;
 import ch.fhnw.shoppingorganizer.model.businessobject.ShoppingListItemBuilder;
 
@@ -60,5 +64,36 @@ public class ExampleUnitTest {
                 .build();
 
         assertEquals(BigDecimal.valueOf(36.9), shoppingListItem.getTotalItemPrice());
+    }
+
+    @Test
+    public void testShoppingList(){
+        ShoppingItem shoppingItem = new ShoppingItemBuilder()
+                .withCategory(Category.VEGETABLES)
+                .withPrice(BigDecimal.valueOf(12.30))
+                .withItemActive(Globals.STATE_ACTIVE)
+                .build();
+
+        ShoppingListItem shoppingListItem = new ShoppingListItemBuilder()
+                .withQuantity(3)
+                .withShoppingItem(shoppingItem)
+                .build();
+
+        ShoppingListItem shoppingListItem2 = new ShoppingListItemBuilder()
+                .withQuantity(2)
+                .withShoppingItem(shoppingItem)
+                .build();
+
+        List<ShoppingListItem> myShoppingList = new ArrayList<>();
+        myShoppingList.add(shoppingListItem);
+        myShoppingList.add(shoppingListItem2);
+
+        ShoppingList shoppingList = new ShoppingListBuilder()
+                .withListName("TestList")
+                .withShoppingListItems(myShoppingList)
+                .build();
+
+        assertEquals(BigDecimal.valueOf(61.5), shoppingList.getTotalPrice());
+        assertEquals(5, shoppingList.getTotalQuantity());
     }
 }
