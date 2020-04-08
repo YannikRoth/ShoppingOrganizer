@@ -1,5 +1,7 @@
 package ch.fhnw.shoppingorganizer.model.businessobject;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.math.BigDecimal;
 import java.nio.file.Path;
 
@@ -8,6 +10,13 @@ public class ShoppingItemBuilder {
     private String itemName;
     private boolean itemActive;
     private Path imgPath;
+
+    public ShoppingItemBuilder(){
+        //set default values
+        this.price = BigDecimal.ZERO;
+        this.itemName = StringUtils.EMPTY;
+        this.itemActive = true;
+    }
 
     public ShoppingItemBuilder withPrice(BigDecimal price){
         this.price = price;
