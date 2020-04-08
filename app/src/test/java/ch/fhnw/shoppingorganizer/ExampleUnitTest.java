@@ -10,6 +10,8 @@ import ch.fhnw.shoppingorganizer.model.Globals;
 import ch.fhnw.shoppingorganizer.model.businessobject.Category;
 import ch.fhnw.shoppingorganizer.model.businessobject.ShoppingItem;
 import ch.fhnw.shoppingorganizer.model.businessobject.ShoppingItemBuilder;
+import ch.fhnw.shoppingorganizer.model.businessobject.ShoppingListItem;
+import ch.fhnw.shoppingorganizer.model.businessobject.ShoppingListItemBuilder;
 
 import static org.junit.Assert.*;
 
@@ -42,5 +44,21 @@ public class ExampleUnitTest {
 
         assertEquals(BigDecimal.valueOf(12.30), shoppingItem.getPrice());
         assertEquals(Category.VEGETABLES, shoppingItem.getCategory());
+    }
+
+    @Test
+    public void testShoppigItemList(){
+        ShoppingItem shoppingItem = new ShoppingItemBuilder()
+                .withCategory(Category.VEGETABLES)
+                .withPrice(BigDecimal.valueOf(12.30))
+                .withItemActive(Globals.STATE_ACTIVE)
+                .build();
+
+        ShoppingListItem shoppingListItem = new ShoppingListItemBuilder()
+                .withQuantity(3)
+                .withShoppingItem(shoppingItem)
+                .build();
+
+        assertEquals(BigDecimal.valueOf(36.9), shoppingListItem.getTotalItemPrice());
     }
 }
