@@ -4,7 +4,12 @@ import android.content.Context;
 
 import org.junit.Test;
 
+import java.math.BigDecimal;
+
+import ch.fhnw.shoppingorganizer.model.Globals;
 import ch.fhnw.shoppingorganizer.model.businessobject.Category;
+import ch.fhnw.shoppingorganizer.model.businessobject.ShoppingItem;
+import ch.fhnw.shoppingorganizer.model.businessobject.ShoppingItemBuilder;
 
 import static org.junit.Assert.*;
 
@@ -25,5 +30,17 @@ public class ExampleUnitTest {
 
         Category c = Category.getById(2);
         assertEquals("MEAT", c.name());
+    }
+
+    @Test
+    public void testShoppingItemBuilder(){
+        ShoppingItem shoppingItem = new ShoppingItemBuilder()
+                .withCategory(Category.VEGETABLES)
+                .withPrice(BigDecimal.valueOf(12.30))
+                .withItemActive(Globals.STATE_ACTIVE)
+                .build();
+
+        assertEquals(BigDecimal.valueOf(12.30), shoppingItem.getPrice());
+        assertEquals(Category.VEGETABLES, shoppingItem.getCategory());
     }
 }

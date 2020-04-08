@@ -1,4 +1,4 @@
 package ch.fhnw.shoppingorganizer.model.businessobject;
 
-public class ListItem {
+public class ShoppingListItem {
 }
