@@ -4,13 +4,23 @@ import java.math.BigDecimal;
 import java.nio.file.Path;
 
 public class ShoppingItem {
+    private long id;
     private BigDecimal price;
     private String itemName;
     private boolean itemActive;
     private Path imgPath;
+    private Category category;
 
     protected ShoppingItem(){
 
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
     }
 
     public BigDecimal getPrice() {
@@ -43,5 +53,13 @@ public class ShoppingItem {
 
     public void setImgPath(Path imgPath) {
         this.imgPath = imgPath;
+    }
+
+    public Category getCategory() {
+        return category;
+    }
+
+    public void setCategory(Category category) {
+        this.category = category;
     }
 }
