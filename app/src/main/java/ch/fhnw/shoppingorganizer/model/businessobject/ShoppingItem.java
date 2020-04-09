@@ -20,7 +20,7 @@ public class ShoppingItem extends Model {
     private boolean itemActive;
 
     @Column(name="itemPath")
-    private Path imgPath;
+    private String imgPath;
 
     @Column(name = "category")
     private Category category;
@@ -53,11 +53,11 @@ public class ShoppingItem extends Model {
         this.itemActive = itemActive;
     }
 
-    public Path getImgPath() {
+    public String getImgPath() {
         return imgPath;
     }
 
-    public void setImgPath(Path imgPath) {
+    public void setImgPath(String imgPath) {
         this.imgPath = imgPath;
     }
 

@@ -8,7 +8,7 @@ public class ShoppingItemBuilder {
     private BigDecimal price;
     private String itemName;
     private boolean itemActive;
-    private Path imgPath;
+    private String imgPath;
     private Category category;
 
     public ShoppingItemBuilder(){
@@ -34,7 +34,7 @@ public class ShoppingItemBuilder {
         return this;
     }
 
-    public ShoppingItemBuilder withImgPath(Path imgPath){
+    public ShoppingItemBuilder withImgPath(String imgPath){
         this.imgPath = imgPath;
         return this;
     }

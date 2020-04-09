@@ -11,6 +11,13 @@
         android:theme="@style/AppTheme"
         android:name="com.activeandroid.app.Application">
 
+        <provider
+            android:name="com.activeandroid.content.ContentProvider"
+            android:authorities="ch.fhnw.shoppingorganizer"
+            android:enabled="true"
+            android:exported="false">
+        </provider>
+
         <meta-data
             android:name="AA_DB_NAME"
             android:value="ShoppingOrganizer.db" />
