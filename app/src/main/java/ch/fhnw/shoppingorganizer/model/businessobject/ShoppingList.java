@@ -11,6 +11,7 @@ import com.activeandroid.annotation.Table;
 import java.math.BigDecimal;
 import java.util.List;
 
+import ch.fhnw.shoppingorganizer.model.database.RepositoryProvider;
 import ch.fhnw.shoppingorganizer.model.database.ShoppingListRepository;
 
 @RequiresApi(api = Build.VERSION_CODES.N)
@@ -56,7 +57,7 @@ public class ShoppingList extends Model {
 
     private List<ShoppingListItem> getShoppingListItemsFromDB(boolean bypassCache){
         if(this.shoppingListItems == null || bypassCache){
-            this.shoppingListItems = new ShoppingListRepository().getShoppingListItems(this);
+            this.shoppingListItems = RepositoryProvider.getShoppingListRepositoryInstance().getShoppingListItems(this);
         }
         return this.shoppingListItems;
     }

@@ -16,6 +16,8 @@ import ch.fhnw.shoppingorganizer.model.businessobject.ShoppingListItem;
 @RequiresApi(api = Build.VERSION_CODES.N)
 public class ShoppingListRepository extends AbstractRepository{
 
+    protected ShoppingListRepository(){}
+
     /**
      * Returns a list of elements found in the ShoppingList table.
      */

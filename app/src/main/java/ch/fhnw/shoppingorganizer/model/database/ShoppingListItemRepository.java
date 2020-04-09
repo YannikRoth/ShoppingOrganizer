@@ -9,6 +9,7 @@ import ch.fhnw.shoppingorganizer.model.businessobject.ShoppingListItem;
 
 public class ShoppingListItemRepository extends AbstractRepository{
 
+    protected ShoppingListItemRepository(){}
     @Override
     public List<ShoppingListItem> getAllItems() {
         return new Select().from(ShoppingListItem.class).execute();
