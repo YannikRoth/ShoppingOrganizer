@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.res.AssetManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.widget.TextView;
 
 import com.activeandroid.ActiveAndroid;
 import com.activeandroid.query.Select;
@@ -34,6 +35,18 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        //display basic values from database (as an example for the GUI guys)
+        // IMPORTATN FOR GUI PEOPLE: always interact with database using the RepositoryProvider for each business object
+        TextView tv = findViewById(R.id.tvHelloWorld);
+        String allElements = RepositoryProvider.getShoppingItemRepositoryInstance()
+                .getAllItems()
+                .stream()
+                .map(item -> item.getItemName() + " ->")
+                .reduce(String::concat)
+                .get();
+        tv.setText(allElements);
+
 
         //import masterdata to database if empty
         if(DbUtils.isEmpty(ShoppingItem.class)) {
