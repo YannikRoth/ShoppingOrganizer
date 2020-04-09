@@ -22,7 +22,7 @@ public class ShoppingItem extends Model {
     @Column(name="itemPath")
     private String imgPath;
 
-    @Column(name = "category")
+    @Column(name = "category", notNull = true, onNullConflict = Column.ConflictAction.FAIL)
     private Category category;
 
     public ShoppingItem(){

@@ -15,10 +15,10 @@ public class ShoppingListItem extends Model {
     @Column(name="itemState")
     private boolean itemState; //when true, item is selected
 
-    @Column(name="shoppingItem")
+    @Column(name="shoppingItem", notNull = true, onNullConflict = Column.ConflictAction.FAIL)
     private ShoppingItem shoppingItem;
 
-    @Column(name="shoppingList")
+    @Column(name="shoppingList", notNull = true, onNullConflict = Column.ConflictAction.FAIL)
     private ShoppingList shoppingList;
 
     public ShoppingListItem(){}
