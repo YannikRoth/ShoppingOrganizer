@@ -1,7 +1,5 @@
 package ch.fhnw.shoppingorganizer.model.businessobject;
 
-import org.apache.commons.lang3.EnumUtils;
-
 public enum Category {
     NONE(0), PASTA(1), MEAT(2), VEGETABLES(3);
 

@@ -1,12 +1,10 @@
 package ch.fhnw.shoppingorganizer.model.businessobject;
 
-import org.apache.commons.lang3.StringUtils;
 
 import java.math.BigDecimal;
 import java.nio.file.Path;
 
 public class ShoppingItemBuilder {
-    private long id;
     private BigDecimal price;
     private String itemName;
     private boolean itemActive;
@@ -16,14 +14,9 @@ public class ShoppingItemBuilder {
     public ShoppingItemBuilder(){
         //set default values
         this.price = BigDecimal.ZERO;
-        this.itemName = StringUtils.EMPTY;
+        this.itemName = "";
         this.itemActive = true;
         this.category = Category.NONE;
-    }
-
-    public ShoppingItemBuilder withId(long id){
-        this.id = id;
-        return this;
     }
 
     public ShoppingItemBuilder withPrice(BigDecimal price){

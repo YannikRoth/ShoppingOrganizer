@@ -4,6 +4,8 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
 
+import com.activeandroid.ActiveAndroid;
+
 import ch.fhnw.shoppingorganizer.R;
 
 public class MainActivity extends AppCompatActivity {
