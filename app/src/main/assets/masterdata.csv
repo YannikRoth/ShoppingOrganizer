@@ -1,0 +1,14 @@
+﻿category;itemPath;itemActive;itemName;price
+MEAT;a/b/c;1;Rind;20.3
+MEAT;a/b/c;1;Schwein;15.2
+MEAT;a/b/c;1;Geflügel;11.2
+NONFOOD;a/b/c;1;Shampoo;5.3
+NONFOOD;a/b/c;1;WC-Papier;1.2
+VEGETABLES;a/b/c;1;Apfel;0.9
+VEGETABLES;a/b/c;1;Erdbeeren;4.2
+VEGETABLES;a/b/c;1;Karrotten;2.2
+VEGETABLES;a/b/c;1;Lauch;1.7
+VEGETABLES;a/b/c;1;Avocado;2.3
+FISH;a/b/c;1;Forelle;7.6
+FISH;a/b/c;1;Lachs;8
+PASTA;a/b/c;1;Barilla;2.75

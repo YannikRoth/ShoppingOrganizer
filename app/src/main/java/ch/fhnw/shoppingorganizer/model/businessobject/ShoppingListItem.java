@@ -1,23 +1,27 @@
 package ch.fhnw.shoppingorganizer.model.businessobject;
 
+import com.activeandroid.Model;
+import com.activeandroid.annotation.Column;
+import com.activeandroid.annotation.Table;
+
 import java.math.BigDecimal;
 
-public class ShoppingListItem {
-    private long id;
+@Table(name ="ShoppingListItem")
+public class ShoppingListItem extends Model {
+
+    @Column(name = "quantity")
     private long quantity;
+
+    @Column(name="itemState")
     private boolean itemState; //when true, item is selected
+
+    @Column(name="shoppingItem", notNull = true, onNullConflict = Column.ConflictAction.FAIL)
     private ShoppingItem shoppingItem;
+
+    @Column(name="shoppingList", notNull = true, onNullConflict = Column.ConflictAction.FAIL)
     private ShoppingList shoppingList;
 
-    protected ShoppingListItem(){}
-
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
+    public ShoppingListItem(){}
 
     public long getQuantity() {
         return quantity;
