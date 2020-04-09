@@ -11,6 +11,9 @@ import com.activeandroid.annotation.Table;
 import java.math.BigDecimal;
 import java.util.List;
 
+import ch.fhnw.shoppingorganizer.model.database.ShoppingListRepository;
+
+@RequiresApi(api = Build.VERSION_CODES.N)
 @Table(name="ShoppingList")
 public class ShoppingList extends Model {
 
@@ -30,33 +33,31 @@ public class ShoppingList extends Model {
     }
 
     public List<ShoppingListItem> getShoppingListItems() {
-        return shoppingListItems;
+        return getShoppingListItemsFromDB(false);
     }
 
     public void setShoppingListItems(List<ShoppingListItem> shoppingListItems) {
         this.shoppingListItems = shoppingListItems;
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.N)
     public BigDecimal getTotalPrice(){
-        BigDecimal result = BigDecimal.ZERO;
-        if(this.shoppingListItems != null){
-            result = this.shoppingListItems.stream()
-                    .map(listItem -> listItem.getTotalItemPrice())
-                    .reduce(BigDecimal.ZERO, BigDecimal::add);
-        }
+        return getShoppingListItemsFromDB(false).stream()
+                .map(listItem -> listItem.getTotalItemPrice())
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        return result;
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.N)
+
     public long getTotalQuantity(){
-        long result = 0;
-        if(this.shoppingListItems != null){
-            result = this.shoppingListItems.stream()
-                    .map(listItem -> listItem.getQuantity())
-                    .reduce(Long.valueOf(0), Long::sum);
+        return getShoppingListItemsFromDB(false).stream()
+                .map(listItem -> listItem.getQuantity())
+                .reduce(Long.valueOf(0), Long::sum);
+    }
+
+    private List<ShoppingListItem> getShoppingListItemsFromDB(boolean bypassCache){
+        if(this.shoppingListItems == null || bypassCache){
+            this.shoppingListItems = new ShoppingListRepository().getShoppingListItems(this);
         }
-        return result;
+        return this.shoppingListItems;
     }
 }
