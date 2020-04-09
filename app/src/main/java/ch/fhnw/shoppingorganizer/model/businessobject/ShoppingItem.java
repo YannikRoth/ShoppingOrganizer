@@ -1,26 +1,32 @@
 package ch.fhnw.shoppingorganizer.model.businessobject;
 
+import com.activeandroid.Model;
+import com.activeandroid.annotation.Column;
+import com.activeandroid.annotation.Table;
+
 import java.math.BigDecimal;
 import java.nio.file.Path;
 
-public class ShoppingItem {
-    private long id;
+@Table(name="ShoppingItem")
+public class ShoppingItem extends Model {
+
+    @Column(name="price")
     private BigDecimal price;
+
+    @Column(name="itemName")
     private String itemName;
+
+    @Column(name="itemActive")
     private boolean itemActive;
+
+    @Column(name="itemPath")
     private Path imgPath;
+
+    @Column(name = "category")
     private Category category;
 
-    protected ShoppingItem(){
+    public ShoppingItem(){
 
-    }
-
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
     }
 
     public BigDecimal getPrice() {

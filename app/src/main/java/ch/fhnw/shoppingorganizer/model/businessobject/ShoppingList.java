@@ -4,23 +4,22 @@ import android.os.Build;
 
 import androidx.annotation.RequiresApi;
 
+import com.activeandroid.Model;
+import com.activeandroid.annotation.Column;
+import com.activeandroid.annotation.Table;
+
 import java.math.BigDecimal;
 import java.util.List;
 
-public class ShoppingList {
-    private long id;
+@Table(name="ShoppingList")
+public class ShoppingList extends Model {
+
+    @Column(name="listName")
     private String listName;
+
     private List<ShoppingListItem> shoppingListItems;
 
-    protected ShoppingList(){}
-
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
+    public ShoppingList(){}
 
     public String getListName() {
         return listName;

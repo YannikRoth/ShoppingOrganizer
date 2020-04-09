@@ -3,7 +3,6 @@ package ch.fhnw.shoppingorganizer.model.businessobject;
 import java.math.BigDecimal;
 
 public class ShoppingListItemBuilder {
-    private long id;
     private long quantity;
     private BigDecimal totalItemPrice;
     private boolean itemState; //when true, item is selected
@@ -13,11 +12,6 @@ public class ShoppingListItemBuilder {
     public ShoppingListItemBuilder(){
         this.quantity = 0;
         this.totalItemPrice = BigDecimal.ZERO;
-    }
-
-    public ShoppingListItemBuilder withId(long id){
-        this.id = id;
-        return this;
     }
 
     public ShoppingListItemBuilder withQuantity(long quantity){
@@ -43,7 +37,6 @@ public class ShoppingListItemBuilder {
 
     public ShoppingListItem build(){
         ShoppingListItem shoppingListItem = new ShoppingListItem();
-        shoppingListItem.setId(this.id);
         shoppingListItem.setQuantity(this.quantity);
         shoppingListItem.setItemState(this.itemState);
         shoppingListItem.setShoppingItem(this.shoppingItem);
