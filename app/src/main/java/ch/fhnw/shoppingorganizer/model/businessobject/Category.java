@@ -1,7 +1,7 @@
 package ch.fhnw.shoppingorganizer.model.businessobject;
 
 public enum Category {
-    NONE(0), PASTA(1), MEAT(2), VEGETABLES(3);
+    NONE(0), PASTA(1), MEAT(2), VEGETABLES(3), NONFOOD(4), FISH(5);
 
     private int id;
 
