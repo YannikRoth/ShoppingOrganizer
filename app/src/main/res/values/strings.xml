@@ -1,3 +1,32 @@
 <resources>
     <string name="app_name">ShoppingOrganizer</string>
+
+    <string name="shopping_lists_title">Shopping Lists</string>
+    <string name="shopping_lists_no_results">There is no lists</string>
+    <string name="shopping_lists_search_menu">Search</string>
+
+    <string name="shopping_lists_popup_title">Shopping List Name</string>
+    <string name="shopping_lists_popup_message">Add new name for the list</string>
+    <string name="shopping_lists_popup_yes_btn">Add</string>
+    <string name="shopping_lists_popup_no_btn">Cancel</string>
+
+    <string name="edit_item_name">Name</string>
+    <string name="edit_item_price">Price</string>
+    <string name="edit_item_active">Active</string>
+    <string name="edit_item_image_description">Click on Picture: Open\nCamera to take a picture\nor pick a picture from\nphones file-explorer</string>
+
+    <string-array name="test_shopping_lists">
+        <item>List 1</item>
+        <item>List 2</item>
+        <item>List 3</item>
+        <item>List 4</item>
+        <item>List 1</item>
+        <item>List 2</item>
+        <item>List 3</item>
+        <item>List 4</item>
+        <item>List 1</item>
+        <item>List 2</item>
+        <item>List 3</item>
+        <item>List 4</item>
+    </string-array>
 </resources>
