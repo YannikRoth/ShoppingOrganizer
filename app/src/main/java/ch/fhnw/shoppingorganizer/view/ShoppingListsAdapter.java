@@ -59,9 +59,9 @@ public class ShoppingListsAdapter extends RecyclerView.Adapter<ShoppingListsAdap
 
     @Override
     public Filter getFilter() {
-        return shoppingListFilter;
+        return shoppingListsFilter;
     }
-    private Filter shoppingListFilter = new Filter() {
+    private Filter shoppingListsFilter = new Filter() {
         @Override
         protected FilterResults performFiltering(CharSequence constraint) {
             List<ShoppingList> filteredList = new ArrayList<>();

@@ -6,6 +6,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -17,6 +19,7 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -30,15 +33,17 @@ import ch.fhnw.shoppingorganizer.model.businessobject.ShoppingListItem;
 import ch.fhnw.shoppingorganizer.model.businessobject.ShoppingListItemBuilder;
 import ch.fhnw.shoppingorganizer.model.database.RepositoryProvider;
 
-public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapter.ShoppingListItemHolder> implements ItemTouchHelperAdapter {
+public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapter.ShoppingListItemHolder> implements ItemTouchHelperAdapter, Filterable {
     private ShoppingList shoppingList;
     private List<ShoppingItem> shoppingItem;
+    private List<ShoppingItem> shoppingItemFull;
     private ShoppingListItemListener listItemListener;
     private final String TAG = this.getClass().getSimpleName();
 
     ShoppingListAdapter(ShoppingList shoppingList, List<ShoppingItem> shoppingItem, List<ShoppingListItem> shoppingListItem, ShoppingListItemListener listener) {
         this.shoppingList = shoppingList;
         this.shoppingItem = shoppingItem;
+        shoppingItemFull = new ArrayList<ShoppingItem>(shoppingItem);
         this.listItemListener = listener;
     }
 
@@ -112,6 +117,37 @@ public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapte
         Log.d("ShoppingListAdapter", "Swiped to the right");
         listItemListener.onSwipeRight(position);
     }
+
+    @Override
+    public Filter getFilter() {
+        return shoppingListFilter;
+    }
+    private Filter shoppingListFilter = new Filter() {
+        @Override
+        protected FilterResults performFiltering(CharSequence constraint) {
+            List<ShoppingItem> filteredList = new ArrayList<ShoppingItem>();
+            if(constraint == null || constraint.length() == 0)
+                filteredList.addAll(shoppingItemFull);
+            else {
+                String filterPattern = constraint.toString().toLowerCase().trim();
+                for(ShoppingItem l:shoppingItemFull) {
+                    if(l.getItemName().toLowerCase().contains(filterPattern)
+                    || l.getCategory().toString().toLowerCase().contains(filterPattern))
+                        filteredList.add(l);
+                }
+            }
+            FilterResults results = new FilterResults();
+            results.values = filteredList;
+            return results;
+        }
+
+        @Override
+        protected void publishResults(CharSequence constraint, FilterResults results) {
+            shoppingItem.clear();
+            shoppingItem.addAll((List)results.values);
+            notifyDataSetChanged();
+        }
+    };
 
     class ShoppingListItemHolder extends RecyclerView.ViewHolder implements ItemTouchHelperViewHolder {
 

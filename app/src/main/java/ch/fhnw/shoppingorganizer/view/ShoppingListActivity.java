@@ -156,7 +156,7 @@ public class ShoppingListActivity extends AppCompatActivity implements ShoppingL
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                // Called when the query text is changed by the user
+                adapter.getFilter().filter(newText);
                 return true;
             }
         });
