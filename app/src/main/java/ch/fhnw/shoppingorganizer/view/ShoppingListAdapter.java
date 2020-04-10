@@ -12,14 +12,26 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import ch.fhnw.shoppingorganizer.R;
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.stream.Collectors;
 
-public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapter.ShoppingListItem> implements ItemTouchHelperAdapter {
-    private String[] shoppingList;
+import ch.fhnw.shoppingorganizer.R;
+import ch.fhnw.shoppingorganizer.model.Globals;
+import ch.fhnw.shoppingorganizer.model.businessobject.ShoppingItem;
+import ch.fhnw.shoppingorganizer.model.businessobject.ShoppingList;
+import ch.fhnw.shoppingorganizer.model.businessobject.ShoppingListItem;
+import ch.fhnw.shoppingorganizer.model.businessobject.ShoppingListItemBuilder;
+import ch.fhnw.shoppingorganizer.model.database.RepositoryProvider;
+
+public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapter.ShoppingListItemHolder> implements ItemTouchHelperAdapter {
+    private ShoppingList shoppingList;
+    private List<ShoppingItem> shoppingItem;
     private ShoppingListItemListener listItemListener;
 
-    ShoppingListAdapter(String[] shoppingLists, ShoppingListItemListener listener) {
-        this.shoppingList = shoppingLists;
+    ShoppingListAdapter(ShoppingList shoppingList, List<ShoppingItem> shoppingItem, List<ShoppingListItem> shoppingListItem, ShoppingListItemListener listener) {
+        this.shoppingList = shoppingList;
+        this.shoppingItem = shoppingItem;
         this.listItemListener = listener;
     }
 
@@ -28,20 +40,36 @@ public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapte
      */
     @NonNull
     @Override
-    public ShoppingListAdapter.ShoppingListItem onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        return new ShoppingListAdapter.ShoppingListItem(LayoutInflater.from(parent.getContext()).inflate(R.layout.shopping_list_item, parent, false));
+    public ShoppingListAdapter.ShoppingListItemHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        return new ShoppingListAdapter.ShoppingListItemHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.shopping_list_item, parent, false));
     }
 
     /**
      * RecyclerView internal method which will called for each item after change
      */
     @Override
-    public void onBindViewHolder(@NonNull ShoppingListAdapter.ShoppingListItem holder, int position) {
-        holder.itemName.setText("Name: " + position);
+    public void onBindViewHolder(@NonNull ShoppingListAdapter.ShoppingListItemHolder holder, int position) {
+        ShoppingItem item = shoppingItem.get(position);
+        ShoppingListItem listItem = null;
+        for (ShoppingListItem it:shoppingList.getShoppingListItems()) {
+            if(it.getShoppingItem().equals(item)) {
+                listItem = it;
+                break;
+            }
+        }
+        holder.itemName.setText("Name: " + item.getItemName());
         holder.itemImage.setImageResource(R.mipmap.ic_launcher);
 
-        float price = Integer.parseInt(holder.inputQuantity.getText().toString()) * position;
-        holder.itemPrice.setText(String.format("CHF %.2f", price));
+        if(listItem != null) {
+            holder.itemPrice.setText(String.format("CHF %.2f", listItem.getTotalItemPrice()));
+            holder.inputQuantity.setText(String.format("%o", listItem.getQuantity()) );
+        } else {
+            holder.itemPrice.setText(String.format("CHF %.2f", 0.00));
+            holder.inputQuantity.setText(String.format("%o", 0) );
+
+        }
+
+        Log.d("ShoppingListAdapter", "onBindViewHolder: end");
     }
 
     /**
@@ -49,7 +77,7 @@ public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapte
      */
     @Override
     public int getItemCount() {
-        return shoppingList.length;
+        return shoppingItem.size();
     }
 
     /**
@@ -69,7 +97,7 @@ public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapte
         listItemListener.onSwipeRight();
     }
 
-    class ShoppingListItem extends RecyclerView.ViewHolder implements ItemTouchHelperViewHolder {
+    class ShoppingListItemHolder extends RecyclerView.ViewHolder implements ItemTouchHelperViewHolder {
 
         TextView itemName;
         TextView itemPrice;
@@ -78,7 +106,7 @@ public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapte
         ImageButton decreaseQuantity;
         EditText inputQuantity;
 
-        ShoppingListItem(@NonNull View itemView) {
+        ShoppingListItemHolder(@NonNull View itemView) {
             super(itemView);
             itemName = itemView.findViewById(R.id.txtItemTitle);
             itemPrice = itemView.findViewById(R.id.txtPrice);
@@ -95,6 +123,48 @@ public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapte
             });
         }
 
+        private void handleShoppingListItem(int number) {
+            ShoppingItem item = shoppingItem.get(this.getAdapterPosition());
+            ShoppingListItem listItem = null;
+            Log.e("TAG", "Search for: " + item);
+            for (ShoppingListItem it:shoppingList.getShoppingListItems()) {
+                Log.e("TAG", "handleShoppingListItem: " + it);
+
+                if(it.getShoppingItem().equals(item)) {
+                    listItem = it;
+                    break;
+                }
+            }
+
+            if(number == 0 && listItem != null) {
+                RepositoryProvider.getShoppingListItemRepositoryInstance()
+                        .deleteEntity(listItem);
+                shoppingList.getShoppingListItems().remove(listItem);
+                notifyItemRemoved(this.getAdapterPosition());
+                return;
+            }
+
+            if(listItem == null) {
+                listItem = new ShoppingListItemBuilder()
+                        .withShoppingItem(item)
+                        .withShoppingList(shoppingList)
+                        .withQuantity(number)
+                        .withItemState(Globals.STATE_SELECTED)
+                        .build();
+            } else
+                listItem.setQuantity(number);
+            RepositoryProvider.getShoppingListItemRepositoryInstance()
+                    .saveEntity(listItem);
+            if(shoppingList.getShoppingListItems().contains(listItem)) {
+                shoppingList.getShoppingListItems().set(shoppingList.getShoppingListItems().indexOf(listItem), listItem);
+                notifyItemChanged(this.getAdapterPosition());
+
+            } else {
+                shoppingList.getShoppingListItems().add(listItem);
+                notifyDataSetChanged();
+            }
+        }
+
         private void increaseQuantity() {
             String text = inputQuantity.getText().toString();
             int number = Integer.parseInt(text);
@@ -103,6 +173,8 @@ public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapte
                 inputQuantity.setText(Integer.toString(number));
             }
             setPrice(number);
+
+            handleShoppingListItem(number);
         }
 
         private void decreaseQuantity() {
@@ -113,6 +185,8 @@ public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapte
                 inputQuantity.setText(Integer.toString(number));
             }
             setPrice(number);
+
+            handleShoppingListItem(number);
         }
 
         private void setPrice(int number) {

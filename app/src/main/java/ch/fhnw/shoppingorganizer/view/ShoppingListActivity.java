@@ -2,6 +2,8 @@ package ch.fhnw.shoppingorganizer.view;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.style.ReplacementSpan;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -18,8 +20,15 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
-import ch.fhnw.shoppingorganizer.R;
+import java.util.List;
 
+import ch.fhnw.shoppingorganizer.R;
+import ch.fhnw.shoppingorganizer.model.businessobject.ShoppingItem;
+import ch.fhnw.shoppingorganizer.model.businessobject.ShoppingList;
+import ch.fhnw.shoppingorganizer.model.businessobject.ShoppingListItem;
+import ch.fhnw.shoppingorganizer.model.database.RepositoryProvider;
+
+import static ch.fhnw.shoppingorganizer.view.MainActivity.LIST_ID;
 import static ch.fhnw.shoppingorganizer.view.MainActivity.LIST_NAME;
 
 public class ShoppingListActivity extends AppCompatActivity implements ShoppingListItemListener {
@@ -27,6 +36,7 @@ public class ShoppingListActivity extends AppCompatActivity implements ShoppingL
     public static final String SHOPPING_LIST_NAME = "Shopping list name";
     public static final String ITEM_NAME_EXTRA = "Item name";
     public static final int EDIT_REQUEST_CODE = 123;
+    private final String TAG = this.getClass().getSimpleName();
 
     private ShoppingListAdapter adapter;
 
@@ -35,24 +45,35 @@ public class ShoppingListActivity extends AppCompatActivity implements ShoppingL
     private RecyclerView rvShoppingLists;
     private TextView tvNoResults;
     private FloatingActionButton btnAdd;
-    private String[] testArray;
-    private String listName;
+
+    private List<ShoppingItem> shoppingItem;
+    private ShoppingList shoppingList;
+    private List<ShoppingListItem> shoppingListItems;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_shopping_list);
 
-        listName = getIntent().getStringExtra(LIST_NAME);
+        this.shoppingItem = RepositoryProvider.getShoppingItemRepositoryInstance().getAllItems();
+        Intent intent = getIntent();
+        Log.e(TAG, "onCreate NAME: " + intent.getStringExtra(LIST_NAME));
+        Log.e(TAG, "onCreate ID: " + intent.getLongExtra(LIST_ID, 0));
+        if(intent.hasExtra(LIST_ID) && intent.getLongExtra(LIST_ID, 0) > 0) {
+            this.shoppingList = RepositoryProvider
+                    .getShoppingListRepositoryInstance()
+                    .getShoppingListById(intent.getLongExtra(LIST_ID, 0));
+            this.shoppingListItems = RepositoryProvider.getShoppingListRepositoryInstance().getShoppingListItems(shoppingList);
+        }
 
-        initUi(listName);
+        initUi();
     }
 
-    private void initUi(String listName) {
+    private void initUi() {
         // Getting references to the Toolbar, ListView and TextView
         tbSearch = findViewById(R.id.toolbarShoppingList);
-        if (listName != null) {
-            tbSearch.setTitle(getString(R.string.shopping_lists_title) + " " + listName);
+        if (shoppingList.getListName() != null) {
+            tbSearch.setTitle(getString(R.string.shopping_lists_title) + " " + shoppingList.getListName());
         }
         // Set Toolbar as ActionBar
         if (tbSearch != null) {
@@ -62,13 +83,12 @@ public class ShoppingListActivity extends AppCompatActivity implements ShoppingL
         btnAdd = findViewById(R.id.btnAdd);
         btnAdd.setOnClickListener(v -> {
             Intent intent = new Intent(this, EditItemActivity.class);
-            intent.putExtra(SHOPPING_LIST_NAME, listName);
+            intent.putExtra(SHOPPING_LIST_NAME, shoppingList.getListName());
             startActivityForResult(intent, EDIT_REQUEST_CODE);
         });
         rvShoppingLists = findViewById(R.id.rvListItems);
         tvNoResults = findViewById(R.id.tvNoResults);
-        testArray = getResources().getStringArray(R.array.test_shopping_lists);
-        adapter = new ShoppingListAdapter(testArray, this);
+        adapter = new ShoppingListAdapter(shoppingList, shoppingItem, shoppingListItems, this);
         DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(this, DividerItemDecoration.VERTICAL);
         rvShoppingLists.addItemDecoration(dividerItemDecoration);
 
@@ -79,12 +99,12 @@ public class ShoppingListActivity extends AppCompatActivity implements ShoppingL
 
         rvShoppingLists.setLayoutManager(new LinearLayoutManager(this));
         rvShoppingLists.setAdapter(adapter);
-        setEmptyView(testArray);
+        setEmptyView(shoppingItem);
     }
 
-    private void setEmptyView(String[] shoppingLists) {
+    private void setEmptyView(List<ShoppingItem> shoppingLists) {
         // TextView Message about "No results"
-        if (shoppingLists.length == 0) {
+        if (shoppingLists.size() == 0) {
             rvShoppingLists.setVisibility(View.INVISIBLE);
             tvNoResults.setVisibility(View.VISIBLE);
         } else {
@@ -158,7 +178,7 @@ public class ShoppingListActivity extends AppCompatActivity implements ShoppingL
     @Override
     public void onHoldItem(String itemName) {
         Intent intent = new Intent(this, EditItemActivity.class);
-        intent.putExtra(SHOPPING_LIST_NAME, listName);
+        intent.putExtra(SHOPPING_LIST_NAME, shoppingList.getListName());
         intent.putExtra(ITEM_NAME_EXTRA, itemName);
         startActivityForResult(intent, EDIT_REQUEST_CODE);
     }
