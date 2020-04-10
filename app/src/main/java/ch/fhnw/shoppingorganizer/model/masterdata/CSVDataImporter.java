@@ -54,7 +54,7 @@ public class CSVDataImporter {
                 ShoppingItem shoppingItem = new ShoppingItemBuilder()
                         .withCategory(Category.valueOf(lineValues[categoryIndex].toUpperCase()))
                         .withImgPath(lineValues[pathIndex])
-                        .withItemActive(lineValues[itemActiveIndex]=="1" ? true : false)
+                        .withItemActive(Integer.parseInt(lineValues[itemActiveIndex])==1)
                         .withItemName(lineValues[itemNameIndex])
                         .withPrice(new BigDecimal(lineValues[itemPriceIndex]))
                         .build();
