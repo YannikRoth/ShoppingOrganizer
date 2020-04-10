@@ -136,6 +136,7 @@ public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapte
                 }
             }
 
+            //0 = Delete form List
             if(number == 0 && listItem != null) {
                 RepositoryProvider.getShoppingListItemRepositoryInstance()
                         .deleteEntity(listItem);
