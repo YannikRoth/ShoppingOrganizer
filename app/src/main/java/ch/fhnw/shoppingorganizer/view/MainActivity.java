@@ -111,7 +111,6 @@ public class MainActivity extends AppCompatActivity implements ShoppingListsItem
             RepositoryProvider.getShoppingListRepositoryInstance().saveEntity(shoppingList);
             shoppingLists.add(shoppingList);
             adapter.notifyDataSetChanged();
-
         });
         alert.setNegativeButton(R.string.shopping_lists_popup_no_btn, ((dialog, which) -> {
             dialog.dismiss();
@@ -163,7 +162,7 @@ public class MainActivity extends AppCompatActivity implements ShoppingListsItem
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                // Called when the query text is changed by the user
+                adapter.getFilter().filter(newText);
                 return true;
             }
         });
@@ -176,6 +175,7 @@ public class MainActivity extends AppCompatActivity implements ShoppingListsItem
      */
     @Override
     public void onHoldItem(int position) {
+
         Log.d("MainActivity", "On hold item ..." + position);
     }
 
