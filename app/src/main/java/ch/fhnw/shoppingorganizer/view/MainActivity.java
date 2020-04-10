@@ -59,14 +59,14 @@ public class MainActivity extends AppCompatActivity implements ShoppingListsItem
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        //display basic values from database (as an example for the GUI guys)
-        // IMPORTATN FOR GUI PEOPLE: always interact with database using the RepositoryProvider for each business object
-        shoppingLists = RepositoryProvider.getShoppingListRepositoryInstance().getAllItems();
-
         //import masterdata to database if empty
         if(DbUtils.isEmpty(ShoppingItem.class)) {
             importMasterData();
         }
+
+        //display basic values from database (as an example for the GUI guys)
+        // IMPORTATN FOR GUI PEOPLE: always interact with database using the RepositoryProvider for each business object
+        shoppingLists = RepositoryProvider.getShoppingListRepositoryInstance().getAllItems();
 
         initUi();
     }
