@@ -4,7 +4,7 @@ package ch.fhnw.shoppingorganizer.view;
  * The interface which should be connection with [{@link ShoppingListActivity}] and the [{@link ShoppingListAdapter}]
  */
 public interface ShoppingListItemListener {
-    void onSwipeLeft();
-    void onSwipeRight();
+    void onSwipeLeft(int position);
+    void onSwipeRight(int position);
     void onHoldItem(String itemName);
 }

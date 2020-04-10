@@ -1,5 +1,6 @@
 package ch.fhnw.shoppingorganizer.view;
 
+import android.graphics.Canvas;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,9 +11,13 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.math.BigDecimal;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -28,6 +33,7 @@ public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapte
     private ShoppingList shoppingList;
     private List<ShoppingItem> shoppingItem;
     private ShoppingListItemListener listItemListener;
+    private final String TAG = this.getClass().getSimpleName();
 
     ShoppingListAdapter(ShoppingList shoppingList, List<ShoppingItem> shoppingItem, List<ShoppingListItem> shoppingListItem, ShoppingListItemListener listener) {
         this.shoppingList = shoppingList;
@@ -50,13 +56,8 @@ public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapte
     @Override
     public void onBindViewHolder(@NonNull ShoppingListAdapter.ShoppingListItemHolder holder, int position) {
         ShoppingItem item = shoppingItem.get(position);
-        ShoppingListItem listItem = null;
-        for (ShoppingListItem it:shoppingList.getShoppingListItems()) {
-            if(it.getShoppingItem().equals(item)) {
-                listItem = it;
-                break;
-            }
-        }
+        ShoppingListItem listItem = shoppingList.getShoppingListItem(item);
+
         holder.itemName.setText("Name: " + item.getItemName());
         holder.itemImage.setImageResource(R.mipmap.ic_launcher);
 
@@ -80,12 +81,26 @@ public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapte
         return shoppingItem.size();
     }
 
+//    ItemTouchHelper.SimpleCallback itemTouchHelperCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT | ItemTouchHelper.LEFT) {
+//
+//        @Override
+//        public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+//            return false;
+//        }
+//
+//        @Override
+//        public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+//
+//        }
+//    };
+
     /**
      * Callback from the {@link SimpleItemTouchHelperCallback}. Method should be update the view through the interface.
      */
     @Override
     public void onSwipedLeft(int position) {
         Log.d("ShoppingListAdapter", "Swiped to the left");
+        listItemListener.onSwipeLeft(position);
     }
 
     /**
@@ -94,7 +109,7 @@ public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapte
     @Override
     public void onSwipedRight(int position) {
         Log.d("ShoppingListAdapter", "Swiped to the right");
-        listItemListener.onSwipeRight();
+        listItemListener.onSwipeRight(position);
     }
 
     class ShoppingListItemHolder extends RecyclerView.ViewHolder implements ItemTouchHelperViewHolder {
@@ -125,23 +140,14 @@ public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapte
 
         private void handleShoppingListItem(int number) {
             ShoppingItem item = shoppingItem.get(this.getAdapterPosition());
-            ShoppingListItem listItem = null;
-            Log.e("TAG", "Search for: " + item);
-            for (ShoppingListItem it:shoppingList.getShoppingListItems()) {
-                Log.e("TAG", "handleShoppingListItem: " + it);
-
-                if(it.getShoppingItem().equals(item)) {
-                    listItem = it;
-                    break;
-                }
-            }
-
+            ShoppingListItem listItem = shoppingList.getShoppingListItem(item);
             //0 = Delete form List
             if(number == 0 && listItem != null) {
+                shoppingList.getShoppingListItems().remove(listItem);
                 RepositoryProvider.getShoppingListItemRepositoryInstance()
                         .deleteEntity(listItem);
-                shoppingList.getShoppingListItems().remove(listItem);
-                notifyItemRemoved(this.getAdapterPosition());
+                notifyItemChanged(this.getAdapterPosition());
+                Log.d(TAG, "Shopping Item " + listItem.getShoppingItem().getItemName() + " removed");
                 return;
             }
 
@@ -159,10 +165,11 @@ public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapte
             if(shoppingList.getShoppingListItems().contains(listItem)) {
                 shoppingList.getShoppingListItems().set(shoppingList.getShoppingListItems().indexOf(listItem), listItem);
                 notifyItemChanged(this.getAdapterPosition());
-
+                Log.d(TAG, "Shopping Item " + listItem.getShoppingItem().getItemName() + " updated");
             } else {
                 shoppingList.getShoppingListItems().add(listItem);
                 notifyDataSetChanged();
+                Log.d(TAG, "Shopping Item " + listItem.getShoppingItem().getItemName() + " inserted");
             }
         }
 

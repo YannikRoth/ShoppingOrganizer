@@ -19,10 +19,15 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.snackbar.Snackbar;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import ch.fhnw.shoppingorganizer.R;
+import ch.fhnw.shoppingorganizer.model.Globals;
 import ch.fhnw.shoppingorganizer.model.businessobject.ShoppingItem;
 import ch.fhnw.shoppingorganizer.model.businessobject.ShoppingList;
 import ch.fhnw.shoppingorganizer.model.businessobject.ShoppingListItem;
@@ -64,6 +69,26 @@ public class ShoppingListActivity extends AppCompatActivity implements ShoppingL
                     .getShoppingListRepositoryInstance()
                     .getShoppingListById(intent.getLongExtra(LIST_ID, 0));
             this.shoppingListItems = RepositoryProvider.getShoppingListRepositoryInstance().getShoppingListItems(shoppingList);
+            this.shoppingList.getShoppingListItems().addAll(this.shoppingListItems);
+
+            Collections.sort(shoppingItem, (o1, o2) -> {
+                int i1 = 3, i2 = 3;
+                for(ShoppingListItem it:shoppingList.getShoppingListItems()) {
+                    if(it.getShoppingItem().equals(o1)) {
+                        if(it.isItemState())
+                            i1 = 1;
+                        else
+                            i1 = 2;
+                    }
+                    if(it.getShoppingItem().equals(o2)) {
+                        if(it.isItemState())
+                            i2 = 1;
+                        else
+                            i2 = 2;
+                    }
+                }
+                return i1-i2;//Globals.STATE_SELECTED
+            });
         }
 
         initUi();
@@ -93,7 +118,7 @@ public class ShoppingListActivity extends AppCompatActivity implements ShoppingL
         rvShoppingLists.addItemDecoration(dividerItemDecoration);
 
         // Setup the touch helper which handle the swipe events
-        ItemTouchHelper.Callback callback = new SimpleItemTouchHelperCallback(adapter);
+        ItemTouchHelper.Callback callback = new SimpleItemTouchHelperCallback(adapter, this);
         ItemTouchHelper mItemTouchHelper = new ItemTouchHelper(callback);
         mItemTouchHelper.attachToRecyclerView(rvShoppingLists);
 
@@ -155,19 +180,27 @@ public class ShoppingListActivity extends AppCompatActivity implements ShoppingL
         }
     }
 
-    /**
-     * Callback from the adapter after the user swipe the item
-     */
+    private ShoppingListItem deletedItem = null;
     @Override
-    public void onSwipeLeft() {
-
+    public void onSwipeLeft(int position) {
+        deletedItem = shoppingList.getShoppingListItem(shoppingItem.get(position));
+        RepositoryProvider.getShoppingItemRepositoryInstance().deleteEntity(deletedItem);
+        shoppingListItems.remove(deletedItem);
+        adapter.notifyItemChanged(position);
+        Snackbar.make(rvShoppingLists, "Item removed: " + deletedItem.getShoppingItem().getItemName(), Snackbar.LENGTH_LONG)
+                .setAction("Undo", v -> {
+                    RepositoryProvider.getShoppingItemRepositoryInstance().saveEntity(deletedItem);
+                    shoppingListItems.add(deletedItem);
+                    adapter.notifyItemChanged(position);
+                })
+                .show();
     }
 
     /**
      * Callback from the adapter after the user swipe the item
      */
     @Override
-    public void onSwipeRight() {
+    public void onSwipeRight(int position) {
 
     }
 

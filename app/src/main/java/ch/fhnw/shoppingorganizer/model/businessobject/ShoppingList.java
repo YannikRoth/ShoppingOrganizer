@@ -37,6 +37,13 @@ public class ShoppingList extends Model {
         return getShoppingListItemsFromDB(false);
     }
 
+    public ShoppingListItem getShoppingListItem(ShoppingItem shoppingItem) {
+        for (ShoppingListItem it:this.getShoppingListItems())
+            if(it.getShoppingItem().equals(shoppingItem))
+                return it;
+        return null;
+    }
+
     public void setShoppingListItems(List<ShoppingListItem> shoppingListItems) {
         this.shoppingListItems = shoppingListItems;
     }
@@ -60,5 +67,12 @@ public class ShoppingList extends Model {
             this.shoppingListItems = RepositoryProvider.getShoppingListRepositoryInstance().getShoppingListItems(this);
         }
         return this.shoppingListItems;
+    }
+
+    @Override
+    public String toString() {
+        return "ShoppingList{" +
+                "listName='" + listName + '\'' +
+                '}';
     }
 }
