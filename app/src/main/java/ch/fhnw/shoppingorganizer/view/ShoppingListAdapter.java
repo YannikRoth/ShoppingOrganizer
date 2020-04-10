@@ -9,6 +9,7 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
@@ -63,7 +64,7 @@ public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapte
 
         if(listItem != null) {
             holder.itemPrice.setText(String.format("CHF %.2f", listItem.getTotalItemPrice()));
-            holder.inputQuantity.setText(String.format("%o", listItem.getQuantity()) );
+            holder.inputQuantity.setText(Globals.NUMBERFORMAT.format(listItem.getQuantity()) );
         } else {
             holder.itemPrice.setText(String.format("CHF %.2f", 0.00));
             holder.inputQuantity.setText(String.format("%o", 0) );
@@ -163,7 +164,8 @@ public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapte
             RepositoryProvider.getShoppingListItemRepositoryInstance()
                     .saveEntity(listItem);
             if(shoppingList.getShoppingListItems().contains(listItem)) {
-                shoppingList.getShoppingListItems().set(shoppingList.getShoppingListItems().indexOf(listItem), listItem);
+                int position = shoppingList.getShoppingListItems().indexOf(listItem);
+                shoppingList.getShoppingListItems().set(position, listItem);
                 notifyItemChanged(this.getAdapterPosition());
                 Log.d(TAG, "Shopping Item " + listItem.getShoppingItem().getItemName() + " updated");
             } else {
@@ -177,27 +179,22 @@ public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapte
             String text = inputQuantity.getText().toString();
             int number = Integer.parseInt(text);
             number++;
-            if (number < 200) {
-                inputQuantity.setText(Integer.toString(number));
-            }
+           // if (number < 200) {
+            //    inputQuantity.setText(Integer.toString(number));
+            //}
             handleShoppingListItem(number);
-            setPrice(number);
+            //setPrice(number);
         }
 
         private void decreaseQuantity() {
             String text = inputQuantity.getText().toString();
             int number = Integer.parseInt(text);
             number--;
-            if (number >= 0) {
-                inputQuantity.setText(Integer.toString(number));
-            }
+            //if (number >= 0) {
+            //    inputQuantity.setText(Integer.toString(number));
+            //}
             handleShoppingListItem(number);
-            setPrice(number);
-        }
-
-        private void setPrice(int number) {
-            ShoppingListItem sli = shoppingList.getShoppingListItem(shoppingItem.get(getAdapterPosition()));
-            itemPrice.setText(String.format("CHF %.2f", sli.getTotalItemPrice()));
+            //setPrice(number);
         }
 
         /**
