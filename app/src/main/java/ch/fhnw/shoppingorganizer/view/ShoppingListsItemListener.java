@@ -5,5 +5,5 @@ package ch.fhnw.shoppingorganizer.view;
  */
 public interface ShoppingListsItemListener {
     void onHoldItem(int position);
-    void onClickItem(String item);
+    void onClickItem(int position);
 }

@@ -22,17 +22,26 @@ import android.widget.TextView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import ch.fhnw.shoppingorganizer.R;
+import ch.fhnw.shoppingorganizer.model.Globals;
 import ch.fhnw.shoppingorganizer.model.businessobject.ShoppingItem;
+import ch.fhnw.shoppingorganizer.model.businessobject.ShoppingItemBuilder;
+import ch.fhnw.shoppingorganizer.model.businessobject.ShoppingList;
+import ch.fhnw.shoppingorganizer.model.businessobject.ShoppingListBuilder;
 import ch.fhnw.shoppingorganizer.model.database.DbUtils;
 import ch.fhnw.shoppingorganizer.model.database.RepositoryProvider;
+import ch.fhnw.shoppingorganizer.model.database.ShoppingListItemRepository;
 import ch.fhnw.shoppingorganizer.model.masterdata.CSVDataImporter;
 
 public class MainActivity extends AppCompatActivity implements ShoppingListsItemListener {
 
     public static final String LIST_NAME = "ListName";
+
+    //Data elemens
+    List<ShoppingList> shoppingLists = new ArrayList<ShoppingList>();
 
     private ShoppingListsAdapter adapter;
 
@@ -51,8 +60,7 @@ public class MainActivity extends AppCompatActivity implements ShoppingListsItem
 
         //display basic values from database (as an example for the GUI guys)
         // IMPORTATN FOR GUI PEOPLE: always interact with database using the RepositoryProvider for each business object
-        List<ShoppingItem> allElements = RepositoryProvider.getShoppingItemRepositoryInstance()
-                .getAllItems();
+        shoppingLists = RepositoryProvider.getShoppingListRepositoryInstance().getAllItems();
 
 
         //import masterdata to database if empty
@@ -78,7 +86,7 @@ public class MainActivity extends AppCompatActivity implements ShoppingListsItem
 
         String[] testArray = getResources().getStringArray(R.array.test_shopping_lists);
 
-        adapter = new ShoppingListsAdapter(testArray, this);
+        adapter = new ShoppingListsAdapter(shoppingLists, this);
         rvShoppingLists.setLayoutManager(new LinearLayoutManager(this));
         DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(this, DividerItemDecoration.VERTICAL);
         rvShoppingLists.addItemDecoration(dividerItemDecoration);
@@ -96,12 +104,22 @@ public class MainActivity extends AppCompatActivity implements ShoppingListsItem
 
         alert.setPositiveButton(R.string.shopping_lists_popup_yes_btn, (dialog, whichButton) -> {
             String inputText = edittext.getText().toString();
+
+            ShoppingList shoppingList = new ShoppingListBuilder()
+                    .withListName(inputText)
+                    .build();
+            RepositoryProvider.getShoppingListRepositoryInstance().saveEntity(shoppingList);
+            shoppingLists.add(shoppingList);
+            adapter.notifyDataSetChanged();
+
         });
         alert.setNegativeButton(R.string.shopping_lists_popup_no_btn, ((dialog, which) -> {
             dialog.dismiss();
         }));
 
         alert.show();
+
+
     }
 
     private void setEmptyView(String[] shoppingLists) {
@@ -163,13 +181,14 @@ public class MainActivity extends AppCompatActivity implements ShoppingListsItem
 
     /**
      * Callback from the adapter's item
-     * @param item of item in the adapter
+     * @param position of item in the adapter
      */
     @Override
-    public void onClickItem(String item) {
+    public void onClickItem(int position) {
+        ShoppingList item = shoppingLists.get(position);
         Log.d("MainActivity", "On click item ...");
         Intent intent = new Intent(this, ShoppingListActivity.class);
-        intent.putExtra(LIST_NAME, item);
+        intent.putExtra(LIST_NAME, item.getListName());
         startActivity(intent);
     }
 }

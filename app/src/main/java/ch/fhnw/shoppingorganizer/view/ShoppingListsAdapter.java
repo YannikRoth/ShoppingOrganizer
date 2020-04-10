@@ -8,14 +8,18 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import ch.fhnw.shoppingorganizer.R;
+import ch.fhnw.shoppingorganizer.model.businessobject.ShoppingList;
 
 public class ShoppingListsAdapter extends RecyclerView.Adapter<ShoppingListsAdapter.ShoppingListsItem> {
 
-    private String[] shoppingLists;
+    private List<ShoppingList> shoppingLists;
     private ShoppingListsItemListener listsItemListener;
 
-    ShoppingListsAdapter(String[] shoppingLists, ShoppingListsItemListener listener) {
+    ShoppingListsAdapter(List<ShoppingList> shoppingLists, ShoppingListsItemListener listener) {
         this.shoppingLists = shoppingLists;
         this.listsItemListener = listener;
     }
@@ -34,9 +38,10 @@ public class ShoppingListsAdapter extends RecyclerView.Adapter<ShoppingListsAdap
      */
     @Override
     public void onBindViewHolder(@NonNull ShoppingListsItem holder, int position) {
-        holder.shoppingListName.setText(shoppingLists[position]);
-        holder.shoppingListPrice.setText(String.format("price %.2f", position * 10.0));
-        holder.shoppingListQuantity.setText(String.format("quantity %d", position * 2));
+        ShoppingList item = shoppingLists.get(position);
+        holder.shoppingListName.setText(item.getListName());
+        holder.shoppingListPrice.setText(String.format("price %.2f", item.getTotalPrice()));
+        holder.shoppingListQuantity.setText(String.format("quantity %d", item.getTotalQuantity()));
     }
 
     /**
@@ -44,7 +49,7 @@ public class ShoppingListsAdapter extends RecyclerView.Adapter<ShoppingListsAdap
      */
     @Override
     public int getItemCount() {
-        return shoppingLists.length;
+        return shoppingLists.size();
     }
 
     class ShoppingListsItem extends RecyclerView.ViewHolder implements View.OnLongClickListener, View.OnClickListener {
@@ -76,7 +81,7 @@ public class ShoppingListsAdapter extends RecyclerView.Adapter<ShoppingListsAdap
          */
         @Override
         public void onClick(View v) {
-            listsItemListener.onClickItem(shoppingLists[getAdapterPosition()]);
+            listsItemListener.onClickItem(getAdapterPosition());
         }
     }
 }
