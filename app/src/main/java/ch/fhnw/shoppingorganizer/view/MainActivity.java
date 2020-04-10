@@ -39,6 +39,8 @@ import ch.fhnw.shoppingorganizer.model.masterdata.CSVDataImporter;
 public class MainActivity extends AppCompatActivity implements ShoppingListsItemListener {
 
     public static final String LIST_NAME = "ListName";
+    public static final String LIST_ID = "pkShoppingList";
+    public final String TAG = this.getClass().getSimpleName();
 
     //Data elemens
     List<ShoppingList> shoppingLists = new ArrayList<ShoppingList>();
@@ -186,9 +188,10 @@ public class MainActivity extends AppCompatActivity implements ShoppingListsItem
     @Override
     public void onClickItem(int position) {
         ShoppingList item = shoppingLists.get(position);
-        Log.d("MainActivity", "On click item ...");
+        Log.d(TAG, "On click List: " + item.getListName());
         Intent intent = new Intent(this, ShoppingListActivity.class);
         intent.putExtra(LIST_NAME, item.getListName());
+        intent.putExtra(LIST_ID, item.getId());
         startActivity(intent);
     }
 }

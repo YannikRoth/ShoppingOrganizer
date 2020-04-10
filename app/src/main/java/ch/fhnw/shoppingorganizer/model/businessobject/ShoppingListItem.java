@@ -59,4 +59,8 @@ public class ShoppingListItem extends Model {
         this.shoppingList = shoppingList;
     }
 
+    @Override
+    public String toString() {
+        return this.getTotalItemPrice() + " CHF: " + this.getQuantity() + "x " + this.getShoppingItem();
+    }
 }

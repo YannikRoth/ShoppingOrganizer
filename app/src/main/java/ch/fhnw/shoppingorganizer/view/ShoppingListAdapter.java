@@ -1,5 +1,6 @@
 package ch.fhnw.shoppingorganizer.view;
 
+import android.graphics.Canvas;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,16 +11,33 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.math.BigDecimal;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import ch.fhnw.shoppingorganizer.R;
+import ch.fhnw.shoppingorganizer.model.Globals;
+import ch.fhnw.shoppingorganizer.model.businessobject.ShoppingItem;
+import ch.fhnw.shoppingorganizer.model.businessobject.ShoppingList;
+import ch.fhnw.shoppingorganizer.model.businessobject.ShoppingListItem;
+import ch.fhnw.shoppingorganizer.model.businessobject.ShoppingListItemBuilder;
+import ch.fhnw.shoppingorganizer.model.database.RepositoryProvider;
 
-public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapter.ShoppingListItem> implements ItemTouchHelperAdapter {
-    private String[] shoppingList;
+public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapter.ShoppingListItemHolder> implements ItemTouchHelperAdapter {
+    private ShoppingList shoppingList;
+    private List<ShoppingItem> shoppingItem;
     private ShoppingListItemListener listItemListener;
+    private final String TAG = this.getClass().getSimpleName();
 
-    ShoppingListAdapter(String[] shoppingLists, ShoppingListItemListener listener) {
-        this.shoppingList = shoppingLists;
+    ShoppingListAdapter(ShoppingList shoppingList, List<ShoppingItem> shoppingItem, List<ShoppingListItem> shoppingListItem, ShoppingListItemListener listener) {
+        this.shoppingList = shoppingList;
+        this.shoppingItem = shoppingItem;
         this.listItemListener = listener;
     }
 
@@ -28,20 +46,31 @@ public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapte
      */
     @NonNull
     @Override
-    public ShoppingListAdapter.ShoppingListItem onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        return new ShoppingListAdapter.ShoppingListItem(LayoutInflater.from(parent.getContext()).inflate(R.layout.shopping_list_item, parent, false));
+    public ShoppingListAdapter.ShoppingListItemHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        return new ShoppingListAdapter.ShoppingListItemHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.shopping_list_item, parent, false));
     }
 
     /**
      * RecyclerView internal method which will called for each item after change
      */
     @Override
-    public void onBindViewHolder(@NonNull ShoppingListAdapter.ShoppingListItem holder, int position) {
-        holder.itemName.setText("Name: " + position);
+    public void onBindViewHolder(@NonNull ShoppingListAdapter.ShoppingListItemHolder holder, int position) {
+        ShoppingItem item = shoppingItem.get(position);
+        ShoppingListItem listItem = shoppingList.getShoppingListItem(item);
+
+        holder.itemName.setText("Name: " + item.getItemName());
         holder.itemImage.setImageResource(R.mipmap.ic_launcher);
 
-        float price = Integer.parseInt(holder.inputQuantity.getText().toString()) * position;
-        holder.itemPrice.setText(String.format("CHF %.2f", price));
+        if(listItem != null) {
+            holder.itemPrice.setText(String.format("CHF %.2f", listItem.getTotalItemPrice()));
+            holder.inputQuantity.setText(String.format("%o", listItem.getQuantity()) );
+        } else {
+            holder.itemPrice.setText(String.format("CHF %.2f", 0.00));
+            holder.inputQuantity.setText(String.format("%o", 0) );
+
+        }
+
+        Log.d("ShoppingListAdapter", "onBindViewHolder: end");
     }
 
     /**
@@ -49,8 +78,21 @@ public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapte
      */
     @Override
     public int getItemCount() {
-        return shoppingList.length;
+        return shoppingItem.size();
     }
+
+//    ItemTouchHelper.SimpleCallback itemTouchHelperCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT | ItemTouchHelper.LEFT) {
+//
+//        @Override
+//        public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+//            return false;
+//        }
+//
+//        @Override
+//        public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+//
+//        }
+//    };
 
     /**
      * Callback from the {@link SimpleItemTouchHelperCallback}. Method should be update the view through the interface.
@@ -58,6 +100,7 @@ public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapte
     @Override
     public void onSwipedLeft(int position) {
         Log.d("ShoppingListAdapter", "Swiped to the left");
+        listItemListener.onSwipeLeft(position);
     }
 
     /**
@@ -66,10 +109,10 @@ public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapte
     @Override
     public void onSwipedRight(int position) {
         Log.d("ShoppingListAdapter", "Swiped to the right");
-        listItemListener.onSwipeRight();
+        listItemListener.onSwipeRight(position);
     }
 
-    class ShoppingListItem extends RecyclerView.ViewHolder implements ItemTouchHelperViewHolder {
+    class ShoppingListItemHolder extends RecyclerView.ViewHolder implements ItemTouchHelperViewHolder {
 
         TextView itemName;
         TextView itemPrice;
@@ -78,7 +121,7 @@ public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapte
         ImageButton decreaseQuantity;
         EditText inputQuantity;
 
-        ShoppingListItem(@NonNull View itemView) {
+        ShoppingListItemHolder(@NonNull View itemView) {
             super(itemView);
             itemName = itemView.findViewById(R.id.txtItemTitle);
             itemPrice = itemView.findViewById(R.id.txtPrice);
@@ -90,9 +133,44 @@ public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapte
             increaseQuantity.setOnClickListener(v -> increaseQuantity());
             decreaseQuantity.setOnClickListener(v -> decreaseQuantity());
             itemView.setOnLongClickListener(v -> {
-                listItemListener.onHoldItem(itemName.getText().toString());
+                listItemListener.onHoldItem(shoppingItem.get(getAdapterPosition()));
                 return true;
             });
+        }
+
+        private void handleShoppingListItem(int number) {
+            ShoppingItem item = shoppingItem.get(this.getAdapterPosition());
+            ShoppingListItem listItem = shoppingList.getShoppingListItem(item);
+            //0 = Delete form List
+            if(number == 0 && listItem != null) {
+                shoppingList.getShoppingListItems().remove(listItem);
+                RepositoryProvider.getShoppingListItemRepositoryInstance()
+                        .deleteEntity(listItem);
+                notifyItemChanged(this.getAdapterPosition());
+                Log.d(TAG, "Shopping Item " + listItem.getShoppingItem().getItemName() + " removed");
+                return;
+            }
+
+            if(listItem == null) {
+                listItem = new ShoppingListItemBuilder()
+                        .withShoppingItem(item)
+                        .withShoppingList(shoppingList)
+                        .withQuantity(number)
+                        .withItemState(Globals.STATE_SELECTED)
+                        .build();
+            } else
+                listItem.setQuantity(number);
+            RepositoryProvider.getShoppingListItemRepositoryInstance()
+                    .saveEntity(listItem);
+            if(shoppingList.getShoppingListItems().contains(listItem)) {
+                shoppingList.getShoppingListItems().set(shoppingList.getShoppingListItems().indexOf(listItem), listItem);
+                notifyItemChanged(this.getAdapterPosition());
+                Log.d(TAG, "Shopping Item " + listItem.getShoppingItem().getItemName() + " updated");
+            } else {
+                shoppingList.getShoppingListItems().add(listItem);
+                notifyDataSetChanged();
+                Log.d(TAG, "Shopping Item " + listItem.getShoppingItem().getItemName() + " inserted");
+            }
         }
 
         private void increaseQuantity() {
@@ -102,6 +180,7 @@ public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapte
             if (number < 200) {
                 inputQuantity.setText(Integer.toString(number));
             }
+            handleShoppingListItem(number);
             setPrice(number);
         }
 
@@ -112,12 +191,13 @@ public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapte
             if (number >= 0) {
                 inputQuantity.setText(Integer.toString(number));
             }
+            handleShoppingListItem(number);
             setPrice(number);
         }
 
         private void setPrice(int number) {
-            int position = getAdapterPosition() == 0 ? 10 : getAdapterPosition();
-            itemPrice.setText(String.format("CHF %.2f", (float) number * position));
+            ShoppingListItem sli = shoppingList.getShoppingListItem(shoppingItem.get(getAdapterPosition()));
+            itemPrice.setText(String.format("CHF %.2f", sli.getTotalItemPrice()));
         }
 
         /**
