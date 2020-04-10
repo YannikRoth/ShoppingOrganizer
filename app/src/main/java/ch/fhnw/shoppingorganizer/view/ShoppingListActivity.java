@@ -8,6 +8,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -40,6 +41,7 @@ public class ShoppingListActivity extends AppCompatActivity implements ShoppingL
 
     public static final String SHOPPING_LIST_NAME = "Shopping list name";
     public static final String ITEM_NAME_EXTRA = "Item name";
+    public static final String SHOPPING_ITEM_ID = "pkShoppingItem";
     public static final int EDIT_REQUEST_CODE = 123;
     private final String TAG = this.getClass().getSimpleName();
 
@@ -201,7 +203,7 @@ public class ShoppingListActivity extends AppCompatActivity implements ShoppingL
      */
     @Override
     public void onSwipeRight(int position) {
-
+        Toast.makeText(this, "Right", Toast.LENGTH_SHORT).show();
     }
 
     /**
@@ -209,10 +211,11 @@ public class ShoppingListActivity extends AppCompatActivity implements ShoppingL
      * Start the new screen for editing.
      */
     @Override
-    public void onHoldItem(String itemName) {
+    public void onHoldItem(ShoppingItem item) {
         Intent intent = new Intent(this, EditItemActivity.class);
         intent.putExtra(SHOPPING_LIST_NAME, shoppingList.getListName());
-        intent.putExtra(ITEM_NAME_EXTRA, itemName);
+        intent.putExtra(ITEM_NAME_EXTRA, item.getItemName());
+        intent.putExtra(SHOPPING_ITEM_ID, item.getId());
         startActivityForResult(intent, EDIT_REQUEST_CODE);
     }
 }

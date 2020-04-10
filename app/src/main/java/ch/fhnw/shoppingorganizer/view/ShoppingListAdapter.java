@@ -133,7 +133,7 @@ public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapte
             increaseQuantity.setOnClickListener(v -> increaseQuantity());
             decreaseQuantity.setOnClickListener(v -> decreaseQuantity());
             itemView.setOnLongClickListener(v -> {
-                listItemListener.onHoldItem(itemName.getText().toString());
+                listItemListener.onHoldItem(shoppingItem.get(getAdapterPosition()));
                 return true;
             });
         }
@@ -180,9 +180,8 @@ public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapte
             if (number < 200) {
                 inputQuantity.setText(Integer.toString(number));
             }
-            setPrice(number);
-
             handleShoppingListItem(number);
+            setPrice(number);
         }
 
         private void decreaseQuantity() {
@@ -192,14 +191,13 @@ public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapte
             if (number >= 0) {
                 inputQuantity.setText(Integer.toString(number));
             }
-            setPrice(number);
-
             handleShoppingListItem(number);
+            setPrice(number);
         }
 
         private void setPrice(int number) {
-            int position = getAdapterPosition() == 0 ? 10 : getAdapterPosition();
-            itemPrice.setText(String.format("CHF %.2f", (float) number * position));
+            ShoppingListItem sli = shoppingList.getShoppingListItem(shoppingItem.get(getAdapterPosition()));
+            itemPrice.setText(String.format("CHF %.2f", sli.getTotalItemPrice()));
         }
 
         /**

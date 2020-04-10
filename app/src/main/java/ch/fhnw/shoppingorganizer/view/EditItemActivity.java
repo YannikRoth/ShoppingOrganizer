@@ -11,10 +11,14 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.recyclerview.widget.RecyclerView;
 
 import ch.fhnw.shoppingorganizer.R;
+import ch.fhnw.shoppingorganizer.model.businessobject.ShoppingItem;
+import ch.fhnw.shoppingorganizer.model.database.RepositoryProvider;
 
 import static ch.fhnw.shoppingorganizer.view.ShoppingListActivity.ITEM_NAME_EXTRA;
+import static ch.fhnw.shoppingorganizer.view.ShoppingListActivity.SHOPPING_ITEM_ID;
 import static ch.fhnw.shoppingorganizer.view.ShoppingListActivity.SHOPPING_LIST_NAME;
 
 public class EditItemActivity extends AppCompatActivity {
@@ -25,15 +29,15 @@ public class EditItemActivity extends AppCompatActivity {
     private Switch activeSwitch;
     private ImageView itemImage;
 
+    private ShoppingItem shoppingItem;
     private String shoppingListName;
-    private String itemName;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_item);
         shoppingListName = getIntent().getStringExtra(SHOPPING_LIST_NAME);
-        itemName = getIntent().getStringExtra(ITEM_NAME_EXTRA);
+        shoppingItem = RepositoryProvider.getShoppingItemRepositoryInstance().getShoppingItemById(getIntent().getLongExtra(SHOPPING_ITEM_ID, 0));
         initUi();
     }
 
@@ -56,15 +60,18 @@ public class EditItemActivity extends AppCompatActivity {
     private void initUi() {
         editItemToolbar = findViewById(R.id.toolbarEditItem);
         if (editItemToolbar != null) {
+            editItemToolbar.setTitle("Edit: " + shoppingItem.getItemName());
             setSupportActionBar(editItemToolbar);
             // Set back button of Toolbar
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
         edtName = findViewById(R.id.edtName);
-        edtName.setText(itemName);
+        edtName.setText(shoppingItem.getItemName());
 
         edtPrice = findViewById(R.id.edtPrice);
+        edtPrice.setText(String.format("%.2f", shoppingItem.getPrice()));
         activeSwitch = findViewById(R.id.activeSwitch);
+        activeSwitch.setChecked(shoppingItem.isItemActive());
         itemImage = findViewById(R.id.imgItem);
     }
 }

@@ -71,6 +71,6 @@ public class ShoppingItem extends Model {
 
     @Override
     public String toString() {
-        return this.getItemName() + " [ID:" + this.getId() +"," + this.getCategory() + "," + this.getPrice() + " CHF," + this.getImgPath() + "]";
+        return this.getItemName() + " [ID:" + this.getId() +"," + this.getCategory() + "," + this.getPrice() + " CHF," + this.getImgPath() + "," + this.isItemActive() + "]";
     }
 }
