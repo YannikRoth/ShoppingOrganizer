@@ -18,6 +18,7 @@ import java.util.Collections;
 import java.util.List;
 
 import ch.fhnw.shoppingorganizer.R;
+import ch.fhnw.shoppingorganizer.model.Globals;
 import ch.fhnw.shoppingorganizer.model.businessobject.ShoppingItem;
 import ch.fhnw.shoppingorganizer.model.businessobject.ShoppingList;
 
@@ -87,8 +88,9 @@ public abstract class ShoppingListsAdapter extends RecyclerView.Adapter<Shopping
     public void onBindViewHolder(@NonNull ShoppingListsAdapter.ShoppingListsItemHolder holder, int position) {
         ShoppingList item = shoppingLists.get(position);
         holder.shoppingListName.setText(item.getListName());
-        holder.shoppingListPrice.setText(String.format("price %.2f", item.getTotalPrice()));
-        holder.shoppingListQuantity.setText(String.format("quantity %d", item.getTotalQuantity()));
+
+        holder.shoppingListPrice.setText(context.getString(R.string.shopping_lists_price) + ": " + Globals.NUMBERFORMAT.format(item.getTotalPrice()));
+        holder.shoppingListQuantity.setText(context.getString(R.string.shopping_lists_quantity) + ": " + Globals.NUMBERFORMAT.format(item.getTotalQuantity()));
     }
 
     /**

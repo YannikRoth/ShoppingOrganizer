@@ -43,6 +43,7 @@ import ch.fhnw.shoppingorganizer.model.businessobject.ShoppingListItemBuilder;
 import ch.fhnw.shoppingorganizer.model.database.DbUtils;
 import ch.fhnw.shoppingorganizer.model.database.RepositoryProvider;
 import ch.fhnw.shoppingorganizer.model.database.ShoppingListItemRepository;
+import ch.fhnw.shoppingorganizer.model.database.ShoppingListRepository;
 import ch.fhnw.shoppingorganizer.model.masterdata.CSVDataImporter;
 import it.xabaras.android.recyclerview.swipedecorator.RecyclerViewSwipeDecorator;
 
@@ -51,6 +52,9 @@ public class MainActivity extends AppCompatActivity {
     public static final String LIST_NAME = "ListName";
     public static final String LIST_ID = "pkShoppingList";
     public final String TAG = this.getClass().getSimpleName();
+
+    private ShoppingListRepository shoppingListRepositoryInstance = RepositoryProvider.getShoppingListRepositoryInstance();
+    private ShoppingListItemRepository shoppingListItemRepositoryInstance = RepositoryProvider.getShoppingListItemRepositoryInstance();
 
     //Data elemens
     List<ShoppingList> shoppingLists = new ArrayList<ShoppingList>();
@@ -76,7 +80,7 @@ public class MainActivity extends AppCompatActivity {
 
         //display basic values from database (as an example for the GUI guys)
         // IMPORTATN FOR GUI PEOPLE: always interact with database using the RepositoryProvider for each business object
-        shoppingLists = RepositoryProvider.getShoppingListRepositoryInstance().getAllItems();
+        shoppingLists = shoppingListRepositoryInstance.getAllItems();
 
         initUi();
     }
@@ -123,18 +127,18 @@ public class MainActivity extends AppCompatActivity {
                 deletedShoppingList = shoppingLists.get(position);
                 deletedShoppingListItems = new ArrayList<>(deletedShoppingList.getShoppingListItems());
                 for(ShoppingListItem item:deletedShoppingListItems) {
-                    RepositoryProvider.getShoppingListItemRepositoryInstance().deleteEntity(item);
+                    shoppingListItemRepositoryInstance.deleteEntity(item);
                     deletedShoppingList.getShoppingListItems().remove(item);
                 }
-                RepositoryProvider.getShoppingListRepositoryInstance().deleteEntity(deletedShoppingList);
+                shoppingListRepositoryInstance.deleteEntity(deletedShoppingList);
                 shoppingLists.remove(deletedShoppingList);
                 adapter.notifyItemRemoved(position);
-                Snackbar.make(rvShoppingLists, "List removed: " + deletedShoppingList.getListName(), Snackbar.LENGTH_LONG)
-                        .setAction("Undo", v -> {
+                Snackbar.make(rvShoppingLists, getString(R.string.snackbar_list_removed) + ": " + deletedShoppingList.getListName(), Snackbar.LENGTH_LONG)
+                        .setAction(getString(R.string.snackbar_undo), v -> {
                             deletedShoppingList = new ShoppingListBuilder()
                                     .withListName(deletedShoppingList.getListName())
                                     .build();
-                            RepositoryProvider.getShoppingListRepositoryInstance().saveEntity(deletedShoppingList);
+                            shoppingListRepositoryInstance.saveEntity(deletedShoppingList);
                             for(ShoppingListItem item:deletedShoppingListItems) {
                                 item = new ShoppingListItemBuilder()
                                         .withShoppingItem(item.getShoppingItem())
@@ -142,7 +146,7 @@ public class MainActivity extends AppCompatActivity {
                                         .withQuantity(item.getQuantity())
                                         .withShoppingList(deletedShoppingList)
                                         .build();
-                                RepositoryProvider.getShoppingListItemRepositoryInstance().saveEntity(item);
+                                shoppingListItemRepositoryInstance.saveEntity(item);
                                 deletedShoppingList.getShoppingListItems().add(item);
                             }
                             shoppingLists.add(position, deletedShoppingList);
@@ -186,7 +190,7 @@ public class MainActivity extends AppCompatActivity {
         alert.setView(edittext);
 
         alert.setPositiveButton(R.string.shopping_lists_popup_yes_btn, (dialog, whichButton) -> {
-            String inputText = edittext.getText().toString();
+            String inputText = edittext.getText().toString().trim();
 
             ShoppingList shoppingList;
             if(shoppingListBase != null) {
@@ -198,7 +202,7 @@ public class MainActivity extends AppCompatActivity {
                         .build();
             }
 
-            RepositoryProvider.getShoppingListRepositoryInstance().saveEntity(shoppingList);
+            shoppingListRepositoryInstance.saveEntity(shoppingList);
             if(!shoppingLists.contains(shoppingList)) {
                 shoppingLists.add(shoppingList);
                 adapter.notifyDataSetChanged();
@@ -244,7 +248,7 @@ public class MainActivity extends AppCompatActivity {
         getMenuInflater().inflate(R.menu.main_menu, menu);
         MenuItem mSearch = menu.findItem(R.id.appSearchBar);
         SearchView mSearchView = (SearchView) mSearch.getActionView();
-        mSearchView.setQueryHint("Search");
+        mSearchView.setQueryHint(getString(R.string.toolbar_search_menu));
         mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {

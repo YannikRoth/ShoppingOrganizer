@@ -3,6 +3,7 @@ package ch.fhnw.shoppingorganizer.view;
 import android.content.Intent;
 import android.graphics.Canvas;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -32,6 +33,9 @@ import ch.fhnw.shoppingorganizer.model.businessobject.ShoppingItem;
 import ch.fhnw.shoppingorganizer.model.businessobject.ShoppingList;
 import ch.fhnw.shoppingorganizer.model.businessobject.ShoppingListItem;
 import ch.fhnw.shoppingorganizer.model.database.RepositoryProvider;
+import ch.fhnw.shoppingorganizer.model.database.ShoppingItemRepository;
+import ch.fhnw.shoppingorganizer.model.database.ShoppingListItemRepository;
+import ch.fhnw.shoppingorganizer.model.database.ShoppingListRepository;
 import it.xabaras.android.recyclerview.swipedecorator.RecyclerViewSwipeDecorator;
 
 import static ch.fhnw.shoppingorganizer.view.MainActivity.LIST_ID;
@@ -42,6 +46,7 @@ public class ShoppingListActivity extends AppCompatActivity {
     public static final String ITEM_NAME_EXTRA = "Item name";
     public static final String SHOPPING_ITEM_ID = "pkShoppingItem";
     public static final int EDIT_REQUEST_CODE = 123;
+    public static final int ADD_REQUEST_CODE = 321;
     private final String TAG = this.getClass().getSimpleName();
 
     private ShoppingListAdapter adapter;
@@ -56,17 +61,19 @@ public class ShoppingListActivity extends AppCompatActivity {
     private List<ShoppingItem> shoppingItem;
     private ShoppingList shoppingList;
 
+    private ShoppingItemRepository shoppingItemRepository = RepositoryProvider.getShoppingItemRepositoryInstance();
+    private ShoppingListRepository shoppingListRepository = RepositoryProvider.getShoppingListRepositoryInstance();
+    private ShoppingListItemRepository shoppingListItemRepository = RepositoryProvider.getShoppingListItemRepositoryInstance();
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_shopping_list);
 
-        this.shoppingItem = RepositoryProvider.getShoppingItemRepositoryInstance().getAllItems();
+        this.shoppingItem = shoppingItemRepository.getAllItems();
         Intent intent = getIntent();
         if(intent.hasExtra(LIST_ID) && intent.getLongExtra(LIST_ID, 0) > 0) {
-            this.shoppingList = RepositoryProvider
-                    .getShoppingListRepositoryInstance()
-                    .getShoppingListById(intent.getLongExtra(LIST_ID, 0));
+            this.shoppingList = shoppingListRepository.getShoppingListById(intent.getLongExtra(LIST_ID, 0));
         }
         initUi();
     }
@@ -75,7 +82,7 @@ public class ShoppingListActivity extends AppCompatActivity {
         // Getting references to the Toolbar, ListView and TextView
         tbSearch = findViewById(R.id.toolbarShoppingList);
         if (shoppingList.getListName() != null) {
-            tbSearch.setTitle(getString(R.string.shopping_lists_title) + " " + shoppingList.getListName());
+            tbSearch.setTitle(shoppingList.getListName());
         }
         // Set Toolbar as ActionBar
         if (tbSearch != null) {
@@ -85,8 +92,9 @@ public class ShoppingListActivity extends AppCompatActivity {
         btnAdd = findViewById(R.id.btnAdd);
         btnAdd.setOnClickListener(v -> {
             Intent intent = new Intent(this, EditItemActivity.class);
+            intent.setAction(Intent.ACTION_GET_CONTENT);
             intent.putExtra(SHOPPING_LIST_NAME, shoppingList.getListName());
-            startActivityForResult(intent, EDIT_REQUEST_CODE);
+            startActivityForResult(intent, ADD_REQUEST_CODE);
         });
 
         swipeContainer = findViewById(R.id.swipeContainer);
@@ -114,6 +122,7 @@ public class ShoppingListActivity extends AppCompatActivity {
             public void onLongItemClick(View view, int position) {
                 ShoppingItem item = shoppingItem.get(position);
                 Intent intent = new Intent(this.getContext(), EditItemActivity.class);
+                intent.setAction(Intent.ACTION_GET_CONTENT);
                 intent.putExtra(SHOPPING_LIST_NAME, shoppingList.getListName());
                 intent.putExtra(ITEM_NAME_EXTRA, item.getItemName());
                 intent.putExtra(SHOPPING_ITEM_ID, item.getId());
@@ -132,16 +141,16 @@ public class ShoppingListActivity extends AppCompatActivity {
                 ShoppingItem item = shoppingItem.get(position);
                 if(shoppingList.getShoppingListItems() == null || shoppingList.getShoppingListItem(item) == null) {
                     adapter.notifyItemChanged(position);
-                    Toast.makeText(this.getContext(), "Item has no quantity, action not possible.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this.getContext(), getContext().getString(R.string.shopping_list_item_no_quantity), Toast.LENGTH_SHORT).show();
                     return;
                 }
                 deletedItem = shoppingList.getShoppingListItem(item);
-                RepositoryProvider.getShoppingItemRepositoryInstance().deleteEntity(deletedItem);
+                shoppingItemRepository.deleteEntity(deletedItem);
                 shoppingList.getShoppingListItems().remove(deletedItem);
                 adapter.notifyItemChanged(position);
-                Snackbar.make(rvShoppingLists, "Item removed: " + deletedItem.getShoppingItem().getItemName(), Snackbar.LENGTH_LONG)
-                        .setAction("Undo", v -> {
-                            RepositoryProvider.getShoppingItemRepositoryInstance().saveEntity(deletedItem);
+                Snackbar.make(rvShoppingLists, getContext().getString(R.string.snackbar_item_removed) + ": " + deletedItem.getShoppingItem().getItemName(), Snackbar.LENGTH_LONG)
+                        .setAction(getContext().getString(R.string.snackbar_undo), v -> {
+                            shoppingItemRepository.saveEntity(deletedItem);
                             shoppingList.getShoppingListItems().add(position, deletedItem);
                             adapter.notifyItemChanged(position);
                         })
@@ -155,17 +164,17 @@ public class ShoppingListActivity extends AppCompatActivity {
                 ShoppingItem item = shoppingItem.get(position);
                 if(shoppingList.getShoppingListItems() == null || shoppingList.getShoppingListItem(item) == null) {
                     adapter.notifyItemChanged(position);
-                    Toast.makeText(this.getContext(), "Item has no quantity, action not possible.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this.getContext(), getContext().getString(R.string.shopping_list_item_no_quantity), Toast.LENGTH_SHORT).show();
                     return;
                 }
                 checkedItem = shoppingList.getShoppingListItem(item);
                 checkedItem.setItemState(Globals.SHOPPING_LIST_ITEM_STATE_CHECKED);
-                RepositoryProvider.getShoppingListItemRepositoryInstance().saveEntity(checkedItem);
+                shoppingListItemRepository.saveEntity(checkedItem);
                 adapter.notifyItemChanged(position);
-                Snackbar.make(rvShoppingLists, "Item checked: " + checkedItem.getShoppingItem().getItemName(), Snackbar.LENGTH_LONG)
-                        .setAction("Undo", v -> {
+                Snackbar.make(rvShoppingLists, getContext().getString(R.string.snackbar_item_checked) + ": " + checkedItem.getShoppingItem().getItemName(), Snackbar.LENGTH_LONG)
+                        .setAction(getContext().getString(R.string.snackbar_undo), v -> {
                             checkedItem.setItemState(Globals.SHOPPING_LIST_ITEM_STATE_UNCHECKED);
-                            RepositoryProvider.getShoppingListItemRepositoryInstance().saveEntity(checkedItem);
+                            shoppingListItemRepository.saveEntity(checkedItem);
                             adapter.notifyItemChanged(position);
                         })
                         .show();
@@ -206,7 +215,7 @@ public class ShoppingListActivity extends AppCompatActivity {
         getMenuInflater().inflate(R.menu.main_menu, menu);
         MenuItem mSearch = menu.findItem(R.id.appSearchBar);
         SearchView mSearchView = (SearchView) mSearch.getActionView();
-        mSearchView.setQueryHint("Search");
+        mSearchView.setQueryHint(getString(R.string.toolbar_search_menu));
         mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
@@ -231,17 +240,25 @@ public class ShoppingListActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == EDIT_REQUEST_CODE) {
-            if (resultCode == RESULT_OK) {
-                if (data != null) {
-                    String shoppingListName = data.getStringExtra(SHOPPING_LIST_NAME);
-                    if (shoppingListName != null) {
-                        tbSearch.setTitle(shoppingListName);
+
+        Log.d(TAG, "onActivityResultCode: " + requestCode);
+
+        switch(requestCode) {
+            case EDIT_REQUEST_CODE:
+                if (resultCode == RESULT_OK && data != null) {
+                    ShoppingItem item = shoppingItemRepository.getShoppingItemById(data.getIntExtra(SHOPPING_ITEM_ID, 0));
+                    if (item != null)
+                        adapter.notifyItemChanged(shoppingItem.indexOf(item));
+                }
+                break;
+            case ADD_REQUEST_CODE:
+                if(resultCode == RESULT_OK && data != null) {
+                    ShoppingItem item = shoppingItemRepository.getShoppingItemById(data.getIntExtra(SHOPPING_ITEM_ID, 0));
+                    if (item != null) {
+                        adapter.addShoppingItem(item);
                     }
                 }
-            }
+                break;
         }
     }
-
-
 }
