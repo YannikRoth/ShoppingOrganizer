@@ -34,6 +34,10 @@ public class ShoppingListRepository extends AbstractRepository{
         return (ShoppingList) super.getById(ShoppingList.class, id);
     }
 
+    public ShoppingList getByName(String name) {
+        return new Select().from(ShoppingList.class).where("listName=?", new Object[]{name}).executeSingle();
+    }
+
     /**
      * Returns a list of all ShoppingListItems that have benn placed into this shopping list
      */
