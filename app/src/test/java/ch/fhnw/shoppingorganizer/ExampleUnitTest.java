@@ -96,4 +96,14 @@ public class ExampleUnitTest {
         assertEquals(BigDecimal.valueOf(61.5), shoppingList.getTotalPrice());
         assertEquals(5, shoppingList.getTotalQuantity());
     }
+
+    @Test
+    public void testImport() {
+
+    }
+
+    @Test
+    public void testExport() {
+
+    }
 }
