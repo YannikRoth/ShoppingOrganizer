@@ -123,11 +123,9 @@ public class MainActivity extends AppCompatActivity {
                 deletedShoppingList = shoppingLists.get(position);
                 deletedShoppingListItems = new ArrayList<>(deletedShoppingList.getShoppingListItems());
                 for(ShoppingListItem item:deletedShoppingListItems) {
-                    Log.d("Del ABCD__-> ", item.toString());
-                    deletedShoppingList.getShoppingListItems().remove(item);
                     RepositoryProvider.getShoppingListItemRepositoryInstance().deleteEntity(item);
+                    deletedShoppingList.getShoppingListItems().remove(item);
                 }
-                Log.d("Del ABCD->", deletedShoppingList.toString());
                 RepositoryProvider.getShoppingListRepositoryInstance().deleteEntity(deletedShoppingList);
                 shoppingLists.remove(deletedShoppingList);
                 adapter.notifyItemRemoved(position);
@@ -135,14 +133,17 @@ public class MainActivity extends AppCompatActivity {
                         .setAction("Undo", v -> {
                             deletedShoppingList = new ShoppingListBuilder()
                                     .withListName(deletedShoppingList.getListName())
-                                    .withShoppingListItems(new ArrayList<>(deletedShoppingListItems))
                                     .build();
                             RepositoryProvider.getShoppingListRepositoryInstance().saveEntity(deletedShoppingList);
-                            Log.d("Add ABCD->", deletedShoppingList.toString());
                             for(ShoppingListItem item:deletedShoppingListItems) {
-                                item.setShoppingList(deletedShoppingList);
+                                item = new ShoppingListItemBuilder()
+                                        .withShoppingItem(item.getShoppingItem())
+                                        .withItemState(item.isItemState())
+                                        .withQuantity(item.getQuantity())
+                                        .withShoppingList(deletedShoppingList)
+                                        .build();
                                 RepositoryProvider.getShoppingListItemRepositoryInstance().saveEntity(item);
-                                Log.d("Add ABCD__-> ", item.toString());
+                                deletedShoppingList.getShoppingListItems().add(item);
                             }
                             shoppingLists.add(position, deletedShoppingList);
                             adapter.notifyItemInserted(position);
