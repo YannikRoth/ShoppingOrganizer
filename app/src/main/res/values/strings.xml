@@ -6,8 +6,8 @@
     <string name="shopping_lists_search_menu">Search</string>
 
     <string name="shopping_lists_popup_title">Shopping List Name</string>
-    <string name="shopping_lists_popup_message">Add new name for the list</string>
-    <string name="shopping_lists_popup_yes_btn">Add</string>
+    <string name="shopping_lists_popup_message">Set Shopping List name</string>
+    <string name="shopping_lists_popup_yes_btn">Set</string>
     <string name="shopping_lists_popup_no_btn">Cancel</string>
 
     <string name="edit_item_name">Name</string>

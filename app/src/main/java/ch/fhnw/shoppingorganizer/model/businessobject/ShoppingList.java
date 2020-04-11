@@ -16,7 +16,7 @@ import ch.fhnw.shoppingorganizer.model.database.ShoppingListRepository;
 
 @RequiresApi(api = Build.VERSION_CODES.N)
 @Table(name="ShoppingList")
-public class ShoppingList extends Model {
+public class ShoppingList extends Model implements Comparable<ShoppingList> {
 
     @Column(name="listName")
     private String listName;
@@ -71,8 +71,13 @@ public class ShoppingList extends Model {
 
     @Override
     public String toString() {
-        return "ShoppingList{" +
-                "listName='" + listName + '\'' +
+        return "ShoppingList{ID: " + getId() +
+                ",listName='" + listName + '\'' +
                 '}';
+    }
+
+    @Override
+    public int compareTo(ShoppingList o) {
+        return this.getListName().compareTo(o.getListName());
     }
 }
