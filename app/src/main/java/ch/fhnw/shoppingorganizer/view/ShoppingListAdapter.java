@@ -238,6 +238,13 @@ public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapte
             }
 
             @Override
+            public int getSwipeDirs(RecyclerView recyclerView, RecyclerView.ViewHolder holder) {
+                int position = holder.getAdapterPosition();
+                ShoppingItem item = shoppingItem.get(position);
+                return shoppingList.getShoppingListItem(item) == null ? 0:super.getSwipeDirs(recyclerView, holder);
+            }
+
+            @Override
             public void onChildDraw(@NonNull Canvas c, @NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
                 listItemInteractionInterface.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
                 super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
