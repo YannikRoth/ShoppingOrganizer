@@ -20,6 +20,7 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import ch.fhnw.shoppingorganizer.R;
@@ -42,6 +43,7 @@ public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapte
         this.context = context;
         this.shoppingList = shoppingList;
         this.shoppingItem = shoppingItem;
+        this.sortShoppingItems(shoppingItem);
         shoppingItemFull = new ArrayList<ShoppingItem>(shoppingItem);
         this.listItemInteractionInterface = listItemInteractionInterface;
     }
@@ -72,12 +74,11 @@ public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapte
         holder.itemImage.setImageResource(R.mipmap.ic_launcher);
 
         if(listItem != null) {
-            holder.itemPrice.setText(String.format("CHF %.2f", listItem.getTotalItemPrice()));
-            holder.inputQuantity.setText(Globals.NUMBERFORMAT.format(listItem.getQuantity()) );
+            holder.itemPrice.setText(Globals.NUMBERFORMAT.getCurrency() + " " + Globals.NUMBERFORMAT.format(listItem.getQuantity()));
+            holder.inputQuantity.setText(Globals.NUMBERFORMAT.format(listItem.getQuantity()));
         } else {
-            holder.itemPrice.setText(String.format("CHF %.2f", 0.00));
-            holder.inputQuantity.setText(String.format("%o", 0) );
-
+            holder.itemPrice.setText(Globals.NUMBERFORMAT.getCurrency() + " " + Globals.NUMBERFORMAT.format(0.00));
+            holder.inputQuantity.setText(Globals.NUMBERFORMAT.format(0));
         }
 
         Log.d("ShoppingListAdapter", "onBindViewHolder: end");
@@ -242,5 +243,35 @@ public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapte
                 super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
             }
         };
+    }
+
+    //Pull-Refresh SwipeRefreshLayout
+    public void onRefreshViewOnPull() {
+//        shoppingListFilter.
+        shoppingItem.clear();
+        sortShoppingItems(shoppingItemFull);
+        shoppingItem.addAll(shoppingItemFull);
+        this.notifyDataSetChanged();
+    }
+
+    private void sortShoppingItems(List<ShoppingItem> items) {
+        Collections.sort(items, (o1, o2) -> {
+            int i1 = 3, i2 = 3;
+            for(ShoppingListItem it:shoppingList.getShoppingListItems()) {
+                if(it.getShoppingItem().equals(o1)) {
+                    if(it.isItemState())
+                        i1 = 2;
+                    else
+                        i1 = 1;
+                }
+                if(it.getShoppingItem().equals(o2)) {
+                    if(it.isItemState())
+                        i2 = 2;
+                    else
+                        i2 = 1;
+                }
+            }
+            return i1-i2;//Globals.STATE_SELECTED
+        });
     }
 }

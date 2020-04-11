@@ -19,11 +19,11 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
-import java.util.Collections;
 import java.util.List;
 
 import ch.fhnw.shoppingorganizer.R;
@@ -48,6 +48,7 @@ public class ShoppingListActivity extends AppCompatActivity implements ListItemI
 
     // GUI controls
     private Toolbar tbSearch;
+    private SwipeRefreshLayout swipeContainer;
     private RecyclerView rvShoppingLists;
     private TextView tvNoResults;
     private FloatingActionButton btnAdd;
@@ -66,29 +67,7 @@ public class ShoppingListActivity extends AppCompatActivity implements ListItemI
             this.shoppingList = RepositoryProvider
                     .getShoppingListRepositoryInstance()
                     .getShoppingListById(intent.getLongExtra(LIST_ID, 0));
-            List<ShoppingListItem> shoppingListItems = RepositoryProvider.getShoppingListRepositoryInstance().getShoppingListItems(shoppingList);
-            this.shoppingList.getShoppingListItems().addAll(shoppingListItems);
-
-            Collections.sort(shoppingItem, (o1, o2) -> {
-                int i1 = 3, i2 = 3;
-                for(ShoppingListItem it:shoppingList.getShoppingListItems()) {
-                    if(it.getShoppingItem().equals(o1)) {
-                        if(it.isItemState())
-                            i1 = 2;
-                        else
-                            i1 = 1;
-                    }
-                    if(it.getShoppingItem().equals(o2)) {
-                        if(it.isItemState())
-                            i2 = 2;
-                        else
-                            i2 = 1;
-                    }
-                }
-                return i1-i2;//Globals.STATE_SELECTED
-            });
         }
-
         initUi();
     }
 
@@ -109,11 +88,26 @@ public class ShoppingListActivity extends AppCompatActivity implements ListItemI
             intent.putExtra(SHOPPING_LIST_NAME, shoppingList.getListName());
             startActivityForResult(intent, EDIT_REQUEST_CODE);
         });
+
+        swipeContainer = findViewById(R.id.swipeContainer);
+        swipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                adapter.onRefreshViewOnPull();
+                swipeContainer.setRefreshing(false);
+            }
+        });
+        // Configure the refreshing colors
+        swipeContainer.setColorSchemeResources(android.R.color.holo_blue_bright,
+                android.R.color.holo_green_light,
+                android.R.color.holo_orange_light,
+                android.R.color.holo_red_light);
+
         rvShoppingLists = findViewById(R.id.rvListItems);
         tvNoResults = findViewById(R.id.tvNoResults);
         adapter = new ShoppingListAdapter(this, shoppingList, shoppingItem, shoppingList.getShoppingListItems(), this);
-//        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(this, DividerItemDecoration.VERTICAL);
-//        rvShoppingLists.addItemDecoration(dividerItemDecoration);
+        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(this, DividerItemDecoration.VERTICAL);
+        rvShoppingLists.addItemDecoration(dividerItemDecoration);
 
         rvShoppingLists.setLayoutManager(new LinearLayoutManager(this));
         rvShoppingLists.setAdapter(adapter);
