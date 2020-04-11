@@ -36,7 +36,7 @@ import it.xabaras.android.recyclerview.swipedecorator.RecyclerViewSwipeDecorator
 
 import static ch.fhnw.shoppingorganizer.view.MainActivity.LIST_ID;
 
-public class ShoppingListActivity extends AppCompatActivity implements ListItemInteractionInterface {
+public class ShoppingListActivity extends AppCompatActivity {
 
     public static final String SHOPPING_LIST_NAME = "Shopping list name";
     public static final String ITEM_NAME_EXTRA = "Item name";
@@ -105,7 +105,79 @@ public class ShoppingListActivity extends AppCompatActivity implements ListItemI
 
         rvShoppingLists = findViewById(R.id.rvListItems);
         tvNoResults = findViewById(R.id.tvNoResults);
-        adapter = new ShoppingListAdapter(this, shoppingList, shoppingItem, shoppingList.getShoppingListItems(), this);
+        adapter = new ShoppingListAdapter(this, shoppingList, shoppingItem, shoppingList.getShoppingListItems()) {
+            @Override
+            public void onItemClick(View view, int position) {
+
+            }
+
+            @Override
+            public void onLongItemClick(View view, int position) {
+                ShoppingItem item = shoppingItem.get(position);
+                Intent intent = new Intent(this.getContext(), EditItemActivity.class);
+                intent.putExtra(SHOPPING_LIST_NAME, shoppingList.getListName());
+                intent.putExtra(ITEM_NAME_EXTRA, item.getItemName());
+                intent.putExtra(SHOPPING_ITEM_ID, item.getId());
+                startActivityForResult(intent, EDIT_REQUEST_CODE);
+            }
+
+            private ShoppingListItem deletedItem = null;
+            @Override
+            public void onSwipeLeft(@NonNull RecyclerView.ViewHolder viewHolder) {
+                int position = viewHolder.getAdapterPosition();
+                ShoppingItem item = shoppingItem.get(position);
+                if(shoppingList.getShoppingListItems() == null || shoppingList.getShoppingListItem(item) == null) {
+                    adapter.notifyItemChanged(position);
+                    Toast.makeText(this.getContext(), "Item has no quantity, action not possible.", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                deletedItem = shoppingList.getShoppingListItem(item);
+                RepositoryProvider.getShoppingItemRepositoryInstance().deleteEntity(deletedItem);
+                shoppingList.getShoppingListItems().remove(deletedItem);
+                adapter.notifyItemChanged(position);
+                Snackbar.make(rvShoppingLists, "Item removed: " + deletedItem.getShoppingItem().getItemName(), Snackbar.LENGTH_LONG)
+                        .setAction("Undo", v -> {
+                            RepositoryProvider.getShoppingItemRepositoryInstance().saveEntity(deletedItem);
+                            shoppingList.getShoppingListItems().add(position, deletedItem);
+                            adapter.notifyItemChanged(position);
+                        })
+                        .show();
+            }
+
+            private ShoppingListItem checkedItem = null;
+            @Override
+            public void onSwipeRight(@NonNull RecyclerView.ViewHolder viewHolder) {
+                int position = viewHolder.getAdapterPosition();
+                ShoppingItem item = shoppingItem.get(position);
+                if(shoppingList.getShoppingListItems() == null || shoppingList.getShoppingListItem(item) == null) {
+                    adapter.notifyItemChanged(position);
+                    Toast.makeText(this.getContext(), "Item has no quantity, action not possible.", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                checkedItem = shoppingList.getShoppingListItem(item);
+                checkedItem.setItemState(Globals.SHOPPING_LIST_ITEM_STATE_CHECKED);
+                RepositoryProvider.getShoppingListItemRepositoryInstance().saveEntity(checkedItem);
+                adapter.notifyItemChanged(position);
+                Snackbar.make(rvShoppingLists, "Item checked: " + checkedItem.getShoppingItem().getItemName(), Snackbar.LENGTH_LONG)
+                        .setAction("Undo", v -> {
+                            checkedItem.setItemState(Globals.SHOPPING_LIST_ITEM_STATE_UNCHECKED);
+                            RepositoryProvider.getShoppingListItemRepositoryInstance().saveEntity(checkedItem);
+                            adapter.notifyItemChanged(position);
+                        })
+                        .show();
+            }
+
+            @Override
+            public void onChildDrawDetails(@NonNull Canvas c, @NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
+                new RecyclerViewSwipeDecorator.Builder(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
+                        .addSwipeLeftBackgroundColor(ContextCompat.getColor(this.getContext(), R.color.colorDelete))
+                        .addSwipeLeftActionIcon(R.drawable.ic_delete_sweep)
+                        .addSwipeRightBackgroundColor(ContextCompat.getColor(this.getContext(), R.color.colorCheck))
+                        .addSwipeRightActionIcon(R.drawable.ic_check)
+                        .create()
+                        .decorate();
+            }
+        };
         DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(this, DividerItemDecoration.VERTICAL);
         rvShoppingLists.addItemDecoration(dividerItemDecoration);
 
@@ -161,82 +233,12 @@ public class ShoppingListActivity extends AppCompatActivity implements ListItemI
                 if (data != null) {
                     String shoppingListName = data.getStringExtra(SHOPPING_LIST_NAME);
                     if (shoppingListName != null) {
-                        tbSearch.setTitle(getString(R.string.shopping_lists_title) + " " + shoppingListName);
+                        tbSearch.setTitle(shoppingListName);
                     }
                 }
             }
         }
     }
 
-    @Override
-    public void onItemClick(View view, int position) {
 
-    }
-
-    @Override
-    public void onLongItemClick(View view, int position) {
-        ShoppingItem item = shoppingItem.get(position);
-        Intent intent = new Intent(this, EditItemActivity.class);
-        intent.putExtra(SHOPPING_LIST_NAME, shoppingList.getListName());
-        intent.putExtra(ITEM_NAME_EXTRA, item.getItemName());
-        intent.putExtra(SHOPPING_ITEM_ID, item.getId());
-        startActivityForResult(intent, EDIT_REQUEST_CODE);
-    }
-
-    private ShoppingListItem deletedItem = null;
-    @Override
-    public void onSwipeLeft(@NonNull RecyclerView.ViewHolder viewHolder) {
-        int position = viewHolder.getAdapterPosition();
-        ShoppingItem item = shoppingItem.get(position);
-        if(shoppingList.getShoppingListItems() == null || shoppingList.getShoppingListItem(item) == null) {
-            adapter.notifyItemChanged(position);
-            Toast.makeText(this, "Item has no quantity, action not possible.", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        deletedItem = shoppingList.getShoppingListItem(item);
-        RepositoryProvider.getShoppingItemRepositoryInstance().deleteEntity(deletedItem);
-        shoppingList.getShoppingListItems().remove(deletedItem);
-        adapter.notifyItemChanged(position);
-        Snackbar.make(rvShoppingLists, "Item removed: " + deletedItem.getShoppingItem().getItemName(), Snackbar.LENGTH_LONG)
-                .setAction("Undo", v -> {
-                    RepositoryProvider.getShoppingItemRepositoryInstance().saveEntity(deletedItem);
-                    shoppingList.getShoppingListItems().add(position, deletedItem);
-                    adapter.notifyItemChanged(position);
-                })
-                .show();
-    }
-
-    private ShoppingListItem checkedItem = null;
-    @Override
-    public void onSwipeRight(@NonNull RecyclerView.ViewHolder viewHolder) {
-        int position = viewHolder.getAdapterPosition();
-        ShoppingItem item = shoppingItem.get(position);
-        if(shoppingList.getShoppingListItems() == null || shoppingList.getShoppingListItem(item) == null) {
-            adapter.notifyItemChanged(position);
-            Toast.makeText(this, "Item has no quantity, action not possible.", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        checkedItem = shoppingList.getShoppingListItem(item);
-        checkedItem.setItemState(Globals.SHOPPING_LIST_ITEM_STATE_CHECKED);
-        RepositoryProvider.getShoppingListItemRepositoryInstance().saveEntity(checkedItem);
-        adapter.notifyItemChanged(position);
-        Snackbar.make(rvShoppingLists, "Item checked: " + checkedItem.getShoppingItem().getItemName(), Snackbar.LENGTH_LONG)
-                .setAction("Undo", v -> {
-                    checkedItem.setItemState(Globals.SHOPPING_LIST_ITEM_STATE_UNCHECKED);
-                    RepositoryProvider.getShoppingListItemRepositoryInstance().saveEntity(checkedItem);
-                    adapter.notifyItemChanged(position);
-                })
-                .show();
-    }
-
-    @Override
-    public void onChildDraw(@NonNull Canvas c, @NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
-        new RecyclerViewSwipeDecorator.Builder(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
-                .addSwipeLeftBackgroundColor(ContextCompat.getColor(this, R.color.colorDelete))
-                .addSwipeLeftActionIcon(R.drawable.ic_delete_sweep)
-                .addSwipeRightBackgroundColor(ContextCompat.getColor(this, R.color.colorCheck))
-                .addSwipeRightActionIcon(R.drawable.ic_check)
-                .create()
-                .decorate();
-    }
 }

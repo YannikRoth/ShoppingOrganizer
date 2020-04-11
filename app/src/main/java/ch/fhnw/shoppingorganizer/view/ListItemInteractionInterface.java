@@ -11,5 +11,5 @@ public interface ListItemInteractionInterface {
     void onLongItemClick(View view, int position);
     void onSwipeLeft(@NonNull RecyclerView.ViewHolder viewHolder);
     void onSwipeRight(@NonNull RecyclerView.ViewHolder viewHolder);
-    void onChildDraw(@NonNull Canvas c, @NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive);
+    void onChildDrawDetails(@NonNull Canvas c, @NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive);
 }

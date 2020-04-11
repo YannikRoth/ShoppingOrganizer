@@ -31,21 +31,23 @@ import ch.fhnw.shoppingorganizer.model.businessobject.ShoppingListItem;
 import ch.fhnw.shoppingorganizer.model.businessobject.ShoppingListItemBuilder;
 import ch.fhnw.shoppingorganizer.model.database.RepositoryProvider;
 
-public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapter.ShoppingListItemHolder> implements Filterable {
+public abstract class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapter.ShoppingListItemHolder> implements Filterable, ListItemInteractionInterface {
     private Context context;
     private ShoppingList shoppingList;
     private List<ShoppingItem> shoppingItem;
     private List<ShoppingItem> shoppingItemFull;
-    private ListItemInteractionInterface listItemInteractionInterface;
     private final String TAG = this.getClass().getSimpleName();
 
-    ShoppingListAdapter(Context context, ShoppingList shoppingList, List<ShoppingItem> shoppingItem, List<ShoppingListItem> shoppingListItem, ListItemInteractionInterface listItemInteractionInterface) {
+    ShoppingListAdapter(Context context, ShoppingList shoppingList, List<ShoppingItem> shoppingItem, List<ShoppingListItem> shoppingListItem) {
         this.context = context;
         this.shoppingList = shoppingList;
         this.shoppingItem = shoppingItem;
         this.sortShoppingItems(shoppingItem);
         shoppingItemFull = new ArrayList<ShoppingItem>(shoppingItem);
-        this.listItemInteractionInterface = listItemInteractionInterface;
+    }
+
+    public Context getContext() {
+        return this.context;
     }
 
     @Override
@@ -143,9 +145,9 @@ public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapte
 
             increaseQuantity.setOnClickListener(v -> increaseQuantity());
             decreaseQuantity.setOnClickListener(v -> decreaseQuantity());
-            itemView.setOnClickListener(v -> listItemInteractionInterface.onItemClick(v, getAdapterPosition()));
+            itemView.setOnClickListener(v -> onItemClick(v, getAdapterPosition()));
             itemView.setOnLongClickListener(v -> {
-                listItemInteractionInterface.onLongItemClick(v, getAdapterPosition());
+                onLongItemClick(v, getAdapterPosition());
                 return true;
             });
         }
@@ -192,22 +194,14 @@ public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapte
             String text = inputQuantity.getText().toString();
             int number = Integer.parseInt(text);
             number++;
-           // if (number < 200) {
-            //    inputQuantity.setText(Integer.toString(number));
-            //}
             handleShoppingListItem(number);
-            //setPrice(number);
         }
 
         private void decreaseQuantity() {
             String text = inputQuantity.getText().toString();
             int number = Integer.parseInt(text);
             number--;
-            //if (number >= 0) {
-            //    inputQuantity.setText(Integer.toString(number));
-            //}
             handleShoppingListItem(number);
-            //setPrice(number);
         }
     }
 
@@ -228,10 +222,10 @@ public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapte
 
                 switch(direction) {
                     case ItemTouchHelper.LEFT:
-                        listItemInteractionInterface.onSwipeLeft(viewHolder);
+                        onSwipeLeft(viewHolder);
                         break;
                     case ItemTouchHelper.RIGHT:
-                        listItemInteractionInterface.onSwipeRight(viewHolder);
+                        onSwipeRight(viewHolder);
                         break;
                 }
 
@@ -246,7 +240,7 @@ public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapte
 
             @Override
             public void onChildDraw(@NonNull Canvas c, @NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
-                listItemInteractionInterface.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
+                onChildDrawDetails(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
                 super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
             }
         };
