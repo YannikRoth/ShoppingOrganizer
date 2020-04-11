@@ -16,5 +16,7 @@ public class Globals {
     public final static boolean STATE_SELECTED = true;
     public final static boolean STATE_DESELECTED = false;
 
+    public final static String EMPTY_STRING = "";
+
     public static final NumberFormat NUMBERFORMAT = NumberFormat.getInstance(new Locale("de", "CH"));
 }
