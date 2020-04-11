@@ -38,12 +38,13 @@ public abstract class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingL
     private List<ShoppingItem> shoppingItemFull;
     private final String TAG = this.getClass().getSimpleName();
 
-    ShoppingListAdapter(Context context, ShoppingList shoppingList, List<ShoppingItem> shoppingItem, List<ShoppingListItem> shoppingListItem) {
+    ShoppingListAdapter(Context context, ShoppingList shoppingList, List<ShoppingItem> shoppingItem, RecyclerView recyclerView) {
         this.context = context;
         this.shoppingList = shoppingList;
         this.shoppingItem = shoppingItem;
         this.sortShoppingItems(shoppingItem);
         shoppingItemFull = new ArrayList<ShoppingItem>(shoppingItem);
+        this.createShoppingListItemTouchHelper(recyclerView, getSwipeDirs());
     }
 
     public Context getContext() {

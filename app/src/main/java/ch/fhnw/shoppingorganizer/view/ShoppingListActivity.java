@@ -98,14 +98,13 @@ public class ShoppingListActivity extends AppCompatActivity {
             }
         });
         // Configure the refreshing colors
-        swipeContainer.setColorSchemeResources(android.R.color.holo_blue_bright,
-                android.R.color.holo_green_light,
-                android.R.color.holo_orange_light,
-                android.R.color.holo_red_light);
+        swipeContainer.setColorSchemeResources(R.color.colorAccent,
+                R.color.colorPrimary,
+                R.color.colorPrimaryDark);
 
         rvShoppingLists = findViewById(R.id.rvListItems);
         tvNoResults = findViewById(R.id.tvNoResults);
-        adapter = new ShoppingListAdapter(this, shoppingList, shoppingItem, shoppingList.getShoppingListItems()) {
+        adapter = new ShoppingListAdapter(this, shoppingList, shoppingItem, rvShoppingLists) {
             @Override
             public void onItemClick(View view, int position) {
 
@@ -119,6 +118,11 @@ public class ShoppingListActivity extends AppCompatActivity {
                 intent.putExtra(ITEM_NAME_EXTRA, item.getItemName());
                 intent.putExtra(SHOPPING_ITEM_ID, item.getId());
                 startActivityForResult(intent, EDIT_REQUEST_CODE);
+            }
+
+            @Override
+            public int getSwipeDirs() {
+                return ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT;
             }
 
             private ShoppingListItem deletedItem = null;
@@ -183,7 +187,6 @@ public class ShoppingListActivity extends AppCompatActivity {
 
         rvShoppingLists.setLayoutManager(new LinearLayoutManager(this));
         rvShoppingLists.setAdapter(adapter);
-        adapter.createShoppingListItemTouchHelper(rvShoppingLists, ItemTouchHelper.RIGHT | ItemTouchHelper.LEFT);
         setEmptyView(shoppingItem);
     }
 
