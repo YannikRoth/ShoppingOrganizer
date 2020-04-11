@@ -10,5 +10,7 @@ public class Globals {
     public final static boolean SHOPPING_LIST_ITEM_STATE_CHECKED = true;
     public final static boolean SHOPPING_LIST_ITEM_STATE_UNCHECKED = false;
 
+    public final static String EMPTY_STRING = "";
+
     public static final NumberFormat NUMBERFORMAT = NumberFormat.getInstance(new Locale("de", "CH"));
 }

@@ -14,6 +14,7 @@
     <string name="edit_item_price">Price</string>
     <string name="edit_item_active">Active</string>
     <string name="edit_item_image_description">Click on Picture: Open\nCamera to take a picture\nor pick a picture from\nphones file-explorer</string>
+    <string name="edit_item_save">Save</string>
 
     <string-array name="test_shopping_lists">
         <item>List 1</item>
