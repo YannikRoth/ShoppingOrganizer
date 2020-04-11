@@ -77,7 +77,7 @@ public abstract class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingL
         holder.itemImage.setImageResource(R.mipmap.ic_launcher);
 
         if(listItem != null) {
-            holder.itemPrice.setText(Globals.NUMBERFORMAT.getCurrency() + " " + Globals.NUMBERFORMAT.format(listItem.getQuantity()));
+            holder.itemPrice.setText(Globals.NUMBERFORMAT.getCurrency() + " " + Globals.NUMBERFORMAT.format(listItem.getTotalItemPrice()));
             holder.inputQuantity.setText(Globals.NUMBERFORMAT.format(listItem.getQuantity()));
         } else {
             holder.itemPrice.setText(Globals.NUMBERFORMAT.getCurrency() + " " + Globals.NUMBERFORMAT.format(0.00));

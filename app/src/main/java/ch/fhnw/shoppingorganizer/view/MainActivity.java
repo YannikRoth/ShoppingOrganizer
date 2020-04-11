@@ -202,6 +202,7 @@ public class MainActivity extends AppCompatActivity {
             if(!shoppingLists.contains(shoppingList)) {
                 shoppingLists.add(shoppingList);
                 adapter.notifyDataSetChanged();
+                setEmptyView(shoppingLists);
             } else {
                 adapter.notifyItemChanged(shoppingLists.indexOf(shoppingList));
             }
