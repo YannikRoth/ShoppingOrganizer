@@ -131,8 +131,7 @@ public class MainActivity extends AppCompatActivity {
                     deletedShoppingList.getShoppingListItems().remove(item);
                 }
                 shoppingListRepositoryInstance.deleteEntity(deletedShoppingList);
-                shoppingLists.remove(deletedShoppingList);
-                adapter.notifyItemRemoved(position);
+                adapter.removeShoppingList(deletedShoppingList);
                 Snackbar.make(rvShoppingLists, getString(R.string.snackbar_list_removed) + ": " + deletedShoppingList.getListName(), Snackbar.LENGTH_LONG)
                         .setAction(getString(R.string.snackbar_undo), v -> {
                             deletedShoppingList = new ShoppingListBuilder()
@@ -149,8 +148,7 @@ public class MainActivity extends AppCompatActivity {
                                 shoppingListItemRepositoryInstance.saveEntity(item);
                                 deletedShoppingList.getShoppingListItems().add(item);
                             }
-                            shoppingLists.add(position, deletedShoppingList);
-                            adapter.notifyItemInserted(position);
+                            adapter.addShoppingList(deletedShoppingList);
                         })
                         .show();
             }
@@ -204,8 +202,7 @@ public class MainActivity extends AppCompatActivity {
 
             shoppingListRepositoryInstance.saveEntity(shoppingList);
             if(!shoppingLists.contains(shoppingList)) {
-                shoppingLists.add(shoppingList);
-                adapter.notifyDataSetChanged();
+                adapter.addShoppingList(shoppingList);
                 setEmptyView(shoppingLists);
             } else {
                 adapter.notifyItemChanged(shoppingLists.indexOf(shoppingList));

@@ -35,6 +35,25 @@ public abstract class ShoppingListsAdapter extends RecyclerView.Adapter<Shopping
         this.createShoppingListItemTouchHelper(recyclerView, getSwipeDirs());
     }
 
+    public void addShoppingList(ShoppingList shoppingList) {
+        if(!this.shoppingListsFull.contains(shoppingList)) {
+            this.shoppingListsFull.add(shoppingList);
+            this.shoppingLists.clear();
+            Collections.sort(this.shoppingListsFull);
+            this.shoppingLists.addAll(this.shoppingListsFull);
+            notifyDataSetChanged();
+        }
+    }
+    public void removeShoppingList(ShoppingList shoppingList) {
+        if(shoppingListsFull.contains(shoppingList))
+            shoppingListsFull.remove(shoppingList);
+        if(shoppingLists.contains(shoppingList)) {
+            int index = shoppingLists.indexOf(shoppingList);
+            shoppingLists.remove(shoppingList);
+            notifyItemRemoved(index);
+        }
+    }
+
     public Context getContext() {
         return this.context;
     }
