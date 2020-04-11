@@ -14,29 +14,33 @@ import ch.fhnw.shoppingorganizer.model.database.ShoppingListItemRepository;
 import ch.fhnw.shoppingorganizer.model.database.ShoppingListRepository;
 
 public class DataExporter {
-    public static String serializeToJson() throws JSONException {
-        // Serialize all items
+    public static JSONObject serializeToJsonFromDatabase() throws JSONException {
         ShoppingItemRepository itemRepository = RepositoryProvider.getShoppingItemRepositoryInstance();
         List<ShoppingItem> items = itemRepository.getAllItems();
 
+        ShoppingListItemRepository listItemRepository = RepositoryProvider.getShoppingListItemRepositoryInstance();
+        List<ShoppingListItem> listItems = listItemRepository.getAllItems();
+
+        ShoppingListRepository listRepository = RepositoryProvider.getShoppingListRepositoryInstance();
+        List<ShoppingList> lists = listRepository.getAllItems();
+
+        return serializeToJson(items, listItems, lists);
+    }
+
+    public static JSONObject serializeToJson(List<ShoppingItem> items, List<ShoppingListItem> listItems, List<ShoppingList> lists) throws JSONException {
+        // Serialize all items
         JSONObject itemsInJson = new JSONObject();
         for (ShoppingItem item : items) {
             itemsInJson.put(String.valueOf(item.getId()), item);
         }
 
         // Serialize all shopping list items
-        ShoppingListItemRepository listItemRepository = RepositoryProvider.getShoppingListItemRepositoryInstance();
-        List<ShoppingListItem> listItems = listItemRepository.getAllItems();
-
         JSONObject listItemsInJson = new JSONObject();
         for (ShoppingListItem listItem : listItems) {
             listItemsInJson.put(String.valueOf(listItem.getId()), listItem);
         }
 
         // Serialize all shopping lists
-        ShoppingListRepository listRepository = RepositoryProvider.getShoppingListRepositoryInstance();
-        List<ShoppingList> lists = listRepository.getAllItems();
-
         JSONObject listsInJson = new JSONObject();
         for (ShoppingList list : lists) {
             listsInJson.put(String.valueOf(list.getId()), list);
@@ -48,7 +52,7 @@ public class DataExporter {
         data.put("listItems", listItemsInJson);
         data.put("lists", listsInJson);
 
-        // Return a one-line JSON string
-        return data.toString();
+        // Return JSON object
+        return data;
     }
 }
