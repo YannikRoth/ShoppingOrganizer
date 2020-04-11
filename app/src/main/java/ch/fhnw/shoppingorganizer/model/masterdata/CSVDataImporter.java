@@ -11,10 +11,18 @@ import java.io.InputStreamReader;
 import java.math.BigDecimal;
 import java.nio.Buffer;
 
+import ch.fhnw.shoppingorganizer.model.Globals;
 import ch.fhnw.shoppingorganizer.model.businessobject.Category;
 import ch.fhnw.shoppingorganizer.model.businessobject.ShoppingItem;
 import ch.fhnw.shoppingorganizer.model.businessobject.ShoppingItemBuilder;
+import ch.fhnw.shoppingorganizer.model.businessobject.ShoppingList;
+import ch.fhnw.shoppingorganizer.model.businessobject.ShoppingListBuilder;
+import ch.fhnw.shoppingorganizer.model.businessobject.ShoppingListItem;
+import ch.fhnw.shoppingorganizer.model.businessobject.ShoppingListItemBuilder;
 import ch.fhnw.shoppingorganizer.model.database.RepositoryProvider;
+import ch.fhnw.shoppingorganizer.model.database.ShoppingItemRepository;
+import ch.fhnw.shoppingorganizer.model.database.ShoppingListItemRepository;
+import ch.fhnw.shoppingorganizer.model.database.ShoppingListRepository;
 
 public class CSVDataImporter {
 
@@ -46,12 +54,46 @@ public class CSVDataImporter {
                 ShoppingItem shoppingItem = new ShoppingItemBuilder()
                         .withCategory(Category.valueOf(lineValues[categoryIndex].toUpperCase()))
                         .withImgPath(lineValues[pathIndex])
-                        .withItemActive(lineValues[itemActiveIndex]=="1" ? true : false)
+                        .withItemActive(Integer.parseInt(lineValues[itemActiveIndex])==1)
                         .withItemName(lineValues[itemNameIndex])
                         .withPrice(new BigDecimal(lineValues[itemPriceIndex]))
                         .build();
                 RepositoryProvider.getShoppingItemRepositoryInstance().saveEntity(shoppingItem);
             }
+
+            //add shopping list
+            ShoppingListRepository shoppingListRepository = RepositoryProvider.getShoppingListRepositoryInstance();
+            ShoppingListItemRepository shoppingListItemRepository = RepositoryProvider.getShoppingListItemRepositoryInstance();
+            ShoppingItemRepository shoppingItemRepository = RepositoryProvider.getShoppingItemRepositoryInstance();
+
+            ShoppingList shoppingList = new ShoppingListBuilder()
+                    .withListName("Einkaufsliste (IMPORTED)")
+                    .build();
+            shoppingListRepository.saveEntity(shoppingList);
+
+            ShoppingListItem shoppingListItem = new ShoppingListItemBuilder()
+                    .withShoppingList(shoppingList)
+                    .withItemState(Globals.STATE_ACTIVE)
+                    .withQuantity(3)
+                    .withShoppingItem(shoppingItemRepository.getShoppingItemById(2))
+                    .build();
+            shoppingListItemRepository.saveEntity(shoppingListItem);
+
+            ShoppingListItem shoppingListItem2 = new ShoppingListItemBuilder()
+                    .withShoppingList(shoppingList)
+                    .withItemState(Globals.STATE_ACTIVE)
+                    .withQuantity(1)
+                    .withShoppingItem(shoppingItemRepository.getShoppingItemById(5))
+                    .build();
+            shoppingListItemRepository.saveEntity(shoppingListItem2);
+
+            ShoppingListItem shoppingListItem3 = new ShoppingListItemBuilder()
+                    .withShoppingList(shoppingList)
+                    .withItemState(Globals.STATE_ACTIVE)
+                    .withQuantity(5)
+                    .withShoppingItem(shoppingItemRepository.getShoppingItemById(7))
+                    .build();
+            shoppingListItemRepository.saveEntity(shoppingListItem3);
 
         }catch (Exception e){
             System.out.println(e.getMessage());

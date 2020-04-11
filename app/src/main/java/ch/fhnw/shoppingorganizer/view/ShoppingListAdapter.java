@@ -6,9 +6,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
@@ -16,6 +19,7 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -29,15 +33,17 @@ import ch.fhnw.shoppingorganizer.model.businessobject.ShoppingListItem;
 import ch.fhnw.shoppingorganizer.model.businessobject.ShoppingListItemBuilder;
 import ch.fhnw.shoppingorganizer.model.database.RepositoryProvider;
 
-public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapter.ShoppingListItemHolder> implements ItemTouchHelperAdapter {
+public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapter.ShoppingListItemHolder> implements ItemTouchHelperAdapter, Filterable {
     private ShoppingList shoppingList;
     private List<ShoppingItem> shoppingItem;
+    private List<ShoppingItem> shoppingItemFull;
     private ShoppingListItemListener listItemListener;
     private final String TAG = this.getClass().getSimpleName();
 
     ShoppingListAdapter(ShoppingList shoppingList, List<ShoppingItem> shoppingItem, List<ShoppingListItem> shoppingListItem, ShoppingListItemListener listener) {
         this.shoppingList = shoppingList;
         this.shoppingItem = shoppingItem;
+        shoppingItemFull = new ArrayList<ShoppingItem>(shoppingItem);
         this.listItemListener = listener;
     }
 
@@ -63,7 +69,7 @@ public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapte
 
         if(listItem != null) {
             holder.itemPrice.setText(String.format("CHF %.2f", listItem.getTotalItemPrice()));
-            holder.inputQuantity.setText(String.format("%o", listItem.getQuantity()) );
+            holder.inputQuantity.setText(Globals.NUMBERFORMAT.format(listItem.getQuantity()) );
         } else {
             holder.itemPrice.setText(String.format("CHF %.2f", 0.00));
             holder.inputQuantity.setText(String.format("%o", 0) );
@@ -111,6 +117,37 @@ public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapte
         Log.d("ShoppingListAdapter", "Swiped to the right");
         listItemListener.onSwipeRight(position);
     }
+
+    @Override
+    public Filter getFilter() {
+        return shoppingListFilter;
+    }
+    private Filter shoppingListFilter = new Filter() {
+        @Override
+        protected FilterResults performFiltering(CharSequence constraint) {
+            List<ShoppingItem> filteredList = new ArrayList<ShoppingItem>();
+            if(constraint == null || constraint.length() == 0)
+                filteredList.addAll(shoppingItemFull);
+            else {
+                String filterPattern = constraint.toString().toLowerCase().trim();
+                for(ShoppingItem l:shoppingItemFull) {
+                    if(l.getItemName().toLowerCase().contains(filterPattern)
+                    || l.getCategory().toString().toLowerCase().contains(filterPattern))
+                        filteredList.add(l);
+                }
+            }
+            FilterResults results = new FilterResults();
+            results.values = filteredList;
+            return results;
+        }
+
+        @Override
+        protected void publishResults(CharSequence constraint, FilterResults results) {
+            shoppingItem.clear();
+            shoppingItem.addAll((List)results.values);
+            notifyDataSetChanged();
+        }
+    };
 
     class ShoppingListItemHolder extends RecyclerView.ViewHolder implements ItemTouchHelperViewHolder {
 
@@ -163,7 +200,8 @@ public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapte
             RepositoryProvider.getShoppingListItemRepositoryInstance()
                     .saveEntity(listItem);
             if(shoppingList.getShoppingListItems().contains(listItem)) {
-                shoppingList.getShoppingListItems().set(shoppingList.getShoppingListItems().indexOf(listItem), listItem);
+                int position = shoppingList.getShoppingListItems().indexOf(listItem);
+                shoppingList.getShoppingListItems().set(position, listItem);
                 notifyItemChanged(this.getAdapterPosition());
                 Log.d(TAG, "Shopping Item " + listItem.getShoppingItem().getItemName() + " updated");
             } else {
@@ -177,27 +215,22 @@ public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapte
             String text = inputQuantity.getText().toString();
             int number = Integer.parseInt(text);
             number++;
-            if (number < 200) {
-                inputQuantity.setText(Integer.toString(number));
-            }
+           // if (number < 200) {
+            //    inputQuantity.setText(Integer.toString(number));
+            //}
             handleShoppingListItem(number);
-            setPrice(number);
+            //setPrice(number);
         }
 
         private void decreaseQuantity() {
             String text = inputQuantity.getText().toString();
             int number = Integer.parseInt(text);
             number--;
-            if (number >= 0) {
-                inputQuantity.setText(Integer.toString(number));
-            }
+            //if (number >= 0) {
+            //    inputQuantity.setText(Integer.toString(number));
+            //}
             handleShoppingListItem(number);
-            setPrice(number);
-        }
-
-        private void setPrice(int number) {
-            ShoppingListItem sli = shoppingList.getShoppingListItem(shoppingItem.get(getAdapterPosition()));
-            itemPrice.setText(String.format("CHF %.2f", sli.getTotalItemPrice()));
+            //setPrice(number);
         }
 
         /**

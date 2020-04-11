@@ -156,7 +156,7 @@ public class ShoppingListActivity extends AppCompatActivity implements ShoppingL
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                // Called when the query text is changed by the user
+                adapter.getFilter().filter(newText);
                 return true;
             }
         });
@@ -192,7 +192,7 @@ public class ShoppingListActivity extends AppCompatActivity implements ShoppingL
         Snackbar.make(rvShoppingLists, "Item removed: " + deletedItem.getShoppingItem().getItemName(), Snackbar.LENGTH_LONG)
                 .setAction("Undo", v -> {
                     RepositoryProvider.getShoppingItemRepositoryInstance().saveEntity(deletedItem);
-                    shoppingListItems.add(deletedItem);
+                    shoppingListItems.add(position, deletedItem);
                     adapter.notifyItemChanged(position);
                 })
                 .show();

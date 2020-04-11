@@ -1,5 +1,8 @@
 package ch.fhnw.shoppingorganizer.model;
 
+import java.text.NumberFormat;
+import java.util.Locale;
+
 public class Globals {
 
     //constants for holding state information
@@ -12,4 +15,6 @@ public class Globals {
      */
     public final static boolean STATE_SELECTED = true;
     public final static boolean STATE_DESELECTED = false;
+
+    public static final NumberFormat NUMBERFORMAT = NumberFormat.getInstance(new Locale("de", "CH"));
 }

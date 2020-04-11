@@ -59,16 +59,15 @@ public class MainActivity extends AppCompatActivity implements ShoppingListsItem
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        //import masterdata to database if empty
+        if(DbUtils.isEmpty(ShoppingItem.class)) {
+            importMasterData();
+        }
 
         //display basic values from database (as an example for the GUI guys)
         // IMPORTATN FOR GUI PEOPLE: always interact with database using the RepositoryProvider for each business object
         shoppingLists = RepositoryProvider.getShoppingListRepositoryInstance().getAllItems();
 
-
-        //import masterdata to database if empty
-        if(DbUtils.isEmpty(ShoppingItem.class)) {
-            importMasterData();
-        }
         initUi();
     }
 
@@ -93,7 +92,7 @@ public class MainActivity extends AppCompatActivity implements ShoppingListsItem
         DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(this, DividerItemDecoration.VERTICAL);
         rvShoppingLists.addItemDecoration(dividerItemDecoration);
         rvShoppingLists.setAdapter(adapter);
-        setEmptyView(testArray);
+        setEmptyView(shoppingLists);
     }
 
     private void showAddDialog() {
@@ -123,9 +122,9 @@ public class MainActivity extends AppCompatActivity implements ShoppingListsItem
 
     }
 
-    private void setEmptyView(String[] shoppingLists) {
+    private void setEmptyView(List<ShoppingList> shoppingLists) {
         // TextView Message about "No results"
-        if (shoppingLists.length == 0) {
+        if (shoppingLists.size() == 0) {
             rvShoppingLists.setVisibility(View.INVISIBLE);
             tvNoResults.setVisibility(View.VISIBLE);
         } else {
