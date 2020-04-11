@@ -73,7 +73,7 @@ public class CSVDataImporter {
 
             ShoppingListItem shoppingListItem = new ShoppingListItemBuilder()
                     .withShoppingList(shoppingList)
-                    .withItemState(Globals.STATE_ACTIVE)
+                    .withItemState(Globals.SHOPPING_LIST_ITEM_STATE_UNCHECKED)
                     .withQuantity(3)
                     .withShoppingItem(shoppingItemRepository.getShoppingItemById(2))
                     .build();
@@ -81,7 +81,7 @@ public class CSVDataImporter {
 
             ShoppingListItem shoppingListItem2 = new ShoppingListItemBuilder()
                     .withShoppingList(shoppingList)
-                    .withItemState(Globals.STATE_ACTIVE)
+                    .withItemState(Globals.SHOPPING_LIST_ITEM_STATE_UNCHECKED)
                     .withQuantity(1)
                     .withShoppingItem(shoppingItemRepository.getShoppingItemById(5))
                     .build();
@@ -89,7 +89,7 @@ public class CSVDataImporter {
 
             ShoppingListItem shoppingListItem3 = new ShoppingListItemBuilder()
                     .withShoppingList(shoppingList)
-                    .withItemState(Globals.STATE_ACTIVE)
+                    .withItemState(Globals.SHOPPING_LIST_ITEM_STATE_UNCHECKED)
                     .withQuantity(5)
                     .withShoppingItem(shoppingItemRepository.getShoppingItemById(7))
                     .build();

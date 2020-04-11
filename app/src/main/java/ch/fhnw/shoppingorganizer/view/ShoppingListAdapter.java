@@ -1,6 +1,8 @@
 package ch.fhnw.shoppingorganizer.view;
 
+import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Paint;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,16 +16,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import ch.fhnw.shoppingorganizer.R;
 import ch.fhnw.shoppingorganizer.model.Globals;
@@ -33,38 +30,45 @@ import ch.fhnw.shoppingorganizer.model.businessobject.ShoppingListItem;
 import ch.fhnw.shoppingorganizer.model.businessobject.ShoppingListItemBuilder;
 import ch.fhnw.shoppingorganizer.model.database.RepositoryProvider;
 
-public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapter.ShoppingListItemHolder> implements ItemTouchHelperAdapter, Filterable {
+public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapter.ShoppingListItemHolder> implements Filterable {
+    private Context context;
     private ShoppingList shoppingList;
     private List<ShoppingItem> shoppingItem;
     private List<ShoppingItem> shoppingItemFull;
-    private ShoppingListItemListener listItemListener;
+    private ListItemInteractionInterface listItemInteractionInterface;
     private final String TAG = this.getClass().getSimpleName();
 
-    ShoppingListAdapter(ShoppingList shoppingList, List<ShoppingItem> shoppingItem, List<ShoppingListItem> shoppingListItem, ShoppingListItemListener listener) {
+    ShoppingListAdapter(Context context, ShoppingList shoppingList, List<ShoppingItem> shoppingItem, List<ShoppingListItem> shoppingListItem, ListItemInteractionInterface listItemInteractionInterface) {
+        this.context = context;
         this.shoppingList = shoppingList;
         this.shoppingItem = shoppingItem;
         shoppingItemFull = new ArrayList<ShoppingItem>(shoppingItem);
-        this.listItemListener = listener;
+        this.listItemInteractionInterface = listItemInteractionInterface;
     }
 
-    /**
-     * RecyclerView internal method which will create view holder class for each item
-     */
-    @NonNull
     @Override
-    public ShoppingListAdapter.ShoppingListItemHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        return new ShoppingListAdapter.ShoppingListItemHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.shopping_list_item, parent, false));
+    public ShoppingListItemHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        LayoutInflater inflater = LayoutInflater.from(context);
+        View view = inflater.inflate(R.layout.shopping_list_item, parent, false);
+        return new ShoppingListItemHolder(view);
     }
 
-    /**
-     * RecyclerView internal method which will called for each item after change
-     */
+    int defaultPaintFlags = 0;
     @Override
     public void onBindViewHolder(@NonNull ShoppingListAdapter.ShoppingListItemHolder holder, int position) {
         ShoppingItem item = shoppingItem.get(position);
         ShoppingListItem listItem = shoppingList.getShoppingListItem(item);
 
         holder.itemName.setText("Name: " + item.getItemName());
+        if(listItem != null && listItem.isItemState()) {
+            if(defaultPaintFlags == 0)
+                holder.itemName.getPaintFlags();
+            holder.itemName.setPaintFlags(defaultPaintFlags | Paint.STRIKE_THRU_TEXT_FLAG);
+            holder.itemName.setTextColor(context.getResources().getColor(R.color.colorTextChecked, context.getTheme()));
+        } else {
+            holder.itemName.setPaintFlags(defaultPaintFlags);
+            holder.itemName.setTextColor(context.getResources().getColor(android.R.color.black, context.getTheme()));
+        }
         holder.itemImage.setImageResource(R.mipmap.ic_launcher);
 
         if(listItem != null) {
@@ -85,37 +89,6 @@ public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapte
     @Override
     public int getItemCount() {
         return shoppingItem.size();
-    }
-
-//    ItemTouchHelper.SimpleCallback itemTouchHelperCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT | ItemTouchHelper.LEFT) {
-//
-//        @Override
-//        public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
-//            return false;
-//        }
-//
-//        @Override
-//        public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
-//
-//        }
-//    };
-
-    /**
-     * Callback from the {@link SimpleItemTouchHelperCallback}. Method should be update the view through the interface.
-     */
-    @Override
-    public void onSwipedLeft(int position) {
-        Log.d("ShoppingListAdapter", "Swiped to the left");
-        listItemListener.onSwipeLeft(position);
-    }
-
-    /**
-     * Callback from the {@link SimpleItemTouchHelperCallback}. Method should be update the view through the interface.
-     */
-    @Override
-    public void onSwipedRight(int position) {
-        Log.d("ShoppingListAdapter", "Swiped to the right");
-        listItemListener.onSwipeRight(position);
     }
 
     @Override
@@ -149,7 +122,7 @@ public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapte
         }
     };
 
-    class ShoppingListItemHolder extends RecyclerView.ViewHolder implements ItemTouchHelperViewHolder {
+    class ShoppingListItemHolder extends RecyclerView.ViewHolder {
 
         TextView itemName;
         TextView itemPrice;
@@ -169,11 +142,14 @@ public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapte
 
             increaseQuantity.setOnClickListener(v -> increaseQuantity());
             decreaseQuantity.setOnClickListener(v -> decreaseQuantity());
+            itemView.setOnClickListener(v -> listItemInteractionInterface.onItemClick(v, getAdapterPosition()));
             itemView.setOnLongClickListener(v -> {
-                listItemListener.onHoldItem(shoppingItem.get(getAdapterPosition()));
+                listItemInteractionInterface.onLongItemClick(v, getAdapterPosition());
                 return true;
             });
         }
+
+
 
         private void handleShoppingListItem(int number) {
             ShoppingItem item = shoppingItem.get(this.getAdapterPosition());
@@ -193,7 +169,7 @@ public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapte
                         .withShoppingItem(item)
                         .withShoppingList(shoppingList)
                         .withQuantity(number)
-                        .withItemState(Globals.STATE_SELECTED)
+                        .withItemState(Globals.SHOPPING_LIST_ITEM_STATE_UNCHECKED)
                         .build();
             } else
                 listItem.setQuantity(number);
@@ -232,23 +208,39 @@ public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapte
             handleShoppingListItem(number);
             //setPrice(number);
         }
+    }
 
-        /**
-         * Callback from the {@link SimpleItemTouchHelperCallback}. Method should be update the view through the interface.
-         */
-        @Override
-        public void onItemSelected() {
-            Log.d("ShoppingListAdapter", "in view holder onItemSelected");
+    public void createShoppingListItemTouchHelper(RecyclerView recyclerView, int swipeDirs) {
+        new ItemTouchHelper(this.getCountryItemTouchHelper(swipeDirs)).attachToRecyclerView(recyclerView);
+    }
 
-        }
+    private ItemTouchHelper.SimpleCallback getCountryItemTouchHelper(int swipeDirs){
+        return new ItemTouchHelper.SimpleCallback(0, swipeDirs) {
+            @Override
+            public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+                return false;
+            }
 
-        /**
-         * Callback from the {@link SimpleItemTouchHelperCallback}. Method should be update the view through the interface.
-         */
-        @Override
-        public void onItemClear() {
-            Log.d("ShoppingListAdapter", "in view holder onItemClear");
+            @Override
+            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+                int position = viewHolder.getAdapterPosition();
 
-        }
+                switch(direction) {
+                    case ItemTouchHelper.LEFT:
+                        listItemInteractionInterface.onSwipeLeft(viewHolder);
+                        break;
+                    case ItemTouchHelper.RIGHT:
+                        listItemInteractionInterface.onSwipeRight(viewHolder);
+                        break;
+                }
+
+            }
+
+            @Override
+            public void onChildDraw(@NonNull Canvas c, @NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
+                listItemInteractionInterface.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
+                super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
+            }
+        };
     }
 }

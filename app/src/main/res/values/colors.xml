@@ -5,4 +5,5 @@
     <color name="colorAccent">#03DAC5</color>
     <color name="colorDelete">#f44336</color>
     <color name="colorCheck">#ccff90</color>
+    <color name="colorTextChecked">#aaa</color>
 </resources>

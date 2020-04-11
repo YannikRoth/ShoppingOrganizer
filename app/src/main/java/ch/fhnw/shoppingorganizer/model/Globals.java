@@ -4,17 +4,11 @@ import java.text.NumberFormat;
 import java.util.Locale;
 
 public class Globals {
+    public final static boolean SHOPPING_ITEM_STATE_INACTIVE = false;
+    public final static boolean SHOPPING_ITEM_STATE_ACTIVE = true;
 
-    //constants for holding state information
-    public final static boolean STATE_INACTIVE = false;
-    public final static boolean STATE_ACTIVE = true;
-
-    /*constants for holding item state in ShoppingList
-    false = not selected
-    true = selected, quantity >=1
-     */
-    public final static boolean STATE_SELECTED = true;
-    public final static boolean STATE_DESELECTED = false;
+    public final static boolean SHOPPING_LIST_ITEM_STATE_CHECKED = true;
+    public final static boolean SHOPPING_LIST_ITEM_STATE_UNCHECKED = false;
 
     public static final NumberFormat NUMBERFORMAT = NumberFormat.getInstance(new Locale("de", "CH"));
 }
