@@ -25,7 +25,9 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import ch.fhnw.shoppingorganizer.R;
 import ch.fhnw.shoppingorganizer.model.Globals;
@@ -119,13 +121,15 @@ public class EditItemActivity extends AppCompatActivity {
         activeSwitch.setChecked(shoppingItem.isItemActive());
         itemImage = findViewById(R.id.imgItem);
 
+        //TODO: does not work properly yet
+        Spinner s = findViewById(R.id.categoryList);
+        s.setSelection(this.shoppingItem.getCategory().ordinal());
+
         itemImage.setOnClickListener(v -> cameraIntent());
 
-        // TODO Should be get the category from the DB
-        List<String> spinnerArray = new ArrayList<>();
-        spinnerArray.add("Category 1");
-        spinnerArray.add("Category 2");
-        spinnerArray.add("Category 3");
+        List<String> spinnerArray = new ArrayList<>((Arrays.stream(Category.values())
+                .map(e -> e.name())
+                .collect(Collectors.toList())));
         ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<String>(
                 this, android.R.layout.simple_spinner_item, spinnerArray);
         spinnerArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -144,6 +148,7 @@ public class EditItemActivity extends AppCompatActivity {
 
     public void saveShoppingItem(View v){
         this.shoppingItem.setItemName(this.<EditText>findCastedViewById(R.id.edtName).getText().toString().trim());
+        this.shoppingItem.setCategory(Category.valueOf(this.<Spinner>findCastedViewById(R.id.categoryList).getSelectedItem().toString()));
         this.shoppingItem.setPrice(new BigDecimal(this.<EditText>findCastedViewById(R.id.edtPrice).getText().toString()));
         this.shoppingItem.setItemActive(this.<Switch>findCastedViewById(R.id.activeSwitch).isChecked());
         this.shoppingItem.setImgPath("further implementation required...");
@@ -189,7 +194,7 @@ public class EditItemActivity extends AppCompatActivity {
 
     /**
      * Helper method to get casted view element
-     * @param GUI element id
+     * @param
      * @param <T> Type of GUI element
      * @return the casted type T of the element
      */
