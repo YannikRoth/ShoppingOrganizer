@@ -31,9 +31,9 @@ public class DataImporter {
             // Get all attributes
             String itemName = item.getString("itemName");
             boolean itemActive = item.getBoolean("itemActive");
-            String imgPath = item.getString("imgPath");
-            Category category = Category.valueOf(item.getString("category"));
-            BigDecimal price = BigDecimal.valueOf(item.getLong("price"));
+            String imgPath = item.getString("itemImgPath");
+            Category category = Category.valueOf(item.getString("itemCategory"));
+            BigDecimal price = BigDecimal.valueOf(item.getLong("itemPrice"));
 
             // Check if the item already exists
             ShoppingItemRepository itemRepository = RepositoryProvider.getShoppingItemRepositoryInstance();
