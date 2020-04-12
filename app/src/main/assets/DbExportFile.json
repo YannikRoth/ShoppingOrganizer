@@ -1,0 +1,33 @@
+{
+   "items":{
+      "1":"{itemId=1, itemName=Rind, itemCategory=MEAT, itemImgPath=a\/b\/c, itemPrice=20.3, itemActive=false}",
+      "2":"{itemId=2, itemName=Schwein, itemCategory=MEAT, itemImgPath=a\/b\/c, itemPrice=15.2, itemActive=false}",
+      "3":"{itemId=3, itemName=Geflügel, itemCategory=MEAT, itemImgPath=a\/b\/c, itemPrice=11.2, itemActive=false}",
+      "4":"{itemId=4, itemName=Shampoo, itemCategory=NONFOOD, itemImgPath=a\/b\/c, itemPrice=5.3, itemActive=false}",
+      "5":"{itemId=5, itemName=WC-Papier, itemCategory=NONFOOD, itemImgPath=a\/b\/c, itemPrice=1.2, itemActive=false}",
+      "6":"{itemId=6, itemName=Apfel, itemCategory=VEGETABLES, itemImgPath=a\/b\/c, itemPrice=0.9, itemActive=false}",
+      "7":"{itemId=7, itemName=Erdbeeren, itemCategory=VEGETABLES, itemImgPath=a\/b\/c, itemPrice=4.2, itemActive=false}",
+      "8":"{itemId=8, itemName=Karrotten, itemCategory=VEGETABLES, itemImgPath=a\/b\/c, itemPrice=2.2, itemActive=false}",
+      "9":"{itemId=9, itemName=Lauch, itemCategory=VEGETABLES, itemImgPath=a\/b\/c, itemPrice=1.7, itemActive=false}",
+      "10":"{itemId=10, itemName=Avocado, itemCategory=VEGETABLES, itemImgPath=a\/b\/c, itemPrice=2.3, itemActive=false}",
+      "11":"{itemId=11, itemName=Forelle, itemCategory=FISH, itemImgPath=a\/b\/c, itemPrice=7.6, itemActive=false}",
+      "12":"{itemId=12, itemName=Lachs, itemCategory=FISH, itemImgPath=a\/b\/c, itemPrice=8, itemActive=false}",
+      "13":"{itemId=13, itemName=Barilla, itemCategory=PASTA, itemImgPath=a\/b\/c, itemPrice=2.75, itemActive=false}",
+      "14":"{itemId=14, itemName=, itemCategory=NONE, itemImgPath=, itemPrice=0, itemActive=true}",
+      "15":"{itemId=15, itemName=, itemCategory=NONE, itemImgPath=, itemPrice=0, itemActive=true}",
+      "16":"{itemId=16, itemName=YannikTest, itemCategory=NONE, itemImgPath=further implementation required..., itemPrice=15.00, itemActive=true}",
+      "17":"{itemId=17, itemName=YannikTest2, itemCategory=NONE, itemImgPath=further implementation required..., itemPrice=89.00, itemActive=true}"
+   },
+   "listItems":{
+      "22":"{listItemState=false, listItemId=22, listItemShoppingItem={itemId=1, itemName=Rind, itemCategory=MEAT, itemImgPath=a\/b\/c, itemPrice=20.3, itemActive=false}, listItemQuantity=2, listItemShoppingList={listId=5, listName=Einkaufsliste (IMPORTED)}}",
+      "23":"{listItemState=false, listItemId=23, listItemShoppingItem={itemId=2, itemName=Schwein, itemCategory=MEAT, itemImgPath=a\/b\/c, itemPrice=15.2, itemActive=false}, listItemQuantity=1, listItemShoppingList={listId=5, listName=Einkaufsliste (IMPORTED)}}",
+      "24":"{listItemState=false, listItemId=24, listItemShoppingItem={itemId=3, itemName=Geflügel, itemCategory=MEAT, itemImgPath=a\/b\/c, itemPrice=11.2, itemActive=false}, listItemQuantity=3, listItemShoppingList={listId=5, listName=Einkaufsliste (IMPORTED)}}",
+      "25":"{listItemState=false, listItemId=25, listItemShoppingItem={itemId=6, itemName=Apfel, itemCategory=VEGETABLES, itemImgPath=a\/b\/c, itemPrice=0.9, itemActive=false}, listItemQuantity=3, listItemShoppingList={listId=5, listName=Einkaufsliste (IMPORTED)}}",
+      "26":"{listItemState=false, listItemId=26, listItemShoppingItem={itemId=14, itemName=, itemCategory=NONE, itemImgPath=, itemPrice=0, itemActive=true}, listItemQuantity=1, listItemShoppingList={listId=5, listName=Einkaufsliste (IMPORTED)}}",
+      "27":"{listItemState=false, listItemId=27, listItemShoppingItem={itemId=10, itemName=Avocado, itemCategory=VEGETABLES, itemImgPath=a\/b\/c, itemPrice=2.3, itemActive=false}, listItemQuantity=1, listItemShoppingList={listId=6, listName=Kleiderliste}}"
+   },
+   "lists":{
+      "5":"{listId=5, listName=Einkaufsliste (IMPORTED)}",
+      "6":"{listId=6, listName=Kleiderliste}"
+   }
+}
