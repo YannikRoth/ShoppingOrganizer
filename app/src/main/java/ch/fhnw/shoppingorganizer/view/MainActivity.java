@@ -47,6 +47,7 @@ import ch.fhnw.shoppingorganizer.model.database.RepositoryProvider;
 import ch.fhnw.shoppingorganizer.model.database.ShoppingListItemRepository;
 import ch.fhnw.shoppingorganizer.model.database.ShoppingListRepository;
 import ch.fhnw.shoppingorganizer.model.datatransfer.DataExporter;
+import ch.fhnw.shoppingorganizer.model.datatransfer.DataImporter;
 import ch.fhnw.shoppingorganizer.model.masterdata.CSVDataImporter;
 import it.xabaras.android.recyclerview.swipedecorator.RecyclerViewSwipeDecorator;
 
@@ -68,7 +69,7 @@ public class MainActivity extends AppCompatActivity {
     private Toolbar tbSearch;
     private RecyclerView rvShoppingLists;
     private TextView tvNoResults;
-    private FloatingActionButton btnAdd, btnExport;
+    private FloatingActionButton btnAdd, btnExport, btnImport;
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
@@ -107,6 +108,17 @@ public class MainActivity extends AppCompatActivity {
                 Log.d("Export data: ",exportData.toString());
             }catch (Exception e){
                 Log.d("Export exception: ", e.getMessage());
+            }
+        });
+
+        //TEMP: import
+        btnImport = findViewById(R.id.btnImport);
+        btnImport.setOnClickListener(v -> {
+            try{
+                AssetManager am = getAssets();
+                DataImporter.unserializeFromJson(am.open("DbExportFile.json").toString());
+            }catch (Exception e){
+                Log.d("Import exception: ", e.getMessage());
             }
         });
 
