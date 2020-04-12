@@ -32,7 +32,7 @@ public class DataImporter {
             String itemName = item.getString("itemName");
             boolean itemActive = item.getBoolean("itemActive");
             String imgPath = item.getString("imgPath");
-            Category category = (Category) item.get("category"); // TODO: Does this work though?
+            Category category = Category.valueOf(item.getString("category"));
             BigDecimal price = BigDecimal.valueOf(item.getLong("price"));
 
             // Check if the item already exists
