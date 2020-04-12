@@ -1,5 +1,19 @@
 package ch.fhnw.shoppingorganizer.view;
 
+import android.content.Intent;
+import android.content.res.AssetManager;
+import android.graphics.Canvas;
+import android.os.Build;
+import android.os.Bundle;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
@@ -12,30 +26,14 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.content.Intent;
-import android.content.res.AssetManager;
-import android.graphics.Canvas;
-import android.os.Build;
-import android.os.Bundle;
-import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
-import android.widget.EditText;
-import android.widget.TextView;
-import android.widget.Toast;
-
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
 import ch.fhnw.shoppingorganizer.R;
-import ch.fhnw.shoppingorganizer.model.Globals;
 import ch.fhnw.shoppingorganizer.model.businessobject.ShoppingItem;
-import ch.fhnw.shoppingorganizer.model.businessobject.ShoppingItemBuilder;
 import ch.fhnw.shoppingorganizer.model.businessobject.ShoppingList;
 import ch.fhnw.shoppingorganizer.model.businessobject.ShoppingListBuilder;
 import ch.fhnw.shoppingorganizer.model.businessobject.ShoppingListItem;
@@ -176,18 +174,22 @@ public class MainActivity extends AppCompatActivity {
         setEmptyView(shoppingLists);
     }
 
-    private void showShoppingListDialog(ShoppingList shoppingListBase) {
+    private AlertDialog alertDialog = null;
 
+    private void showShoppingListDialog(ShoppingList shoppingListBase)  {
         AlertDialog.Builder alert = new AlertDialog.Builder(this);
-        final EditText edittext = new EditText(this);
-        alert.setMessage(R.string.shopping_lists_popup_message);
-        alert.setTitle(R.string.shopping_lists_popup_title);
 
-        if(shoppingListBase != null)
-            edittext.setText(shoppingListBase.getListName());
-        alert.setView(edittext);
+        LayoutInflater inflater = this.getLayoutInflater();
+        View dialogView = inflater.inflate(R.layout.shopping_list_alert_dialog, null);
+        alert.setView(dialogView);
 
-        alert.setPositiveButton(R.string.shopping_lists_popup_yes_btn, (dialog, whichButton) -> {
+        final EditText edittext = dialogView.findViewById(R.id.edCreateNewList);
+        Button saveButton = dialogView.findViewById(R.id.buttonSaveNewList);
+
+        saveButton.setOnClickListener((view) -> {
+            if (alertDialog != null) {
+                alertDialog.dismiss();
+            }
             String inputText = edittext.getText().toString().trim();
 
             ShoppingList shoppingList;
@@ -208,11 +210,8 @@ public class MainActivity extends AppCompatActivity {
                 adapter.notifyItemChanged(shoppingLists.indexOf(shoppingList));
             }
         });
-        alert.setNegativeButton(R.string.shopping_lists_popup_no_btn, ((dialog, which) -> {
-            dialog.dismiss();
-        }));
 
-        alert.show();
+        alertDialog = alert.show();
     }
 
     private void setEmptyView(List<ShoppingList> shoppingLists) {
