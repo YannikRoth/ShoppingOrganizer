@@ -30,6 +30,9 @@ import com.google.android.material.snackbar.Snackbar;
 
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
@@ -116,7 +119,14 @@ public class MainActivity extends AppCompatActivity {
         btnImport.setOnClickListener(v -> {
             try{
                 AssetManager am = getAssets();
-                DataImporter.unserializeFromJson(am.open("DbExportFile.json").toString());
+                InputStream is = am.open("DbExportFile.json");
+                BufferedReader br = new BufferedReader(new InputStreamReader(is));
+                StringBuilder sb = new StringBuilder();
+                String line;
+                while((line = br.readLine()) != null){
+                    sb.append(line);
+                }
+                DataImporter.unserializeFromJson(sb.toString());
             }catch (Exception e){
                 Log.d("Import exception: ", e.getMessage());
             }
