@@ -28,6 +28,8 @@ import android.widget.Toast;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
+import org.json.JSONObject;
+
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
@@ -44,6 +46,7 @@ import ch.fhnw.shoppingorganizer.model.database.DbUtils;
 import ch.fhnw.shoppingorganizer.model.database.RepositoryProvider;
 import ch.fhnw.shoppingorganizer.model.database.ShoppingListItemRepository;
 import ch.fhnw.shoppingorganizer.model.database.ShoppingListRepository;
+import ch.fhnw.shoppingorganizer.model.datatransfer.DataExporter;
 import ch.fhnw.shoppingorganizer.model.masterdata.CSVDataImporter;
 import it.xabaras.android.recyclerview.swipedecorator.RecyclerViewSwipeDecorator;
 
@@ -65,7 +68,7 @@ public class MainActivity extends AppCompatActivity {
     private Toolbar tbSearch;
     private RecyclerView rvShoppingLists;
     private TextView tvNoResults;
-    private FloatingActionButton btnAdd;
+    private FloatingActionButton btnAdd, btnExport;
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
@@ -95,6 +98,18 @@ public class MainActivity extends AppCompatActivity {
         btnAdd.setOnClickListener(v -> {
             showShoppingListDialog(null);
         });
+
+        //TEMP: Export
+        btnExport = findViewById(R.id.btnExport);
+        btnExport.setOnClickListener(v ->{
+            try {
+                JSONObject exportData = DataExporter.serializeToJsonFromDatabase();
+                Log.d("Export data: ",exportData.toString());
+            }catch (Exception e){
+                Log.d("Export exception: ", e.getMessage());
+            }
+        });
+
         rvShoppingLists = findViewById(R.id.rvShoppingLists);
         tvNoResults = findViewById(R.id.tvNoResults);
 

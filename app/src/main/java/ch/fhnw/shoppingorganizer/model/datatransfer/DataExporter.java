@@ -31,7 +31,7 @@ public class DataExporter {
         // Serialize all items
         JSONObject itemsInJson = new JSONObject();
         for (ShoppingItem item : items) {
-            itemsInJson.put(String.valueOf(item.getId()), item);
+            itemsInJson.put(String.valueOf(item.getId()), item.toMap());
         }
 
         // Serialize all shopping list items
