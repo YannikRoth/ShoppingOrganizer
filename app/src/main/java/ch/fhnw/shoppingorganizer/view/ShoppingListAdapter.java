@@ -20,6 +20,7 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import ch.fhnw.shoppingorganizer.R;
@@ -29,21 +30,28 @@ import ch.fhnw.shoppingorganizer.model.businessobject.ShoppingList;
 import ch.fhnw.shoppingorganizer.model.businessobject.ShoppingListItem;
 import ch.fhnw.shoppingorganizer.model.businessobject.ShoppingListItemBuilder;
 import ch.fhnw.shoppingorganizer.model.database.RepositoryProvider;
+import ch.fhnw.shoppingorganizer.model.database.ShoppingListItemRepository;
 
-public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapter.ShoppingListItemHolder> implements Filterable {
+public abstract class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapter.ShoppingListItemHolder> implements Filterable, ListItemInteractionInterface {
     private Context context;
     private ShoppingList shoppingList;
     private List<ShoppingItem> shoppingItem;
     private List<ShoppingItem> shoppingItemFull;
-    private ListItemInteractionInterface listItemInteractionInterface;
     private final String TAG = this.getClass().getSimpleName();
 
-    ShoppingListAdapter(Context context, ShoppingList shoppingList, List<ShoppingItem> shoppingItem, List<ShoppingListItem> shoppingListItem, ListItemInteractionInterface listItemInteractionInterface) {
+    private ShoppingListItemRepository shoppingListItemRepository = RepositoryProvider.getShoppingListItemRepositoryInstance();
+
+    ShoppingListAdapter(Context context, ShoppingList shoppingList, List<ShoppingItem> shoppingItem, RecyclerView recyclerView) {
         this.context = context;
         this.shoppingList = shoppingList;
         this.shoppingItem = shoppingItem;
+        this.sortShoppingItems(shoppingItem);
         shoppingItemFull = new ArrayList<ShoppingItem>(shoppingItem);
-        this.listItemInteractionInterface = listItemInteractionInterface;
+        this.createShoppingListItemTouchHelper(recyclerView, getSwipeDirs());
+    }
+
+    public Context getContext() {
+        return this.context;
     }
 
     @Override
@@ -59,7 +67,7 @@ public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapte
         ShoppingItem item = shoppingItem.get(position);
         ShoppingListItem listItem = shoppingList.getShoppingListItem(item);
 
-        holder.itemName.setText("Name: " + item.getItemName());
+        holder.itemName.setText(context.getString(R.string.shopping_list_item_name) + ": " + item.getItemName());
         if(listItem != null && listItem.isItemState()) {
             if(defaultPaintFlags == 0)
                 holder.itemName.getPaintFlags();
@@ -72,12 +80,11 @@ public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapte
         holder.itemImage.setImageResource(R.mipmap.ic_launcher);
 
         if(listItem != null) {
-            holder.itemPrice.setText(String.format("CHF %.2f", listItem.getTotalItemPrice()));
-            holder.inputQuantity.setText(Globals.NUMBERFORMAT.format(listItem.getQuantity()) );
+            holder.itemPrice.setText(Globals.NUMBERFORMAT.getCurrency() + " " + Globals.NUMBERFORMAT.format(listItem.getTotalItemPrice()));
+            holder.inputQuantity.setText(Globals.NUMBERFORMAT.format(listItem.getQuantity()));
         } else {
-            holder.itemPrice.setText(String.format("CHF %.2f", 0.00));
-            holder.inputQuantity.setText(String.format("%o", 0) );
-
+            holder.itemPrice.setText(Globals.NUMBERFORMAT.getCurrency() + " " + Globals.NUMBERFORMAT.format(0.00));
+            holder.inputQuantity.setText(Globals.NUMBERFORMAT.format(0));
         }
 
         Log.d("ShoppingListAdapter", "onBindViewHolder: end");
@@ -142,9 +149,9 @@ public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapte
 
             increaseQuantity.setOnClickListener(v -> increaseQuantity());
             decreaseQuantity.setOnClickListener(v -> decreaseQuantity());
-            itemView.setOnClickListener(v -> listItemInteractionInterface.onItemClick(v, getAdapterPosition()));
+            itemView.setOnClickListener(v -> onItemClick(v, getAdapterPosition()));
             itemView.setOnLongClickListener(v -> {
-                listItemInteractionInterface.onLongItemClick(v, getAdapterPosition());
+                onLongItemClick(v, getAdapterPosition());
                 return true;
             });
         }
@@ -157,8 +164,7 @@ public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapte
             //0 = Delete form List
             if(number == 0 && listItem != null) {
                 shoppingList.getShoppingListItems().remove(listItem);
-                RepositoryProvider.getShoppingListItemRepositoryInstance()
-                        .deleteEntity(listItem);
+                shoppingListItemRepository.deleteEntity(listItem);
                 notifyItemChanged(this.getAdapterPosition());
                 Log.d(TAG, "Shopping Item " + listItem.getShoppingItem().getItemName() + " removed");
                 return;
@@ -173,8 +179,7 @@ public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapte
                         .build();
             } else
                 listItem.setQuantity(number);
-            RepositoryProvider.getShoppingListItemRepositoryInstance()
-                    .saveEntity(listItem);
+            shoppingListItemRepository.saveEntity(listItem);
             if(shoppingList.getShoppingListItems().contains(listItem)) {
                 int position = shoppingList.getShoppingListItems().indexOf(listItem);
                 shoppingList.getShoppingListItems().set(position, listItem);
@@ -191,22 +196,14 @@ public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapte
             String text = inputQuantity.getText().toString();
             int number = Integer.parseInt(text);
             number++;
-           // if (number < 200) {
-            //    inputQuantity.setText(Integer.toString(number));
-            //}
             handleShoppingListItem(number);
-            //setPrice(number);
         }
 
         private void decreaseQuantity() {
             String text = inputQuantity.getText().toString();
             int number = Integer.parseInt(text);
             number--;
-            //if (number >= 0) {
-            //    inputQuantity.setText(Integer.toString(number));
-            //}
             handleShoppingListItem(number);
-            //setPrice(number);
         }
     }
 
@@ -227,20 +224,68 @@ public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapte
 
                 switch(direction) {
                     case ItemTouchHelper.LEFT:
-                        listItemInteractionInterface.onSwipeLeft(viewHolder);
+                        onSwipeLeft(viewHolder);
                         break;
                     case ItemTouchHelper.RIGHT:
-                        listItemInteractionInterface.onSwipeRight(viewHolder);
+                        onSwipeRight(viewHolder);
                         break;
                 }
 
             }
 
             @Override
+            public int getSwipeDirs(RecyclerView recyclerView, RecyclerView.ViewHolder holder) {
+                int position = holder.getAdapterPosition();
+                ShoppingItem item = shoppingItem.get(position);
+                return shoppingList.getShoppingListItem(item) == null ? 0:super.getSwipeDirs(recyclerView, holder);
+            }
+
+            @Override
             public void onChildDraw(@NonNull Canvas c, @NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
-                listItemInteractionInterface.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
+                onChildDrawDetails(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
                 super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
             }
         };
     }
+
+    //Pull-Refresh SwipeRefreshLayout
+    public void onRefreshViewOnPull() {
+//        shoppingListFilter.
+        shoppingItem.clear();
+        sortShoppingItems(shoppingItemFull);
+        shoppingItem.addAll(shoppingItemFull);
+        this.notifyDataSetChanged();
+    }
+
+    public void addShoppingItem(ShoppingItem shoppingItem) {
+        if(!shoppingItemFull.contains(shoppingItem)) {
+            shoppingItemFull.add(shoppingItem);
+            onRefreshViewOnPull();
+        }
+    }
+
+    private void sortShoppingItems(List<ShoppingItem> items) {
+        Collections.sort(items, (o1, o2) -> {
+            int i1 = 3, i2 = 3;
+            for(ShoppingListItem it:shoppingList.getShoppingListItems()) {
+                if(it.getShoppingItem().equals(o1)) {
+                    if(it.isItemState())
+                        i1 = 2;
+                    else
+                        i1 = 1;
+                }
+                if(it.getShoppingItem().equals(o2)) {
+                    if(it.isItemState())
+                        i2 = 2;
+                    else
+                        i2 = 1;
+                }
+            }
+            if(i1 == i2)
+                return o1.getItemName().compareTo(o2.getItemName());
+            return i1-i2;//Globals.STATE_SELECTED
+        });
+    }
+
+
 }
