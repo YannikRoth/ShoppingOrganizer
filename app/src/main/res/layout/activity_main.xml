@@ -67,7 +67,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="end|bottom"
         android:layout_margin="16dp"
-        android:src="@drawable/ic_check"
+        android:src="@drawable/ic_file_upload_black_24dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintRight_toLeftOf="@id/btnExport" />
 </androidx.constraintlayout.widget.ConstraintLayout>
