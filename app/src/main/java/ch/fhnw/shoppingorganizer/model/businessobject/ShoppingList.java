@@ -8,10 +8,11 @@ import com.activeandroid.Model;
 import com.activeandroid.annotation.Column;
 import com.activeandroid.annotation.Table;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.math.BigDecimal;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import ch.fhnw.shoppingorganizer.model.database.RepositoryProvider;
 import ch.fhnw.shoppingorganizer.model.database.ShoppingListRepository;
@@ -83,10 +84,14 @@ public class ShoppingList extends Model implements Comparable<ShoppingList> {
         return this.getListName().compareTo(o.getListName());
     }
 
-    public Map<String, Object> toMap(){
-        Map<String, Object> result = new HashMap<>();
-        result.put("listId", super.getId());
-        result.put("listName", listName);
-        return result;
+    public JSONObject toJson(){
+        try {
+            JSONObject json = new JSONObject();
+            json.put("id", getId());
+            json.put("listName", listName);
+            return json;
+        } catch (JSONException e) {
+            return null;
+        }
     }
 }

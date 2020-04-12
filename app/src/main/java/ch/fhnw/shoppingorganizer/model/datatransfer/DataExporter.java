@@ -31,19 +31,19 @@ public class DataExporter {
         // Serialize all items
         JSONObject itemsInJson = new JSONObject();
         for (ShoppingItem item : items) {
-            itemsInJson.put(String.valueOf(item.getId()), item.toMap());
+            itemsInJson.put(String.valueOf(item.getId()), item.toJson());
         }
 
         // Serialize all shopping list items
         JSONObject listItemsInJson = new JSONObject();
         for (ShoppingListItem listItem : listItems) {
-            listItemsInJson.put(String.valueOf(listItem.getId()), listItem.toMap());
+            listItemsInJson.put(String.valueOf(listItem.getId()), listItem.toJson());
         }
 
         // Serialize all shopping lists
         JSONObject listsInJson = new JSONObject();
         for (ShoppingList list : lists) {
-            listsInJson.put(String.valueOf(list.getId()), list.toMap());
+            listsInJson.put(String.valueOf(list.getId()), list.toJson());
         }
 
         // Combine all lists into one

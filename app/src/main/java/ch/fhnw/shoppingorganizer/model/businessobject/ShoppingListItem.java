@@ -4,9 +4,10 @@ import com.activeandroid.Model;
 import com.activeandroid.annotation.Column;
 import com.activeandroid.annotation.Table;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.math.BigDecimal;
-import java.util.HashMap;
-import java.util.Map;
 
 @Table(name ="ShoppingListItem")
 public class ShoppingListItem extends Model {
@@ -66,13 +67,17 @@ public class ShoppingListItem extends Model {
         return shoppingList + " -> ID:" + getId() + "," +  this.getTotalItemPrice() + " CHF," + this.getQuantity() + "x " + this.getShoppingItem();
     }
 
-    public Map<String, Object> toMap(){
-        Map<String, Object> result = new HashMap<>();
-        result.put("listItemId", super.getId());
-        result.put("listItemQuantity", quantity);
-        result.put("listItemState", itemState);
-        result.put("listItemShoppingItem", shoppingItem.toMap());
-        result.put("listItemShoppingList", shoppingList.toMap());
-        return result;
+    public JSONObject toJson(){
+        try {
+            JSONObject json = new JSONObject();
+            json.put("id", getId());
+            json.put("quantity", quantity);
+            json.put("itemState", itemState);
+            json.put("shoppingItem", shoppingItem.getId());
+            json.put("shoppingList", shoppingList.getId());
+            return json;
+        } catch (JSONException e) {
+            return null;
+        }
     }
 }
