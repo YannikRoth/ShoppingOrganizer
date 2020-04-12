@@ -5,6 +5,8 @@ import com.activeandroid.annotation.Column;
 import com.activeandroid.annotation.Table;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.Map;
 
 @Table(name ="ShoppingListItem")
 public class ShoppingListItem extends Model {
@@ -62,5 +64,15 @@ public class ShoppingListItem extends Model {
     @Override
     public String toString() {
         return shoppingList + " -> ID:" + getId() + "," +  this.getTotalItemPrice() + " CHF," + this.getQuantity() + "x " + this.getShoppingItem();
+    }
+
+    public Map<String, Object> toMap(){
+        Map<String, Object> result = new HashMap<>();
+        result.put("listItemId", super.getId());
+        result.put("listItemQuantity", quantity);
+        result.put("listItemState", itemState);
+        result.put("listItemShoppingItem", shoppingItem.toMap());
+        result.put("listItemShoppingList", shoppingList.toMap());
+        return result;
     }
 }

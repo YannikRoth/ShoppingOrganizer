@@ -37,13 +37,13 @@ public class DataExporter {
         // Serialize all shopping list items
         JSONObject listItemsInJson = new JSONObject();
         for (ShoppingListItem listItem : listItems) {
-            listItemsInJson.put(String.valueOf(listItem.getId()), listItem);
+            listItemsInJson.put(String.valueOf(listItem.getId()), listItem.toMap());
         }
 
         // Serialize all shopping lists
         JSONObject listsInJson = new JSONObject();
         for (ShoppingList list : lists) {
-            listsInJson.put(String.valueOf(list.getId()), list);
+            listsInJson.put(String.valueOf(list.getId()), list.toMap());
         }
 
         // Combine all lists into one

@@ -9,7 +9,9 @@ import com.activeandroid.annotation.Column;
 import com.activeandroid.annotation.Table;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import ch.fhnw.shoppingorganizer.model.database.RepositoryProvider;
 import ch.fhnw.shoppingorganizer.model.database.ShoppingListRepository;
@@ -79,5 +81,12 @@ public class ShoppingList extends Model implements Comparable<ShoppingList> {
     @Override
     public int compareTo(ShoppingList o) {
         return this.getListName().compareTo(o.getListName());
+    }
+
+    public Map<String, Object> toMap(){
+        Map<String, Object> result = new HashMap<>();
+        result.put("listId", super.getId());
+        result.put("listName", listName);
+        return result;
     }
 }
