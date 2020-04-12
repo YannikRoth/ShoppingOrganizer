@@ -31,9 +31,9 @@ public class DataImporter {
             // Get all attributes
             String itemName = item.getString("itemName");
             boolean itemActive = item.getBoolean("itemActive");
-            String imgPath = item.getString("itemImgPath");
-            Category category = Category.valueOf(item.getString("itemCategory"));
-            BigDecimal price = BigDecimal.valueOf(item.getLong("itemPrice"));
+            String imgPath = item.getString("imgPath");
+            Category category = Category.valueOf(item.getString("category"));
+            BigDecimal price = BigDecimal.valueOf(item.getLong("price"));
 
             // Check if the item already exists
             ShoppingItemRepository itemRepository = RepositoryProvider.getShoppingItemRepositoryInstance();
@@ -61,6 +61,7 @@ public class DataImporter {
             JSONObject list = listsInJson.getJSONObject(i.next());
 
             // Get all attributes
+            long listId = list.getLong("id");
             String listName = list.getString("listName");
 
             // Check if the item already exists
@@ -83,17 +84,37 @@ public class DataImporter {
             for (Iterator<String> i2 = listItemsInJson.keys(); i2.hasNext(); ) {
                 JSONObject listItem = listItemsInJson.getJSONObject(i2.next());
 
+                ShoppingItemRepository itemRepository = RepositoryProvider.getShoppingItemRepositoryInstance();
+                ShoppingListItemRepository listItemRepository = RepositoryProvider.getShoppingListItemRepositoryInstance();
+
                 // Get all attributes
                 long quantity = listItem.getLong("quantity");
                 boolean itemState = listItem.getBoolean("itemState");
-                ShoppingItem shoppingItem = (ShoppingItem) listItem.get("shoppingItem"); // TODO: Does this work though?
-                ShoppingList shoppingList = (ShoppingList) listItem.get("shoppingList"); // TODO: Does this work though?
+                long shoppingItemId = listItem.getLong("shoppingItem");
+                long shoppingListId = listItem.getLong("shoppingList");
 
                 // Check if we are in the loop of the list we just created
-                ShoppingListItemRepository listItemRepository = RepositoryProvider.getShoppingListItemRepositoryInstance();
-                if (!listName.equals(shoppingList.getListName())) {
+                if (listId != shoppingListId) {
                     continue;
                 }
+
+                // Find the existing item inside the local database for further usage
+                ShoppingItem shoppingItem = null;
+                for (Iterator<String> i3 = itemsInJson.keys(); i3.hasNext(); ) {
+                    JSONObject item = itemsInJson.getJSONObject(i3.next());
+
+                    long itemId = item.getLong("id");
+                    String itemName = item.getString("itemName");
+
+                    // Check if the item already exists
+                    if (shoppingItemId == itemId) {
+                        shoppingItem = itemRepository.getByName(itemName);
+                        break;
+                    }
+                }
+
+                // Find the existing list inside the local database for further usage
+                ShoppingList shoppingList = listRepository.getByName(listName);
 
                 // Create new item
                 ShoppingListItem newItem2 = new ShoppingListItemBuilder()
