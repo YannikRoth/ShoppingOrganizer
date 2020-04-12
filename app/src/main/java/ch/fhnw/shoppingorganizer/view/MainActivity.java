@@ -1,16 +1,8 @@
 package ch.fhnw.shoppingorganizer.view;
 
-import androidx.annotation.RequiresApi;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.SearchView;
-import androidx.appcompat.widget.Toolbar;
-import androidx.recyclerview.widget.DividerItemDecoration;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.content.Intent;
 import android.content.res.AssetManager;
+import android.graphics.Canvas;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -22,27 +14,45 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SearchView;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.ItemTouchHelper;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.snackbar.Snackbar;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import ch.fhnw.shoppingorganizer.R;
-import ch.fhnw.shoppingorganizer.model.Globals;
 import ch.fhnw.shoppingorganizer.model.businessobject.ShoppingItem;
-import ch.fhnw.shoppingorganizer.model.businessobject.ShoppingItemBuilder;
 import ch.fhnw.shoppingorganizer.model.businessobject.ShoppingList;
 import ch.fhnw.shoppingorganizer.model.businessobject.ShoppingListBuilder;
+import ch.fhnw.shoppingorganizer.model.businessobject.ShoppingListItem;
+import ch.fhnw.shoppingorganizer.model.businessobject.ShoppingListItemBuilder;
 import ch.fhnw.shoppingorganizer.model.database.DbUtils;
 import ch.fhnw.shoppingorganizer.model.database.RepositoryProvider;
 import ch.fhnw.shoppingorganizer.model.database.ShoppingListItemRepository;
+import ch.fhnw.shoppingorganizer.model.database.ShoppingListRepository;
 import ch.fhnw.shoppingorganizer.model.masterdata.CSVDataImporter;
+import it.xabaras.android.recyclerview.swipedecorator.RecyclerViewSwipeDecorator;
 
-public class MainActivity extends AppCompatActivity implements ShoppingListsItemListener {
+public class MainActivity extends AppCompatActivity {
 
     public static final String LIST_NAME = "ListName";
     public static final String LIST_ID = "pkShoppingList";
     public final String TAG = this.getClass().getSimpleName();
+
+    private ShoppingListRepository shoppingListRepositoryInstance = RepositoryProvider.getShoppingListRepositoryInstance();
+    private ShoppingListItemRepository shoppingListItemRepositoryInstance = RepositoryProvider.getShoppingListItemRepositoryInstance();
 
     //Data elemens
     List<ShoppingList> shoppingLists = new ArrayList<ShoppingList>();
@@ -62,13 +72,13 @@ public class MainActivity extends AppCompatActivity implements ShoppingListsItem
         setContentView(R.layout.activity_main);
 
         //import masterdata to database if empty
-        if (DbUtils.isEmpty(ShoppingItem.class)) {
+        if(DbUtils.isEmpty(ShoppingItem.class)) {
             importMasterData();
         }
 
         //display basic values from database (as an example for the GUI guys)
         // IMPORTATN FOR GUI PEOPLE: always interact with database using the RepositoryProvider for each business object
-        shoppingLists = RepositoryProvider.getShoppingListRepositoryInstance().getAllItems();
+        shoppingLists = shoppingListRepositoryInstance.getAllItems();
 
         initUi();
     }
@@ -81,15 +91,82 @@ public class MainActivity extends AppCompatActivity implements ShoppingListsItem
             setSupportActionBar(tbSearch);
         btnAdd = findViewById(R.id.btnAdd);
         btnAdd.setOnClickListener(v -> {
-            showAddDialog();
+            showShoppingListDialog(null);
         });
         rvShoppingLists = findViewById(R.id.rvShoppingLists);
         tvNoResults = findViewById(R.id.tvNoResults);
 
+        adapter = new ShoppingListsAdapter(this, shoppingLists, rvShoppingLists) {
+            @Override
+            public void onItemClick(View view, int position) {
+                ShoppingList item = shoppingLists.get(position);
+                Log.d(TAG, "On click List: " + item.getListName());
+                Intent intent = new Intent(this.getContext(), ShoppingListActivity.class);
+                intent.putExtra(LIST_NAME, item.getListName());
+                intent.putExtra(LIST_ID, item.getId());
+                startActivity(intent);
+            }
 
-        String[] testArray = getResources().getStringArray(R.array.test_shopping_lists);
+            @Override
+            public void onLongItemClick(View view, int position) {
+                showShoppingListDialog(shoppingLists.get(position));
+            }
 
-        adapter = new ShoppingListsAdapter(shoppingLists, this);
+            @Override
+            public int getSwipeDirs() {
+                return ItemTouchHelper.LEFT;
+            }
+
+            ShoppingList deletedShoppingList = null;
+            List<ShoppingListItem> deletedShoppingListItems = null;
+            @Override
+            public void onSwipeLeft(@NonNull RecyclerView.ViewHolder viewHolder) {
+                int position = viewHolder.getAdapterPosition();
+                deletedShoppingList = shoppingLists.get(position);
+                deletedShoppingListItems = new ArrayList<>(deletedShoppingList.getShoppingListItems());
+                for(ShoppingListItem item:deletedShoppingListItems) {
+                    shoppingListItemRepositoryInstance.deleteEntity(item);
+                    deletedShoppingList.getShoppingListItems().remove(item);
+                }
+                shoppingListRepositoryInstance.deleteEntity(deletedShoppingList);
+                adapter.removeShoppingList(deletedShoppingList);
+                Snackbar.make(rvShoppingLists, getString(R.string.snackbar_list_removed) + ": " + deletedShoppingList.getListName(), Snackbar.LENGTH_LONG)
+                        .setAction(getString(R.string.snackbar_undo), v -> {
+                            deletedShoppingList = new ShoppingListBuilder()
+                                    .withListName(deletedShoppingList.getListName())
+                                    .build();
+                            shoppingListRepositoryInstance.saveEntity(deletedShoppingList);
+                            for(ShoppingListItem item:deletedShoppingListItems) {
+                                item = new ShoppingListItemBuilder()
+                                        .withShoppingItem(item.getShoppingItem())
+                                        .withItemState(item.isItemState())
+                                        .withQuantity(item.getQuantity())
+                                        .withShoppingList(deletedShoppingList)
+                                        .build();
+                                shoppingListItemRepositoryInstance.saveEntity(item);
+                                deletedShoppingList.getShoppingListItems().add(item);
+                            }
+                            adapter.addShoppingList(deletedShoppingList);
+                        })
+                        .show();
+            }
+
+            @Override
+            public void onSwipeRight(@NonNull RecyclerView.ViewHolder viewHolder) {
+
+            }
+
+            @Override
+            public void onChildDrawDetails(@NonNull Canvas c, @NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
+                new RecyclerViewSwipeDecorator.Builder(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
+                        .addSwipeLeftBackgroundColor(ContextCompat.getColor(this.getContext(), R.color.colorDelete))
+                        .addSwipeLeftActionIcon(R.drawable.ic_delete_sweep)
+                        .addSwipeRightBackgroundColor(ContextCompat.getColor(this.getContext(), R.color.colorCheck))
+                        .addSwipeRightActionIcon(R.drawable.ic_check)
+                        .create()
+                        .decorate();
+            }
+        };
         rvShoppingLists.setLayoutManager(new LinearLayoutManager(this));
         DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(this, DividerItemDecoration.VERTICAL);
         rvShoppingLists.addItemDecoration(dividerItemDecoration);
@@ -99,7 +176,7 @@ public class MainActivity extends AppCompatActivity implements ShoppingListsItem
 
     private AlertDialog alertDialog = null;
 
-    private void showAddDialog() {
+    private void showShoppingListDialog(ShoppingList shoppingListBase)  {
         AlertDialog.Builder alert = new AlertDialog.Builder(this);
 
         LayoutInflater inflater = this.getLayoutInflater();
@@ -107,26 +184,32 @@ public class MainActivity extends AppCompatActivity implements ShoppingListsItem
         alert.setView(dialogView);
 
         final EditText edittext = dialogView.findViewById(R.id.edCreateNewList);
-//        alert.setMessage(R.string.shopping_lists_popup_message);
-//        alert.setTitle(R.string.shopping_lists_popup_title);
         Button saveButton = dialogView.findViewById(R.id.buttonSaveNewList);
 
         saveButton.setOnClickListener((view) -> {
             if (alertDialog != null) {
                 alertDialog.dismiss();
             }
-            String inputText = edittext.getText().toString();
+            String inputText = edittext.getText().toString().trim();
 
-            ShoppingList shoppingList = new ShoppingListBuilder()
-                    .withListName(inputText)
-                    .build();
-            RepositoryProvider.getShoppingListRepositoryInstance().saveEntity(shoppingList);
-            shoppingLists.add(shoppingList);
-            adapter.notifyDataSetChanged();
+            ShoppingList shoppingList;
+            if(shoppingListBase != null) {
+                shoppingList = shoppingListBase;
+                shoppingList.setListName(inputText);
+            } else {
+                shoppingList = new ShoppingListBuilder()
+                        .withListName(inputText)
+                        .build();
+            }
+
+            shoppingListRepositoryInstance.saveEntity(shoppingList);
+            if(!shoppingLists.contains(shoppingList)) {
+                adapter.addShoppingList(shoppingList);
+                setEmptyView(shoppingLists);
+            } else {
+                adapter.notifyItemChanged(shoppingLists.indexOf(shoppingList));
+            }
         });
-//        alert.setNegativeButton(R.string.shopping_lists_popup_no_btn, ((dialog, which) -> {
-//            dialog.dismiss();
-//        }));
 
         alertDialog = alert.show();
     }
@@ -143,12 +226,12 @@ public class MainActivity extends AppCompatActivity implements ShoppingListsItem
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
-    public void importMasterData() {
+    public void importMasterData(){
         final AssetManager am = getAssets();
         try {
             CSVDataImporter csvDataImporter = new CSVDataImporter(am.open("masterdata.csv"));
             csvDataImporter.performImport();
-        } catch (Exception e) {
+        }catch (Exception e){
 
         }
     }
@@ -161,7 +244,7 @@ public class MainActivity extends AppCompatActivity implements ShoppingListsItem
         getMenuInflater().inflate(R.menu.main_menu, menu);
         MenuItem mSearch = menu.findItem(R.id.appSearchBar);
         SearchView mSearchView = (SearchView) mSearch.getActionView();
-        mSearchView.setQueryHint("Search");
+        mSearchView.setQueryHint(getString(R.string.toolbar_search_menu));
         mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
@@ -177,31 +260,5 @@ public class MainActivity extends AppCompatActivity implements ShoppingListsItem
             }
         });
         return super.onCreateOptionsMenu(menu);
-    }
-
-    /**
-     * Callback from the adapter's item
-     *
-     * @param position of item in the adapter
-     */
-    @Override
-    public void onHoldItem(int position) {
-
-        Log.d("MainActivity", "On hold item ..." + position);
-    }
-
-    /**
-     * Callback from the adapter's item
-     *
-     * @param position of item in the adapter
-     */
-    @Override
-    public void onClickItem(int position) {
-        ShoppingList item = shoppingLists.get(position);
-        Log.d(TAG, "On click List: " + item.getListName());
-        Intent intent = new Intent(this, ShoppingListActivity.class);
-        intent.putExtra(LIST_NAME, item.getListName());
-        intent.putExtra(LIST_ID, item.getId());
-        startActivity(intent);
     }
 }

@@ -1,15 +1,21 @@
 <resources>
     <string name="app_name">ShoppingOrganizer</string>
 
+    <string name="toolbar_search_menu">Search</string>
+
     <string name="shopping_lists_title">Shopping Lists</string>
     <string name="shopping_lists_no_results">There is no lists</string>
-    <string name="shopping_lists_search_menu">Search</string>
+    <string name="shopping_lists_price">Price</string>
+    <string name="shopping_lists_quantity">Quantity</string>
 
     <string name="shopping_lists_popup_title">Shopping List Name</string>
-    <string name="shopping_lists_popup_message">Add new name for the list</string>
-    <string name="shopping_lists_popup_yes_btn">Add</string>
+    <string name="shopping_lists_popup_message">Set Shopping List name</string>
+    <string name="shopping_lists_popup_yes_btn">Set</string>
     <string name="shopping_lists_popup_no_btn">Cancel</string>
     <string name="shopping_lists_popup_hint">List Name</string>
+
+    <string name="shopping_list_item_name">Name</string>
+    <string name="shopping_list_item_no_quantity">Item has no quantity, action not possible.</string>
 
     <string name="edit_item_name">Name</string>
     <string name="edit_item_price">Price</string>
@@ -18,18 +24,10 @@
     <string name="edit_item_image_description">Click on Picture: Open\nCamera to take a picture\nor pick a picture from\nphones file-explorer</string>
     <string name="edit_item_save">Save</string>
 
-    <string-array name="test_shopping_lists">
-        <item>List 1</item>
-        <item>List 2</item>
-        <item>List 3</item>
-        <item>List 4</item>
-        <item>List 1</item>
-        <item>List 2</item>
-        <item>List 3</item>
-        <item>List 4</item>
-        <item>List 1</item>
-        <item>List 2</item>
-        <item>List 3</item>
-        <item>List 4</item>
-    </string-array>
+    <string name="snackbar_undo">Undo</string>
+    <string name="snackbar_list_removed">List removed</string>
+    <string name="snackbar_item_removed">Item removed</string>
+    <string name="snackbar_item_checked">Undo</string>
+
+
 </resources>

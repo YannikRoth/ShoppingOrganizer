@@ -30,6 +30,7 @@ import ch.fhnw.shoppingorganizer.model.businessobject.ShoppingList;
 import ch.fhnw.shoppingorganizer.model.businessobject.ShoppingListItem;
 import ch.fhnw.shoppingorganizer.model.businessobject.ShoppingListItemBuilder;
 import ch.fhnw.shoppingorganizer.model.database.RepositoryProvider;
+import ch.fhnw.shoppingorganizer.model.database.ShoppingListItemRepository;
 
 public abstract class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapter.ShoppingListItemHolder> implements Filterable, ListItemInteractionInterface {
     private Context context;
@@ -37,6 +38,8 @@ public abstract class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingL
     private List<ShoppingItem> shoppingItem;
     private List<ShoppingItem> shoppingItemFull;
     private final String TAG = this.getClass().getSimpleName();
+
+    private ShoppingListItemRepository shoppingListItemRepository = RepositoryProvider.getShoppingListItemRepositoryInstance();
 
     ShoppingListAdapter(Context context, ShoppingList shoppingList, List<ShoppingItem> shoppingItem, RecyclerView recyclerView) {
         this.context = context;
@@ -64,7 +67,7 @@ public abstract class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingL
         ShoppingItem item = shoppingItem.get(position);
         ShoppingListItem listItem = shoppingList.getShoppingListItem(item);
 
-        holder.itemName.setText("Name: " + item.getItemName());
+        holder.itemName.setText(context.getString(R.string.shopping_list_item_name) + ": " + item.getItemName());
         if(listItem != null && listItem.isItemState()) {
             if(defaultPaintFlags == 0)
                 holder.itemName.getPaintFlags();
@@ -77,7 +80,7 @@ public abstract class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingL
         holder.itemImage.setImageResource(R.mipmap.ic_launcher);
 
         if(listItem != null) {
-            holder.itemPrice.setText(Globals.NUMBERFORMAT.getCurrency() + " " + Globals.NUMBERFORMAT.format(listItem.getQuantity()));
+            holder.itemPrice.setText(Globals.NUMBERFORMAT.getCurrency() + " " + Globals.NUMBERFORMAT.format(listItem.getTotalItemPrice()));
             holder.inputQuantity.setText(Globals.NUMBERFORMAT.format(listItem.getQuantity()));
         } else {
             holder.itemPrice.setText(Globals.NUMBERFORMAT.getCurrency() + " " + Globals.NUMBERFORMAT.format(0.00));
@@ -161,8 +164,7 @@ public abstract class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingL
             //0 = Delete form List
             if(number == 0 && listItem != null) {
                 shoppingList.getShoppingListItems().remove(listItem);
-                RepositoryProvider.getShoppingListItemRepositoryInstance()
-                        .deleteEntity(listItem);
+                shoppingListItemRepository.deleteEntity(listItem);
                 notifyItemChanged(this.getAdapterPosition());
                 Log.d(TAG, "Shopping Item " + listItem.getShoppingItem().getItemName() + " removed");
                 return;
@@ -177,8 +179,7 @@ public abstract class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingL
                         .build();
             } else
                 listItem.setQuantity(number);
-            RepositoryProvider.getShoppingListItemRepositoryInstance()
-                    .saveEntity(listItem);
+            shoppingListItemRepository.saveEntity(listItem);
             if(shoppingList.getShoppingListItems().contains(listItem)) {
                 int position = shoppingList.getShoppingListItems().indexOf(listItem);
                 shoppingList.getShoppingListItems().set(position, listItem);
@@ -256,6 +257,13 @@ public abstract class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingL
         this.notifyDataSetChanged();
     }
 
+    public void addShoppingItem(ShoppingItem shoppingItem) {
+        if(!shoppingItemFull.contains(shoppingItem)) {
+            shoppingItemFull.add(shoppingItem);
+            onRefreshViewOnPull();
+        }
+    }
+
     private void sortShoppingItems(List<ShoppingItem> items) {
         Collections.sort(items, (o1, o2) -> {
             int i1 = 3, i2 = 3;
@@ -273,7 +281,11 @@ public abstract class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingL
                         i2 = 1;
                 }
             }
+            if(i1 == i2)
+                return o1.getItemName().compareTo(o2.getItemName());
             return i1-i2;//Globals.STATE_SELECTED
         });
     }
+
+
 }

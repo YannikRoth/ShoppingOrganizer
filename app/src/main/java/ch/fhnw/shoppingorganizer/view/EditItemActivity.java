@@ -1,5 +1,6 @@
 package ch.fhnw.shoppingorganizer.view;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -33,6 +34,7 @@ import ch.fhnw.shoppingorganizer.model.businessobject.ShoppingItem;
 import ch.fhnw.shoppingorganizer.model.businessobject.ShoppingItemBuilder;
 import ch.fhnw.shoppingorganizer.model.database.RepositoryProvider;
 import ch.fhnw.shoppingorganizer.model.database.ShoppingItemRepository;
+import ch.fhnw.shoppingorganizer.model.database.ShoppingListRepository;
 
 import static ch.fhnw.shoppingorganizer.view.ShoppingListActivity.SHOPPING_ITEM_ID;
 import static ch.fhnw.shoppingorganizer.view.ShoppingListActivity.SHOPPING_LIST_NAME;
@@ -49,17 +51,22 @@ public class EditItemActivity extends AppCompatActivity {
     private ShoppingItem shoppingItem;
     private String shoppingListName;
     private static final int PIC_ID = 123;
-    private static final int SELECT_PICTURE = 345;
+
+    private Intent intent;
+
 
     private final static ShoppingItemRepository shoppingItemRepository = RepositoryProvider.getShoppingItemRepositoryInstance();
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        intent = getIntent();
         setContentView(R.layout.activity_edit_item);
         shoppingListName = getIntent().getStringExtra(SHOPPING_LIST_NAME);
         shoppingItem = shoppingItemRepository
-                .getShoppingItemById(getIntent().getLongExtra(SHOPPING_ITEM_ID, 0));
+                .getShoppingItemById(intent.getLongExtra(SHOPPING_ITEM_ID, 0));
+
+
 
         //if new button was clicked, DB will NOT return an object, therefore create one and save it to the database
         if (shoppingItem == null) {
@@ -107,7 +114,7 @@ public class EditItemActivity extends AppCompatActivity {
         edtName.setText(shoppingItem.getItemName());
 
         edtPrice = findViewById(R.id.edtPrice);
-        edtPrice.setText(String.format("%.2f", shoppingItem.getPrice()));
+        edtPrice.setText(Globals.NUMBERFORMAT.format(shoppingItem.getPrice()));
         activeSwitch = findViewById(R.id.activeSwitch);
         activeSwitch.setChecked(shoppingItem.isItemActive());
         itemImage = findViewById(R.id.imgItem);
@@ -135,12 +142,21 @@ public class EditItemActivity extends AppCompatActivity {
         startActivityForResult(chooser, PIC_ID);
     }
 
-    public void saveShoppingItem(View v) {
-        this.shoppingItem.setItemName(this.<EditText>findCastedViewById(R.id.edtName).getText().toString());
+    public void saveShoppingItem(View v){
+        this.shoppingItem.setItemName(this.<EditText>findCastedViewById(R.id.edtName).getText().toString().trim());
         this.shoppingItem.setPrice(new BigDecimal(this.<EditText>findCastedViewById(R.id.edtPrice).getText().toString()));
         this.shoppingItem.setItemActive(this.<Switch>findCastedViewById(R.id.activeSwitch).isChecked());
         this.shoppingItem.setImgPath("further implementation required...");
         shoppingItemRepository.saveEntity(shoppingItem);
+
+        int ShoppingItemId = shoppingItem.getId().intValue();
+        if(!shoppingItemRepository.getAllItems().contains(shoppingItem)) {
+            shoppingItemRepository.getAllItems().add(shoppingItem);
+        }
+
+        Intent result = new Intent();
+        result.putExtra(SHOPPING_ITEM_ID, ShoppingItemId);
+        setResult(Activity.RESULT_OK, result);
 
         finish();
     }
@@ -173,7 +189,6 @@ public class EditItemActivity extends AppCompatActivity {
 
     /**
      * Helper method to get casted view element
-     *
      * @param GUI element id
      * @param <T> Type of GUI element
      * @return the casted type T of the element
