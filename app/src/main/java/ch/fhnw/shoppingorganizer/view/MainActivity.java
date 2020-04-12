@@ -14,9 +14,11 @@ import android.content.res.AssetManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
@@ -60,7 +62,7 @@ public class MainActivity extends AppCompatActivity implements ShoppingListsItem
         setContentView(R.layout.activity_main);
 
         //import masterdata to database if empty
-        if(DbUtils.isEmpty(ShoppingItem.class)) {
+        if (DbUtils.isEmpty(ShoppingItem.class)) {
             importMasterData();
         }
 
@@ -95,15 +97,24 @@ public class MainActivity extends AppCompatActivity implements ShoppingListsItem
         setEmptyView(shoppingLists);
     }
 
+    private AlertDialog alertDialog = null;
+
     private void showAddDialog() {
         AlertDialog.Builder alert = new AlertDialog.Builder(this);
-        final EditText edittext = new EditText(this);
-        alert.setMessage(R.string.shopping_lists_popup_message);
-        alert.setTitle(R.string.shopping_lists_popup_title);
 
-        alert.setView(edittext);
+        LayoutInflater inflater = this.getLayoutInflater();
+        View dialogView = inflater.inflate(R.layout.shopping_list_alert_dialog, null);
+        alert.setView(dialogView);
 
-        alert.setPositiveButton(R.string.shopping_lists_popup_yes_btn, (dialog, whichButton) -> {
+        final EditText edittext = dialogView.findViewById(R.id.edCreateNewList);
+//        alert.setMessage(R.string.shopping_lists_popup_message);
+//        alert.setTitle(R.string.shopping_lists_popup_title);
+        Button saveButton = dialogView.findViewById(R.id.buttonSaveNewList);
+
+        saveButton.setOnClickListener((view) -> {
+            if (alertDialog != null) {
+                alertDialog.dismiss();
+            }
             String inputText = edittext.getText().toString();
 
             ShoppingList shoppingList = new ShoppingListBuilder()
@@ -113,13 +124,11 @@ public class MainActivity extends AppCompatActivity implements ShoppingListsItem
             shoppingLists.add(shoppingList);
             adapter.notifyDataSetChanged();
         });
-        alert.setNegativeButton(R.string.shopping_lists_popup_no_btn, ((dialog, which) -> {
-            dialog.dismiss();
-        }));
+//        alert.setNegativeButton(R.string.shopping_lists_popup_no_btn, ((dialog, which) -> {
+//            dialog.dismiss();
+//        }));
 
-        alert.show();
-
-
+        alertDialog = alert.show();
     }
 
     private void setEmptyView(List<ShoppingList> shoppingLists) {
@@ -134,12 +143,12 @@ public class MainActivity extends AppCompatActivity implements ShoppingListsItem
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
-    public void importMasterData(){
+    public void importMasterData() {
         final AssetManager am = getAssets();
         try {
             CSVDataImporter csvDataImporter = new CSVDataImporter(am.open("masterdata.csv"));
             csvDataImporter.performImport();
-        }catch (Exception e){
+        } catch (Exception e) {
 
         }
     }
@@ -172,6 +181,7 @@ public class MainActivity extends AppCompatActivity implements ShoppingListsItem
 
     /**
      * Callback from the adapter's item
+     *
      * @param position of item in the adapter
      */
     @Override
@@ -182,6 +192,7 @@ public class MainActivity extends AppCompatActivity implements ShoppingListsItem
 
     /**
      * Callback from the adapter's item
+     *
      * @param position of item in the adapter
      */
     @Override
