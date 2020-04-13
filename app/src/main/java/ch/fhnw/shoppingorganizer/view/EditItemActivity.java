@@ -2,12 +2,16 @@ package ch.fhnw.shoppingorganizer.view;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Path;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.MenuItem;
@@ -17,6 +21,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.Switch;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -25,11 +30,18 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.math.BigDecimal;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
@@ -53,6 +65,7 @@ public class EditItemActivity extends AppCompatActivity {
     private EditText edtPrice;
     private Switch activeSwitch;
     private ImageView itemImage;
+    private File itemImageFile;
     private Spinner categoryList;
 
     private ShoppingItem shoppingItem;
@@ -61,6 +74,7 @@ public class EditItemActivity extends AppCompatActivity {
 
     private Intent intent;
 
+    private String TAG = this.getClass().getSimpleName();
 
     private final static ShoppingItemRepository shoppingItemRepository = RepositoryProvider.getShoppingItemRepositoryInstance();
 
@@ -87,6 +101,14 @@ public class EditItemActivity extends AppCompatActivity {
 
             this.shoppingItem = newItem;
         }
+
+        //Reques permissions for picture handling
+        String [] permissionsNeeded = new String[3];
+        permissionsNeeded[0] = Manifest.permission.CAMERA;
+        permissionsNeeded[1] = Manifest.permission.WRITE_EXTERNAL_STORAGE;
+        permissionsNeeded[2] = Manifest.permission.READ_EXTERNAL_STORAGE;
+        Random r = new Random();
+        ActivityCompat.requestPermissions(this, permissionsNeeded, r.nextInt(99)+1);
 
         initUi();
     }
@@ -125,6 +147,9 @@ public class EditItemActivity extends AppCompatActivity {
         activeSwitch = findViewById(R.id.activeSwitch);
         activeSwitch.setChecked(shoppingItem.isItemActive());
         itemImage = findViewById(R.id.imgItem);
+        itemImageFile = new File(shoppingItem.getImgPath());
+        if(itemImageFile != null)
+            presentFileOnView(itemImageFile);
 
         //TODO: does not work properly yet
         Spinner s = findViewById(R.id.categoryList);
@@ -142,12 +167,6 @@ public class EditItemActivity extends AppCompatActivity {
     }
 
     private void cameraIntent() {
-        String [] permissionsNeeded = new String[2];
-        permissionsNeeded[0] = Manifest.permission.CAMERA;
-        permissionsNeeded[1] = Manifest.permission.ACCESS_MEDIA_LOCATION;
-        Random r = new Random();
-        ActivityCompat.requestPermissions(this, permissionsNeeded, r.nextInt(99)+1);
-
         Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         Intent galleryIntent = new Intent();
         galleryIntent.setType("image/*");
@@ -162,7 +181,8 @@ public class EditItemActivity extends AppCompatActivity {
         this.shoppingItem.setCategory(Category.valueOf(this.<Spinner>findCastedViewById(R.id.categoryList).getSelectedItem().toString()));
         this.shoppingItem.setPrice(new BigDecimal(this.<EditText>findCastedViewById(R.id.edtPrice).getText().toString()));
         this.shoppingItem.setItemActive(this.<Switch>findCastedViewById(R.id.activeSwitch).isChecked());
-        this.shoppingItem.setImgPath("further implementation required...");
+        if(itemImageFile.getAbsoluteFile().exists())
+            this.shoppingItem.setImgPath(itemImageFile.getAbsoluteFile().toString());
         shoppingItemRepository.saveEntity(shoppingItem);
 
         int ShoppingItemId = shoppingItem.getId().intValue();
@@ -177,6 +197,34 @@ public class EditItemActivity extends AppCompatActivity {
         finish();
     }
 
+    private File safeBitmapToFileDirectory(Bitmap bitmap) {
+        ContextWrapper cw = new ContextWrapper(getApplicationContext());
+        File dir = cw.getDir("imageDir", Context.MODE_PRIVATE);
+        dir.mkdir();
+        Timestamp ts = new Timestamp(new Date().getTime());
+        File file = new File(dir, shoppingItem.getItemName() + ts + ".jpg");
+        OutputStream outputStream;
+        try {
+            outputStream = new FileOutputStream(file);
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
+            outputStream.flush();
+            outputStream.close();
+            Toast.makeText(getApplicationContext(), "Image saved to app" + file.getAbsolutePath(), Toast.LENGTH_LONG).show();
+            return file;
+        } catch (IOException e) {
+            Log.e(TAG, "safeBitmapToFileDirectory: " + e.getMessage());
+            return null;
+        }
+    }
+
+    private void presentFileOnView(File file) {
+        if(file.exists()) {
+            itemImageFile = file;
+            Bitmap bitmap = BitmapFactory.decodeFile(itemImageFile.getAbsolutePath());
+            itemImage.setImageBitmap(bitmap);
+        }
+    }
+
     // This method will help to retrieve the image
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -185,8 +233,11 @@ public class EditItemActivity extends AppCompatActivity {
             // Result from the camera intent
             if (data.getExtras() != null) {     // Check if Intent is empty
                 Bitmap photo = (Bitmap) data.getExtras().get("data");
-                // Set the image in ImageView for display
-                itemImage.setImageBitmap(photo);
+                File photoFile = safeBitmapToFileDirectory(photo);
+                if(photoFile != null)
+                    presentFileOnView(photoFile);
+                else
+                    Toast.makeText(this, "No file picked", Toast.LENGTH_SHORT).show();
             }
 
             // Result from the gallery intent
@@ -195,7 +246,11 @@ public class EditItemActivity extends AppCompatActivity {
                     final Uri imageUri = data.getData();
                     final InputStream imageStream = getContentResolver().openInputStream(imageUri);
                     final Bitmap selectedImage = BitmapFactory.decodeStream(imageStream);
-                    itemImage.setImageBitmap(selectedImage);
+                    File photoFile = safeBitmapToFileDirectory(selectedImage);
+                    if(photoFile != null)
+                        presentFileOnView(photoFile);
+                    else
+                        Toast.makeText(this, "No file picked", Toast.LENGTH_SHORT).show();
                 } catch (FileNotFoundException e) {
                     e.printStackTrace();
                 }
