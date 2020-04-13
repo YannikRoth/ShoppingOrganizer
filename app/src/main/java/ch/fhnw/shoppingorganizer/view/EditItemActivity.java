@@ -1,7 +1,9 @@
 package ch.fhnw.shoppingorganizer.view;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
@@ -20,6 +22,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
@@ -27,6 +31,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 import ch.fhnw.shoppingorganizer.R;
@@ -137,6 +142,12 @@ public class EditItemActivity extends AppCompatActivity {
     }
 
     private void cameraIntent() {
+        String [] permissionsNeeded = new String[2];
+        permissionsNeeded[0] = Manifest.permission.CAMERA;
+        permissionsNeeded[1] = Manifest.permission.ACCESS_MEDIA_LOCATION;
+        Random r = new Random();
+        ActivityCompat.requestPermissions(this, permissionsNeeded, r.nextInt(99)+1);
+
         Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         Intent galleryIntent = new Intent();
         galleryIntent.setType("image/*");
