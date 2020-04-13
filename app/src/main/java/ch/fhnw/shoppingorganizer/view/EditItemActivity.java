@@ -151,10 +151,6 @@ public class EditItemActivity extends AppCompatActivity {
         if(itemImageFile != null)
             presentFileOnView(itemImageFile);
 
-        //TODO: does not work properly yet
-        Spinner s = findViewById(R.id.categoryList);
-        s.setSelection(this.shoppingItem.getCategory().ordinal());
-
         itemImage.setOnClickListener(v -> cameraIntent());
 
         List<String> spinnerArray = new ArrayList<>((Arrays.stream(Category.values())
@@ -164,6 +160,9 @@ public class EditItemActivity extends AppCompatActivity {
                 this, android.R.layout.simple_spinner_item, spinnerArray);
         spinnerArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         categoryList.setAdapter(spinnerArrayAdapter);
+
+        //set the default value of spinner
+        categoryList.setSelection(this.shoppingItem.getCategory().ordinal());
     }
 
     private void cameraIntent() {
