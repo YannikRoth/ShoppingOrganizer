@@ -19,6 +19,7 @@ public class TutorialSliderActivity extends TutorialActivity {
 
     private final String PREF_TUTORIAL = "UserTutorialSlider";
     private SharedPreferences prefs;
+    private TutorialType tutorialType = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,22 +32,22 @@ public class TutorialSliderActivity extends TutorialActivity {
             switch(type) {
                 case 0: //TUTORIAL_SHOPPING_LIST
                     if(!prefs.getBoolean(TUTORIAL_SHOPPING_LIST.toString(), false)) {
+                        tutorialType = TUTORIAL_SHOPPING_LIST;
                         onCreateShoppingList(savedInstanceState);
-                        safePreferences(TUTORIAL_SHOPPING_LIST.toString());
                     } else
                         finish();
                     break;
                 case 1: //TUTORIAL_SHOPPING_ITEM_LIST
                     if(!prefs.getBoolean(TUTORIAL_SHOPPING_ITEM_LIST.toString(), false)) {
+                        tutorialType = TUTORIAL_SHOPPING_ITEM_LIST;
                         onCreateShoppingItemList(savedInstanceState);
-                        safePreferences(TUTORIAL_SHOPPING_ITEM_LIST.toString());
                     } else
                         finish();
                     break;
                 case 2: //TUTORIAL_SHOPPING_ITEM_EDIT
                     if(!prefs.getBoolean(TUTORIAL_SHOPPING_ITEM_EDIT.toString(), false)) {
+                        tutorialType = TUTORIAL_SHOPPING_ITEM_EDIT;
                         onCreateShoppingItemEdit(savedInstanceState);
-                        safePreferences(TUTORIAL_SHOPPING_ITEM_EDIT.toString());
                     } else
                         finish();
                     break;
@@ -116,6 +117,7 @@ public class TutorialSliderActivity extends TutorialActivity {
 
     @Override
     public void finishTutorial() {
+        safePreferences(tutorialType.toString());
         finish();
     }
 
