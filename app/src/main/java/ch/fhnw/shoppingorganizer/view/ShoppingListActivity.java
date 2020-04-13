@@ -36,6 +36,8 @@ import ch.fhnw.shoppingorganizer.model.database.RepositoryProvider;
 import ch.fhnw.shoppingorganizer.model.database.ShoppingItemRepository;
 import ch.fhnw.shoppingorganizer.model.database.ShoppingListItemRepository;
 import ch.fhnw.shoppingorganizer.model.database.ShoppingListRepository;
+import ch.fhnw.shoppingorganizer.view.Tutorial.OnboardingSliderType;
+import ch.fhnw.shoppingorganizer.view.Tutorial.UserOnboardingSliderActivity;
 import it.xabaras.android.recyclerview.swipedecorator.RecyclerViewSwipeDecorator;
 
 import static ch.fhnw.shoppingorganizer.view.MainActivity.LIST_ID;
@@ -76,6 +78,10 @@ public class ShoppingListActivity extends AppCompatActivity {
             this.shoppingList = shoppingListRepository.getShoppingListById(intent.getLongExtra(LIST_ID, 0));
         }
         initUi();
+
+        Intent intentOnboarding = new Intent(this, UserOnboardingSliderActivity.class);
+        intentOnboarding.putExtra(Globals.INTENT_ONBOARDING_SLIDER_TYPE, OnboardingSliderType.ONBOARDING_SHOPPING_ITEM_LIST.toString());
+        startActivity(intentOnboarding);
     }
 
     private void initUi() {

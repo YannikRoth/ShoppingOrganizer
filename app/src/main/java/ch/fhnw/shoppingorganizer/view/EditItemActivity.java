@@ -54,6 +54,8 @@ import ch.fhnw.shoppingorganizer.model.businessobject.ShoppingItemBuilder;
 import ch.fhnw.shoppingorganizer.model.database.RepositoryProvider;
 import ch.fhnw.shoppingorganizer.model.database.ShoppingItemRepository;
 import ch.fhnw.shoppingorganizer.model.database.ShoppingListRepository;
+import ch.fhnw.shoppingorganizer.view.Tutorial.OnboardingSliderType;
+import ch.fhnw.shoppingorganizer.view.Tutorial.UserOnboardingSliderActivity;
 
 import static ch.fhnw.shoppingorganizer.view.ShoppingListActivity.SHOPPING_ITEM_ID;
 import static ch.fhnw.shoppingorganizer.view.ShoppingListActivity.SHOPPING_LIST_NAME;
@@ -111,6 +113,10 @@ public class EditItemActivity extends AppCompatActivity {
         ActivityCompat.requestPermissions(this, permissionsNeeded, r.nextInt(99)+1);
 
         initUi();
+
+        Intent intentOnboarding = new Intent(this, UserOnboardingSliderActivity.class);
+        intentOnboarding.putExtra(Globals.INTENT_ONBOARDING_SLIDER_TYPE, OnboardingSliderType.ONBOARDING_SHOPPING_ITEM_EDIT.toString());
+        startActivity(intentOnboarding);
     }
 
     @Override

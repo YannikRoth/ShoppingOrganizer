@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ch.fhnw.shoppingorganizer.R;
+import ch.fhnw.shoppingorganizer.model.Globals;
 import ch.fhnw.shoppingorganizer.model.businessobject.ShoppingItem;
 import ch.fhnw.shoppingorganizer.model.businessobject.ShoppingList;
 import ch.fhnw.shoppingorganizer.model.businessobject.ShoppingListBuilder;
@@ -43,6 +44,8 @@ import ch.fhnw.shoppingorganizer.model.database.RepositoryProvider;
 import ch.fhnw.shoppingorganizer.model.database.ShoppingListItemRepository;
 import ch.fhnw.shoppingorganizer.model.database.ShoppingListRepository;
 import ch.fhnw.shoppingorganizer.model.masterdata.CSVDataImporter;
+import ch.fhnw.shoppingorganizer.view.Tutorial.OnboardingSliderType;
+import ch.fhnw.shoppingorganizer.view.Tutorial.UserOnboardingSliderActivity;
 import it.xabaras.android.recyclerview.swipedecorator.RecyclerViewSwipeDecorator;
 
 public class MainActivity extends AppCompatActivity {
@@ -81,6 +84,10 @@ public class MainActivity extends AppCompatActivity {
         shoppingLists = shoppingListRepositoryInstance.getAllItems();
 
         initUi();
+
+        Intent intentOnboarding = new Intent(this, UserOnboardingSliderActivity.class);
+        intentOnboarding.putExtra(Globals.INTENT_ONBOARDING_SLIDER_TYPE, OnboardingSliderType.ONBOARDING_SHOPPING_LIST.toString());
+        startActivity(intentOnboarding);
     }
 
     private void initUi() {

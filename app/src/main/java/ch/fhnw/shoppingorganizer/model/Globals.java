@@ -12,5 +12,7 @@ public class Globals {
 
     public final static String EMPTY_STRING = "";
 
+    //View
     public static final NumberFormat NUMBERFORMAT = NumberFormat.getInstance(new Locale("de", "CH"));
+    public final static String INTENT_ONBOARDING_SLIDER_TYPE = "SliderType";
 }

@@ -29,5 +29,11 @@
     <string name="snackbar_item_removed">Item removed</string>
     <string name="snackbar_item_checked">Undo</string>
 
+    <string name="tutorial_shopping_list_delete_title">Delete list</string>
+    <string name="tutorial_shopping_list_delete_content">Swipe left to delete a list</string>
+    <string name="tutorial_shopping_list_open_title">Open list</string>
+    <string name="tutorial_shopping_list_open_content">Tab a list to open</string>
+    <string name="tutorial_shopping_list_edit_name_title">Edit list name</string>
+    <string name="tutorial_shopping_list_edit_name_content">Press and hold list to edit list name</string>
 
 </resources>
