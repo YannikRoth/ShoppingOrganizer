@@ -44,8 +44,8 @@ import ch.fhnw.shoppingorganizer.model.database.RepositoryProvider;
 import ch.fhnw.shoppingorganizer.model.database.ShoppingListItemRepository;
 import ch.fhnw.shoppingorganizer.model.database.ShoppingListRepository;
 import ch.fhnw.shoppingorganizer.model.masterdata.CSVDataImporter;
-import ch.fhnw.shoppingorganizer.view.Tutorial.OnboardingSliderType;
-import ch.fhnw.shoppingorganizer.view.Tutorial.UserOnboardingSliderActivity;
+import ch.fhnw.shoppingorganizer.view.Tutorial.TutorialType;
+import ch.fhnw.shoppingorganizer.view.Tutorial.TutorialSliderActivity;
 import it.xabaras.android.recyclerview.swipedecorator.RecyclerViewSwipeDecorator;
 
 public class MainActivity extends AppCompatActivity {
@@ -85,9 +85,9 @@ public class MainActivity extends AppCompatActivity {
 
         initUi();
 
-        Intent intentOnboarding = new Intent(this, UserOnboardingSliderActivity.class);
-        intentOnboarding.putExtra(Globals.INTENT_ONBOARDING_SLIDER_TYPE, OnboardingSliderType.ONBOARDING_SHOPPING_LIST.toString());
-        startActivity(intentOnboarding);
+        Intent intentTutorial = new Intent(this, TutorialSliderActivity.class);
+        intentTutorial.putExtra(Globals.INTENT_TUTORIAL_TYPE, TutorialType.TUTORIAL_SHOPPING_LIST.toString());
+        startActivity(intentTutorial);
     }
 
     private void initUi() {
