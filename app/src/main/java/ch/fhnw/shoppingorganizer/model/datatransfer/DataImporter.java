@@ -19,6 +19,11 @@ import ch.fhnw.shoppingorganizer.model.database.ShoppingListItemRepository;
 import ch.fhnw.shoppingorganizer.model.database.ShoppingListRepository;
 
 public class DataImporter {
+
+    private static final ShoppingItemRepository itemRepository = RepositoryProvider.getShoppingItemRepositoryInstance();
+    private static final ShoppingListItemRepository listItemRepository = RepositoryProvider.getShoppingListItemRepositoryInstance();
+    private static final ShoppingListRepository listRepository = RepositoryProvider.getShoppingListRepositoryInstance();
+
     public static void unserializeFromJson(String jsonString) throws JSONException {
         JSONObject data = new JSONObject(jsonString);
 
@@ -65,7 +70,6 @@ public class DataImporter {
             String listName = list.getString("listName");
 
             // Check if the item already exists
-            ShoppingListRepository listRepository = RepositoryProvider.getShoppingListRepositoryInstance();
             if (listRepository.getByName(listName) != null) {
                 continue;
             }
@@ -83,9 +87,6 @@ public class DataImporter {
 
             for (Iterator<String> i2 = listItemsInJson.keys(); i2.hasNext(); ) {
                 JSONObject listItem = listItemsInJson.getJSONObject(i2.next());
-
-                ShoppingItemRepository itemRepository = RepositoryProvider.getShoppingItemRepositoryInstance();
-                ShoppingListItemRepository listItemRepository = RepositoryProvider.getShoppingListItemRepositoryInstance();
 
                 // Get all attributes
                 long quantity = listItem.getLong("quantity");
