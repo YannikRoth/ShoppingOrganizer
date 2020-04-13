@@ -1,6 +1,8 @@
 package ch.fhnw.shoppingorganizer.view;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.util.Log;
@@ -19,6 +21,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -77,7 +80,15 @@ public abstract class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingL
             holder.itemName.setPaintFlags(defaultPaintFlags);
             holder.itemName.setTextColor(context.getResources().getColor(android.R.color.black, context.getTheme()));
         }
-        holder.itemImage.setImageResource(R.mipmap.ic_launcher);
+
+
+        File itemImageFile = new File(item.getImgPath());
+        if(itemImageFile != null && itemImageFile.exists()) {
+            Bitmap bitmap = BitmapFactory.decodeFile(itemImageFile.getAbsolutePath());
+            holder.itemImage.setImageBitmap(bitmap);
+        } else {
+            holder.itemImage.setImageResource(R.mipmap.ic_launcher);
+        }
 
         if(listItem != null) {
             holder.itemPrice.setText(Globals.NUMBERFORMAT.getCurrency() + " " + Globals.NUMBERFORMAT.format(listItem.getTotalItemPrice()));
