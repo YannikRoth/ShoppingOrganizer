@@ -50,6 +50,7 @@ import ch.fhnw.shoppingorganizer.model.database.ShoppingListItemRepository;
 import ch.fhnw.shoppingorganizer.model.database.ShoppingListRepository;
 import ch.fhnw.shoppingorganizer.model.datatransfer.DataExporter;
 import ch.fhnw.shoppingorganizer.model.datatransfer.DataImporter;
+import ch.fhnw.shoppingorganizer.model.datatransfer.Zipper;
 import ch.fhnw.shoppingorganizer.model.masterdata.CSVDataImporter;
 import it.xabaras.android.recyclerview.swipedecorator.RecyclerViewSwipeDecorator;
 
@@ -106,8 +107,7 @@ public class MainActivity extends AppCompatActivity {
         btnExport = findViewById(R.id.btnExport);
         btnExport.setOnClickListener(v ->{
             try {
-                JSONObject exportData = DataExporter.serializeToJsonFromDatabase();
-                Log.d("Export data: ",exportData.toString());
+                Zipper.zipApplicationData(getApplicationContext());
             }catch (Exception e){
                 Log.d("Export exception: ", e.getMessage());
             }

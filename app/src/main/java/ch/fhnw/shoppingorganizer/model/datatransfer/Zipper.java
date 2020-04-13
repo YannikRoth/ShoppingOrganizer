@@ -29,27 +29,30 @@ public class Zipper {
     private static final ShoppingItemRepository itemRepository = RepositoryProvider.getShoppingItemRepositoryInstance();
 
     public static void zipApplicationData(Context applicationContext){
-        List<String> filePaths = new ArrayList<>();
+        final List<String> filePaths = new ArrayList<>();
+        final ContextWrapper cw = new ContextWrapper(applicationContext);
+        final File dir = cw.getDir("transfer", Context.MODE_PRIVATE);
+        dir.mkdir();
 
         try {
-            //Get all current (used imaged)
+            //Get all current (used images)
             filePaths.addAll(
                     itemRepository.getAllItems()
                             .stream()
                             .map(entry -> new File(entry.getImgPath()))
+                            .filter(File::exists)
                             .map(file -> file.getAbsolutePath())
                             .collect(Collectors.toList())
             );
 
             //add json file
-            final ContextWrapper cw = new ContextWrapper(applicationContext);
-            File dir = cw.getDir("transfer", Context.MODE_PRIVATE);
             File file = new File(dir, "exportData.json");
-            dir.mkdir();
 
             OutputStream outputStream = new FileOutputStream(file);
             Writer writer = new OutputStreamWriter(outputStream);
             writer.write(DataExporter.serializeToJsonFromDatabase().toString());
+            writer.flush();
+            writer.close();
             outputStream.flush();
             outputStream.close();
 
@@ -59,11 +62,12 @@ public class Zipper {
 
         }
 
-        performZip(filePaths, "");
+        File zipFile = new File(dir, "ShoppingOrganizer.zip");
 
+        performZip(filePaths, zipFile);
     }
 
-    private static void performZip(List<String> files, String zipFile) {
+    private static void performZip(final List<String> files, final File zipFile) {
         try {
             BufferedInputStream origin = null;
             FileOutputStream dest = new FileOutputStream(zipFile);
