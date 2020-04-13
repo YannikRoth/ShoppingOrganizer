@@ -1,4 +1,4 @@
-package ch.fhnw.shoppingorganizer.view;
+package ch.fhnw.shoppingorganizer.controller;
 
 import android.graphics.Canvas;
 import android.view.View;

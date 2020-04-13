@@ -28,6 +28,7 @@ import com.google.android.material.snackbar.Snackbar;
 import java.util.List;
 
 import ch.fhnw.shoppingorganizer.R;
+import ch.fhnw.shoppingorganizer.controller.ShoppingListAdapter;
 import ch.fhnw.shoppingorganizer.model.Globals;
 import ch.fhnw.shoppingorganizer.model.businessobject.ShoppingItem;
 import ch.fhnw.shoppingorganizer.model.businessobject.ShoppingList;

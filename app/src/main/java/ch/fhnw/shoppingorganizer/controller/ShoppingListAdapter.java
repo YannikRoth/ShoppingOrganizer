@@ -1,4 +1,4 @@
-package ch.fhnw.shoppingorganizer.view;
+package ch.fhnw.shoppingorganizer.controller;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -15,7 +15,6 @@ import android.widget.Filterable;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.ItemTouchHelper;
@@ -44,7 +43,7 @@ public abstract class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingL
 
     private ShoppingListItemRepository shoppingListItemRepository = RepositoryProvider.getShoppingListItemRepositoryInstance();
 
-    ShoppingListAdapter(Context context, ShoppingList shoppingList, List<ShoppingItem> shoppingItem, RecyclerView recyclerView) {
+    public ShoppingListAdapter(Context context, ShoppingList shoppingList, List<ShoppingItem> shoppingItem, RecyclerView recyclerView) {
         this.context = context;
         this.shoppingList = shoppingList;
         this.shoppingItem = shoppingItem;
