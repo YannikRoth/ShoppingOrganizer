@@ -36,6 +36,8 @@ import ch.fhnw.shoppingorganizer.model.database.RepositoryProvider;
 import ch.fhnw.shoppingorganizer.model.database.ShoppingItemRepository;
 import ch.fhnw.shoppingorganizer.model.database.ShoppingListItemRepository;
 import ch.fhnw.shoppingorganizer.model.database.ShoppingListRepository;
+import ch.fhnw.shoppingorganizer.view.Tutorial.TutorialType;
+import ch.fhnw.shoppingorganizer.view.Tutorial.TutorialSliderActivity;
 import it.xabaras.android.recyclerview.swipedecorator.RecyclerViewSwipeDecorator;
 
 import static ch.fhnw.shoppingorganizer.view.MainActivity.LIST_ID;
@@ -76,6 +78,10 @@ public class ShoppingListActivity extends AppCompatActivity {
             this.shoppingList = shoppingListRepository.getShoppingListById(intent.getLongExtra(LIST_ID, 0));
         }
         initUi();
+
+        Intent intentTutorial = new Intent(this, TutorialSliderActivity.class);
+        intentTutorial.putExtra(Globals.INTENT_TUTORIAL_TYPE, TutorialType.TUTORIAL_SHOPPING_ITEM_LIST.toString());
+        startActivity(intentTutorial);
     }
 
     private void initUi() {

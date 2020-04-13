@@ -5,13 +5,10 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Path;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.MenuItem;
@@ -28,10 +25,8 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -53,7 +48,8 @@ import ch.fhnw.shoppingorganizer.model.businessobject.ShoppingItem;
 import ch.fhnw.shoppingorganizer.model.businessobject.ShoppingItemBuilder;
 import ch.fhnw.shoppingorganizer.model.database.RepositoryProvider;
 import ch.fhnw.shoppingorganizer.model.database.ShoppingItemRepository;
-import ch.fhnw.shoppingorganizer.model.database.ShoppingListRepository;
+import ch.fhnw.shoppingorganizer.view.Tutorial.TutorialType;
+import ch.fhnw.shoppingorganizer.view.Tutorial.TutorialSliderActivity;
 
 import static ch.fhnw.shoppingorganizer.view.ShoppingListActivity.SHOPPING_ITEM_ID;
 import static ch.fhnw.shoppingorganizer.view.ShoppingListActivity.SHOPPING_LIST_NAME;
@@ -111,6 +107,10 @@ public class EditItemActivity extends AppCompatActivity {
         ActivityCompat.requestPermissions(this, permissionsNeeded, r.nextInt(99)+1);
 
         initUi();
+
+        Intent intentTutorial = new Intent(this, TutorialSliderActivity.class);
+        intentTutorial.putExtra(Globals.INTENT_TUTORIAL_TYPE, TutorialType.TUTORIAL_SHOPPING_ITEM_EDIT.toString());
+        startActivity(intentTutorial);
     }
 
     @Override
@@ -201,17 +201,17 @@ public class EditItemActivity extends AppCompatActivity {
         File dir = cw.getDir("imageDir", Context.MODE_PRIVATE);
         dir.mkdir();
         Timestamp ts = new Timestamp(new Date().getTime());
-        File file = new File(dir, shoppingItem.getItemName() + ts + ".jpg");
+        File file = new File(dir, shoppingItem.getItemName() + ts + ".png");
         OutputStream outputStream;
         try {
             outputStream = new FileOutputStream(file);
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
             outputStream.flush();
             outputStream.close();
             Toast.makeText(getApplicationContext(), "Image saved to app" + file.getAbsolutePath(), Toast.LENGTH_LONG).show();
             return file;
         } catch (IOException e) {
-            Log.e(TAG, "safeBitmapToFileDirectory: " + e.getMessage());
+            Log.e(TAG, "safeImageToFileDirectory: " + e.getMessage());
             return null;
         }
     }
