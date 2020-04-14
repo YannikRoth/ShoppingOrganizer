@@ -192,6 +192,8 @@ public class MainActivity extends AppCompatActivity {
         alert.setView(dialogView);
 
         final EditText edittext = dialogView.findViewById(R.id.edCreateNewList);
+        if(shoppingListBase != null)
+            edittext.setText(shoppingListBase.getListName());
         Button saveButton = dialogView.findViewById(R.id.buttonSaveNewList);
 
         saveButton.setOnClickListener((view) -> {
