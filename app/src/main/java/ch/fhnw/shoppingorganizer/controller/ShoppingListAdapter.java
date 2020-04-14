@@ -5,6 +5,9 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.text.Editable;
+import android.text.InputFilter;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,7 +23,10 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
+import org.w3c.dom.Text;
+
 import java.io.File;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -40,6 +46,9 @@ public abstract class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingL
     private List<ShoppingItem> shoppingItem;
     private List<ShoppingItem> shoppingItemFull;
     private final String TAG = this.getClass().getSimpleName();
+
+    private final long QUANTITY_MIN_VALUE = 0;
+    private final long QUANTITY_MAX_VALUE = 1000000;
 
     private ShoppingListItemRepository shoppingListItemRepository = RepositoryProvider.getShoppingListItemRepositoryInstance();
 
@@ -90,14 +99,18 @@ public abstract class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingL
         }
 
         if(listItem != null) {
-            holder.itemPrice.setText(Globals.NUMBERFORMAT.getCurrency() + " " + Globals.NUMBERFORMAT.format(listItem.getTotalItemPrice()));
-            holder.inputQuantity.setText(Globals.NUMBERFORMAT.format(listItem.getQuantity()));
+            holder.itemPrice.setText(formatPrice(listItem.getTotalItemPrice()));
+            holder.inputQuantity.setText(String.format("%d", listItem.getQuantity()));
         } else {
-            holder.itemPrice.setText(Globals.NUMBERFORMAT.getCurrency() + " " + Globals.NUMBERFORMAT.format(0.00));
+            holder.itemPrice.setText(formatPrice(new BigDecimal(0.00)));
             holder.inputQuantity.setText(Globals.NUMBERFORMAT.format(0));
         }
 
         Log.d("ShoppingListAdapter", "onBindViewHolder: end");
+    }
+
+    private String formatPrice(BigDecimal price) {
+        return Globals.NUMBERFORMAT.getCurrency() + " " + Globals.NUMBERFORMAT.format(price);
     }
 
     /**
@@ -156,6 +169,35 @@ public abstract class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingL
             increaseQuantity = itemView.findViewById(R.id.btnPlus);
             decreaseQuantity = itemView.findViewById(R.id.btnMinus);
             inputQuantity = itemView.findViewById(R.id.edQuantity);
+            inputQuantity.setFilters(new InputFilter[]{ new MinMaxFilter(String.format("%d", QUANTITY_MIN_VALUE), String.format("%d", QUANTITY_MAX_VALUE))});
+            inputQuantity.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                }
+
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
+                }
+
+                @Override
+                public void afterTextChanged(Editable s) {
+                    Long q = new Long(0);
+                    if(!s.toString().isEmpty()) {
+                        try {
+                            q = Long.parseLong(s.toString());
+                        } catch (NumberFormatException e) {
+                            q = Long.MAX_VALUE;
+                        }
+                    }
+                    handleShoppingListItem(q, false);
+                    ShoppingItem item = shoppingItem.get(getAdapterPosition());
+                    ShoppingListItem listItem = shoppingList.getShoppingListItem(item);
+                    if(listItem != null)
+                        itemPrice.setText(formatPrice(listItem.getTotalItemPrice()));
+                    else
+                        itemPrice.setText(formatPrice(new BigDecimal(0.00)));
+                }
+            });
 
             increaseQuantity.setOnClickListener(v -> increaseQuantity());
             decreaseQuantity.setOnClickListener(v -> decreaseQuantity());
@@ -168,14 +210,15 @@ public abstract class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingL
 
 
 
-        private void handleShoppingListItem(int number) {
+        protected void handleShoppingListItem(long number, boolean notifyChange) {
             ShoppingItem item = shoppingItem.get(this.getAdapterPosition());
             ShoppingListItem listItem = shoppingList.getShoppingListItem(item);
             //0 = Delete form List
             if(number == 0 && listItem != null) {
                 shoppingList.getShoppingListItems().remove(listItem);
                 shoppingListItemRepository.deleteEntity(listItem);
-                notifyItemChanged(this.getAdapterPosition());
+                if(notifyChange)
+                    notifyItemChanged(this.getAdapterPosition());
                 Log.d(TAG, "Shopping Item " + listItem.getShoppingItem().getItemName() + " removed");
                 return;
             }
@@ -193,27 +236,35 @@ public abstract class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingL
             if(shoppingList.getShoppingListItems().contains(listItem)) {
                 int position = shoppingList.getShoppingListItems().indexOf(listItem);
                 shoppingList.getShoppingListItems().set(position, listItem);
-                notifyItemChanged(this.getAdapterPosition());
+                if(notifyChange)
+                    notifyItemChanged(this.getAdapterPosition());
                 Log.d(TAG, "Shopping Item " + listItem.getShoppingItem().getItemName() + " updated");
             } else {
                 shoppingList.getShoppingListItems().add(listItem);
-                notifyDataSetChanged();
+                if(notifyChange)
+                    notifyItemChanged(this.getAdapterPosition());
                 Log.d(TAG, "Shopping Item " + listItem.getShoppingItem().getItemName() + " inserted");
             }
         }
 
         private void increaseQuantity() {
-            String text = inputQuantity.getText().toString();
-            int number = Integer.parseInt(text);
-            number++;
-            handleShoppingListItem(number);
+            String text = inputQuantity.getText().toString().replace("'", "");
+            if(text.isEmpty())
+                text = "0";
+            long number = Long.parseLong(text);
+            if(number < QUANTITY_MAX_VALUE)
+                number++;
+            handleShoppingListItem(number, true);
         }
 
         private void decreaseQuantity() {
-            String text = inputQuantity.getText().toString();
-            int number = Integer.parseInt(text);
-            number--;
-            handleShoppingListItem(number);
+            String text = inputQuantity.getText().toString().replace("'", "");
+            if(text == "" || text == "0" || text.isEmpty())
+                return;
+            Long number = Long.parseLong(text);
+            if(number > QUANTITY_MIN_VALUE)
+                number--;
+            handleShoppingListItem(number, true);
         }
     }
 
