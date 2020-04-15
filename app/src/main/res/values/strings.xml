@@ -15,6 +15,7 @@
     <string name="shopping_lists_popup_hint">List Name</string>
 
     <string name="shopping_list_item_name">Name</string>
+    <string name="shopping_list_item_inactive">Inactive</string>
     <string name="shopping_list_item_no_quantity">Item has no quantity, action not possible.</string>
 
     <string name="edit_item_name">Name</string>

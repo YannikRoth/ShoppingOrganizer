@@ -29,7 +29,9 @@ import java.io.File;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import ch.fhnw.shoppingorganizer.R;
 import ch.fhnw.shoppingorganizer.model.Globals;
@@ -78,7 +80,7 @@ public abstract class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingL
         ShoppingItem item = shoppingItem.get(position);
         ShoppingListItem listItem = shoppingList.getShoppingListItem(item);
 
-        holder.itemName.setText(context.getString(R.string.shopping_list_item_name) + ": " + item.getItemName());
+        holder.itemName.setText( item.getItemName() + (item.isItemActive() ? "":" (" + context.getString(R.string.shopping_list_item_inactive) + ")"));
         if(listItem != null && listItem.isItemState()) {
             if(defaultPaintFlags == 0)
                 holder.itemName.getPaintFlags();
@@ -223,6 +225,9 @@ public abstract class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingL
                 return;
             }
 
+            if(number == 0)
+                return;
+
             if(listItem == null) {
                 listItem = new ShoppingListItemBuilder()
                         .withShoppingItem(item)
@@ -230,21 +235,15 @@ public abstract class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingL
                         .withQuantity(number)
                         .withItemState(Globals.SHOPPING_LIST_ITEM_STATE_UNCHECKED)
                         .build();
-            } else
-                listItem.setQuantity(number);
-            shoppingListItemRepository.saveEntity(listItem);
-            if(shoppingList.getShoppingListItems().contains(listItem)) {
-                int position = shoppingList.getShoppingListItems().indexOf(listItem);
-                shoppingList.getShoppingListItems().set(position, listItem);
-                if(notifyChange)
-                    notifyItemChanged(this.getAdapterPosition());
-                Log.d(TAG, "Shopping Item " + listItem.getShoppingItem().getItemName() + " updated");
-            } else {
                 shoppingList.getShoppingListItems().add(listItem);
+                Log.d(TAG, "Shopping Item " + listItem.getShoppingItem().getItemName() + " inserted");
+            } else {
+                listItem.setQuantity(number);
+                Log.d(TAG, "Shopping Item " + listItem.getShoppingItem().getItemName() + " updated");
+            }
+            shoppingListItemRepository.saveEntity(listItem);
                 if(notifyChange)
                     notifyItemChanged(this.getAdapterPosition());
-                Log.d(TAG, "Shopping Item " + listItem.getShoppingItem().getItemName() + " inserted");
-            }
         }
 
         private void increaseQuantity() {
@@ -311,7 +310,6 @@ public abstract class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingL
 
     //Pull-Refresh SwipeRefreshLayout
     public void onRefreshViewOnPull() {
-//        shoppingListFilter.
         shoppingItem.clear();
         sortShoppingItems(shoppingItemFull);
         shoppingItem.addAll(shoppingItemFull);
@@ -326,26 +324,45 @@ public abstract class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingL
     }
 
     private void sortShoppingItems(List<ShoppingItem> items) {
-        Collections.sort(items, (o1, o2) -> {
-            int i1 = 3, i2 = 3;
-            for(ShoppingListItem it:shoppingList.getShoppingListItems()) {
-                if(it.getShoppingItem().equals(o1)) {
-                    if(it.isItemState())
-                        i1 = 2;
-                    else
-                        i1 = 1;
+        List<ShoppingItem> itemsNeed = new ArrayList<ShoppingItem>();
+        List<ShoppingItem> itemsHave = new ArrayList<ShoppingItem>();
+        List<ShoppingItem> itemsOpen = new ArrayList<ShoppingItem>();
+        for(ShoppingItem si:items) {
+            if(shoppingList.getShoppingListItem(si) != null) {
+                if (shoppingList.getShoppingListItem(si).isItemState())
+                    itemsHave.add(si);
+                else
+                    itemsNeed.add(si);
+            } else
+                itemsOpen.add(si);
+        }
+        items.clear();
+
+        Comparator<ShoppingItem> comp = new Comparator<ShoppingItem>() {
+            @Override
+            public int compare(ShoppingItem o1, ShoppingItem o2) {
+                if(o1.isItemActive() != o2.isItemActive()) {
+                    int i1 = o1.isItemActive() ? 1:0;
+                    int i2 = o2.isItemActive() ? 1:0;
+                    return i2-i1;
                 }
-                if(it.getShoppingItem().equals(o2)) {
-                    if(it.isItemState())
-                        i2 = 2;
-                    else
-                        i2 = 1;
-                }
+                return o1.getItemName().compareToIgnoreCase(o2.getItemName());
             }
-            if(i1 == i2)
-                return o1.getItemName().compareTo(o2.getItemName());
-            return i1-i2;//Globals.STATE_SELECTED
-        });
+        };
+
+        if(!itemsNeed.isEmpty()) {
+            Collections.sort(itemsNeed, comp);
+            items.addAll(itemsNeed);
+        }
+        if(!itemsHave.isEmpty()) {
+            Collections.sort(itemsHave, comp);
+            items.addAll(itemsHave);
+        }
+        if(!itemsOpen.isEmpty()) {
+            Collections.sort(itemsOpen, comp);
+            items.addAll(itemsOpen);
+        }
+
     }
 
 
