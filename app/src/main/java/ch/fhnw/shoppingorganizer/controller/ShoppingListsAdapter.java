@@ -1,4 +1,4 @@
-package ch.fhnw.shoppingorganizer.view;
+package ch.fhnw.shoppingorganizer.controller;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -19,7 +19,6 @@ import java.util.List;
 
 import ch.fhnw.shoppingorganizer.R;
 import ch.fhnw.shoppingorganizer.model.Globals;
-import ch.fhnw.shoppingorganizer.model.businessobject.ShoppingItem;
 import ch.fhnw.shoppingorganizer.model.businessobject.ShoppingList;
 
 public abstract class ShoppingListsAdapter extends RecyclerView.Adapter<ShoppingListsAdapter.ShoppingListsItemHolder> implements Filterable, ListItemInteractionInterface {
@@ -27,7 +26,7 @@ public abstract class ShoppingListsAdapter extends RecyclerView.Adapter<Shopping
     private List<ShoppingList> shoppingLists;
     private List<ShoppingList> shoppingListsFull;
 
-    ShoppingListsAdapter(Context context, List<ShoppingList> shoppingLists, RecyclerView recyclerView) {
+    public ShoppingListsAdapter(Context context, List<ShoppingList> shoppingLists, RecyclerView recyclerView) {
         this.context = context;
         this.shoppingLists = shoppingLists;
         Collections.sort(this.shoppingLists);

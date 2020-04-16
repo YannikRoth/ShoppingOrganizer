@@ -39,6 +39,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ch.fhnw.shoppingorganizer.R;
+import ch.fhnw.shoppingorganizer.controller.ShoppingListsAdapter;
+import ch.fhnw.shoppingorganizer.model.Globals;
 import ch.fhnw.shoppingorganizer.model.businessobject.ShoppingItem;
 import ch.fhnw.shoppingorganizer.model.businessobject.ShoppingList;
 import ch.fhnw.shoppingorganizer.model.businessobject.ShoppingListBuilder;
@@ -52,6 +54,8 @@ import ch.fhnw.shoppingorganizer.model.datatransfer.DataExporter;
 import ch.fhnw.shoppingorganizer.model.datatransfer.DataImporter;
 import ch.fhnw.shoppingorganizer.model.datatransfer.Zipper;
 import ch.fhnw.shoppingorganizer.model.masterdata.CSVDataImporter;
+import ch.fhnw.shoppingorganizer.view.Tutorial.TutorialType;
+import ch.fhnw.shoppingorganizer.view.Tutorial.TutorialSliderActivity;
 import it.xabaras.android.recyclerview.swipedecorator.RecyclerViewSwipeDecorator;
 
 public class MainActivity extends AppCompatActivity {
@@ -90,6 +94,10 @@ public class MainActivity extends AppCompatActivity {
         shoppingLists = shoppingListRepositoryInstance.getAllItems();
 
         initUi();
+
+        Intent intentTutorial = new Intent(this, TutorialSliderActivity.class);
+        intentTutorial.putExtra(Globals.INTENT_TUTORIAL_TYPE, TutorialType.TUTORIAL_SHOPPING_LIST.toString());
+        startActivity(intentTutorial);
     }
 
     private void initUi() {
@@ -222,6 +230,8 @@ public class MainActivity extends AppCompatActivity {
         alert.setView(dialogView);
 
         final EditText edittext = dialogView.findViewById(R.id.edCreateNewList);
+        if(shoppingListBase != null)
+            edittext.setText(shoppingListBase.getListName());
         Button saveButton = dialogView.findViewById(R.id.buttonSaveNewList);
 
         saveButton.setOnClickListener((view) -> {

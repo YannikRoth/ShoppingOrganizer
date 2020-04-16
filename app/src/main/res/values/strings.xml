@@ -15,6 +15,7 @@
     <string name="shopping_lists_popup_hint">List Name</string>
 
     <string name="shopping_list_item_name">Name</string>
+    <string name="shopping_list_item_inactive">Inactive</string>
     <string name="shopping_list_item_no_quantity">Item has no quantity, action not possible.</string>
 
     <string name="edit_item_name">Name</string>
@@ -29,5 +30,21 @@
     <string name="snackbar_item_removed">Item removed</string>
     <string name="snackbar_item_checked">Undo</string>
 
+    <string name="tutorial_shopping_list_delete_title">Delete list</string>
+    <string name="tutorial_shopping_list_delete_content">Swipe left to delete a list</string>
+    <string name="tutorial_shopping_list_delete_undo_title">Undo delete</string>
+    <string name="tutorial_shopping_list_delete_undo_content">Press undo on the bottom to undo list delete</string>
+    <string name="tutorial_shopping_list_open_title">Open list</string>
+    <string name="tutorial_shopping_list_open_content">Tab a list to open</string>
+    <string name="tutorial_shopping_list_edit_name_title">Edit list name</string>
+    <string name="tutorial_shopping_list_edit_name_content">Press and hold list to edit list name</string>
+    <string name="tutorial_shopping_item_list_check_title">Check item</string>
+    <string name="tutorial_shopping_item_list_check_content">Swipe right to check item on list</string>
+    <string name="tutorial_shopping_item_list_delete_title">Delete quantity</string>
+    <string name="tutorial_shopping_item_list_delete_content">Swipe left to remove item quantity from list</string>
+    <string name="tutorial_shopping_item_list_edit_title">Edit item</string>
+    <string name="tutorial_shopping_item_list_edit_content">Press and hold to edit item</string>
+    <string name="tutorial_shopping_item_edit_image_title">Choose/change image</string>
+    <string name="tutorial_shopping_item_edit_image_content">Press on image to change it</string>
 
 </resources>

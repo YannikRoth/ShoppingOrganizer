@@ -1,10 +1,13 @@
-package ch.fhnw.shoppingorganizer.view;
+package ch.fhnw.shoppingorganizer.controller;
 
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.text.Editable;
+import android.text.InputFilter;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,16 +18,20 @@ import android.widget.Filterable;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
+import org.w3c.dom.Text;
+
 import java.io.File;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import ch.fhnw.shoppingorganizer.R;
 import ch.fhnw.shoppingorganizer.model.Globals;
@@ -42,9 +49,12 @@ public abstract class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingL
     private List<ShoppingItem> shoppingItemFull;
     private final String TAG = this.getClass().getSimpleName();
 
+    private final long QUANTITY_MIN_VALUE = 0;
+    private final long QUANTITY_MAX_VALUE = 1000000;
+
     private ShoppingListItemRepository shoppingListItemRepository = RepositoryProvider.getShoppingListItemRepositoryInstance();
 
-    ShoppingListAdapter(Context context, ShoppingList shoppingList, List<ShoppingItem> shoppingItem, RecyclerView recyclerView) {
+    public ShoppingListAdapter(Context context, ShoppingList shoppingList, List<ShoppingItem> shoppingItem, RecyclerView recyclerView) {
         this.context = context;
         this.shoppingList = shoppingList;
         this.shoppingItem = shoppingItem;
@@ -70,7 +80,7 @@ public abstract class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingL
         ShoppingItem item = shoppingItem.get(position);
         ShoppingListItem listItem = shoppingList.getShoppingListItem(item);
 
-        holder.itemName.setText(context.getString(R.string.shopping_list_item_name) + ": " + item.getItemName());
+        holder.itemName.setText( item.getItemName() + (item.isItemActive() ? "":" (" + context.getString(R.string.shopping_list_item_inactive) + ")"));
         if(listItem != null && listItem.isItemState()) {
             if(defaultPaintFlags == 0)
                 holder.itemName.getPaintFlags();
@@ -91,14 +101,18 @@ public abstract class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingL
         }
 
         if(listItem != null) {
-            holder.itemPrice.setText(Globals.NUMBERFORMAT.getCurrency() + " " + Globals.NUMBERFORMAT.format(listItem.getTotalItemPrice()));
-            holder.inputQuantity.setText(Globals.NUMBERFORMAT.format(listItem.getQuantity()));
+            holder.itemPrice.setText(formatPrice(listItem.getTotalItemPrice()));
+            holder.inputQuantity.setText(String.format("%d", listItem.getQuantity()));
         } else {
-            holder.itemPrice.setText(Globals.NUMBERFORMAT.getCurrency() + " " + Globals.NUMBERFORMAT.format(0.00));
+            holder.itemPrice.setText(formatPrice(new BigDecimal(0.00)));
             holder.inputQuantity.setText(Globals.NUMBERFORMAT.format(0));
         }
 
         Log.d("ShoppingListAdapter", "onBindViewHolder: end");
+    }
+
+    private String formatPrice(BigDecimal price) {
+        return Globals.NUMBERFORMAT.getCurrency() + " " + Globals.NUMBERFORMAT.format(price);
     }
 
     /**
@@ -157,6 +171,35 @@ public abstract class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingL
             increaseQuantity = itemView.findViewById(R.id.btnPlus);
             decreaseQuantity = itemView.findViewById(R.id.btnMinus);
             inputQuantity = itemView.findViewById(R.id.edQuantity);
+            inputQuantity.setFilters(new InputFilter[]{ new MinMaxFilter(String.format("%d", QUANTITY_MIN_VALUE), String.format("%d", QUANTITY_MAX_VALUE))});
+            inputQuantity.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                }
+
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
+                }
+
+                @Override
+                public void afterTextChanged(Editable s) {
+                    Long q = new Long(0);
+                    if(!s.toString().isEmpty()) {
+                        try {
+                            q = Long.parseLong(s.toString());
+                        } catch (NumberFormatException e) {
+                            q = Long.MAX_VALUE;
+                        }
+                    }
+                    handleShoppingListItem(q, false);
+                    ShoppingItem item = shoppingItem.get(getAdapterPosition());
+                    ShoppingListItem listItem = shoppingList.getShoppingListItem(item);
+                    if(listItem != null)
+                        itemPrice.setText(formatPrice(listItem.getTotalItemPrice()));
+                    else
+                        itemPrice.setText(formatPrice(new BigDecimal(0.00)));
+                }
+            });
 
             increaseQuantity.setOnClickListener(v -> increaseQuantity());
             decreaseQuantity.setOnClickListener(v -> decreaseQuantity());
@@ -169,17 +212,21 @@ public abstract class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingL
 
 
 
-        private void handleShoppingListItem(int number) {
+        protected void handleShoppingListItem(long number, boolean notifyChange) {
             ShoppingItem item = shoppingItem.get(this.getAdapterPosition());
             ShoppingListItem listItem = shoppingList.getShoppingListItem(item);
             //0 = Delete form List
             if(number == 0 && listItem != null) {
                 shoppingList.getShoppingListItems().remove(listItem);
                 shoppingListItemRepository.deleteEntity(listItem);
-                notifyItemChanged(this.getAdapterPosition());
+                if(notifyChange)
+                    notifyItemChanged(this.getAdapterPosition());
                 Log.d(TAG, "Shopping Item " + listItem.getShoppingItem().getItemName() + " removed");
                 return;
             }
+
+            if(number == 0)
+                return;
 
             if(listItem == null) {
                 listItem = new ShoppingListItemBuilder()
@@ -188,33 +235,35 @@ public abstract class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingL
                         .withQuantity(number)
                         .withItemState(Globals.SHOPPING_LIST_ITEM_STATE_UNCHECKED)
                         .build();
-            } else
-                listItem.setQuantity(number);
-            shoppingListItemRepository.saveEntity(listItem);
-            if(shoppingList.getShoppingListItems().contains(listItem)) {
-                int position = shoppingList.getShoppingListItems().indexOf(listItem);
-                shoppingList.getShoppingListItems().set(position, listItem);
-                notifyItemChanged(this.getAdapterPosition());
-                Log.d(TAG, "Shopping Item " + listItem.getShoppingItem().getItemName() + " updated");
-            } else {
                 shoppingList.getShoppingListItems().add(listItem);
-                notifyDataSetChanged();
                 Log.d(TAG, "Shopping Item " + listItem.getShoppingItem().getItemName() + " inserted");
+            } else {
+                listItem.setQuantity(number);
+                Log.d(TAG, "Shopping Item " + listItem.getShoppingItem().getItemName() + " updated");
             }
+            shoppingListItemRepository.saveEntity(listItem);
+                if(notifyChange)
+                    notifyItemChanged(this.getAdapterPosition());
         }
 
         private void increaseQuantity() {
-            String text = inputQuantity.getText().toString();
-            int number = Integer.parseInt(text);
-            number++;
-            handleShoppingListItem(number);
+            String text = inputQuantity.getText().toString().replace("'", "");
+            if(text.isEmpty())
+                text = "0";
+            long number = Long.parseLong(text);
+            if(number < QUANTITY_MAX_VALUE)
+                number++;
+            handleShoppingListItem(number, true);
         }
 
         private void decreaseQuantity() {
-            String text = inputQuantity.getText().toString();
-            int number = Integer.parseInt(text);
-            number--;
-            handleShoppingListItem(number);
+            String text = inputQuantity.getText().toString().replace("'", "");
+            if(text == "" || text == "0" || text.isEmpty())
+                return;
+            Long number = Long.parseLong(text);
+            if(number > QUANTITY_MIN_VALUE)
+                number--;
+            handleShoppingListItem(number, true);
         }
     }
 
@@ -261,7 +310,6 @@ public abstract class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingL
 
     //Pull-Refresh SwipeRefreshLayout
     public void onRefreshViewOnPull() {
-//        shoppingListFilter.
         shoppingItem.clear();
         sortShoppingItems(shoppingItemFull);
         shoppingItem.addAll(shoppingItemFull);
@@ -276,26 +324,45 @@ public abstract class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingL
     }
 
     private void sortShoppingItems(List<ShoppingItem> items) {
-        Collections.sort(items, (o1, o2) -> {
-            int i1 = 3, i2 = 3;
-            for(ShoppingListItem it:shoppingList.getShoppingListItems()) {
-                if(it.getShoppingItem().equals(o1)) {
-                    if(it.isItemState())
-                        i1 = 2;
-                    else
-                        i1 = 1;
+        List<ShoppingItem> itemsNeed = new ArrayList<ShoppingItem>();
+        List<ShoppingItem> itemsHave = new ArrayList<ShoppingItem>();
+        List<ShoppingItem> itemsOpen = new ArrayList<ShoppingItem>();
+        for(ShoppingItem si:items) {
+            if(shoppingList.getShoppingListItem(si) != null) {
+                if (shoppingList.getShoppingListItem(si).isItemState())
+                    itemsHave.add(si);
+                else
+                    itemsNeed.add(si);
+            } else
+                itemsOpen.add(si);
+        }
+        items.clear();
+
+        Comparator<ShoppingItem> comp = new Comparator<ShoppingItem>() {
+            @Override
+            public int compare(ShoppingItem o1, ShoppingItem o2) {
+                if(o1.isItemActive() != o2.isItemActive()) {
+                    int i1 = o1.isItemActive() ? 1:0;
+                    int i2 = o2.isItemActive() ? 1:0;
+                    return i2-i1;
                 }
-                if(it.getShoppingItem().equals(o2)) {
-                    if(it.isItemState())
-                        i2 = 2;
-                    else
-                        i2 = 1;
-                }
+                return o1.getItemName().compareToIgnoreCase(o2.getItemName());
             }
-            if(i1 == i2)
-                return o1.getItemName().compareTo(o2.getItemName());
-            return i1-i2;//Globals.STATE_SELECTED
-        });
+        };
+
+        if(!itemsNeed.isEmpty()) {
+            Collections.sort(itemsNeed, comp);
+            items.addAll(itemsNeed);
+        }
+        if(!itemsHave.isEmpty()) {
+            Collections.sort(itemsHave, comp);
+            items.addAll(itemsHave);
+        }
+        if(!itemsOpen.isEmpty()) {
+            Collections.sort(itemsOpen, comp);
+            items.addAll(itemsOpen);
+        }
+
     }
 
 
