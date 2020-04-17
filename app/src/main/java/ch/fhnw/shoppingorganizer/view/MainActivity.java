@@ -81,7 +81,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView tvNoResults;
     private FloatingActionButton btnAdd, btnExport, btnImport;
 
-    @RequiresApi(api = Build.VERSION_CODES.N)
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
