@@ -37,6 +37,9 @@ import java.io.InputStreamReader;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
+import java.util.zip.ZipInputStream;
 
 import ch.fhnw.shoppingorganizer.R;
 import ch.fhnw.shoppingorganizer.controller.ShoppingListsAdapter;
@@ -100,6 +103,7 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intentTutorial);
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     private void initUi() {
         // Getting references to the Toolbar, ListView and TextView
         tbSearch = findViewById(R.id.toolbarEditItem);
@@ -125,15 +129,10 @@ public class MainActivity extends AppCompatActivity {
         btnImport = findViewById(R.id.btnImport);
         btnImport.setOnClickListener(v -> {
             try{
-                AssetManager am = getAssets();
-                InputStream is = am.open("DbExportFile.json");
-                BufferedReader br = new BufferedReader(new InputStreamReader(is));
-                StringBuilder sb = new StringBuilder();
-                String line;
-                while((line = br.readLine()) != null){
-                    sb.append(line);
-                }
-                DataImporter.unserializeFromJson(sb.toString());
+                final AssetManager am = getAssets();
+                ZipInputStream zip = new ZipInputStream(am.open("ShoppingOrganizer.zip"));
+                Zipper.upzipApplicationData(zip, getApplicationContext());
+
             }catch (Exception e){
                 Log.d("Import exception: ", e.getMessage());
             }

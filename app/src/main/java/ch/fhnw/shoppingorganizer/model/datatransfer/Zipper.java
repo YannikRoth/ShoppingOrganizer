@@ -27,9 +27,13 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 import ch.fhnw.shoppingorganizer.model.database.RepositoryProvider;
@@ -40,6 +44,13 @@ public class Zipper {
     private static final ShoppingItemRepository itemRepository = RepositoryProvider.getShoppingItemRepositoryInstance();
 
     public static final String JSONExportFileName = "exportData.json";
+    private static final Set<String> IMAGE_FILETYPES = new TreeSet<>();
+
+    static {
+        IMAGE_FILETYPES.add("PNG");
+        IMAGE_FILETYPES.add("JPG");
+        IMAGE_FILETYPES.add("JPEG");
+    }
 
     public static void zipApplicationData(final Context applicationContext){
         final List<String> filePaths = new ArrayList<>();
@@ -78,39 +89,37 @@ public class Zipper {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
-    public static void upzipApplicationData(final ZipFile zipFile, final Context applicationContext){
-        try {
-            //Get json data
-            final ZipEntry jsonFile = zipFile.getEntry(JSONExportFileName);
-            final StringBuilder sb = new StringBuilder();
-            final BufferedReader reader = new BufferedReader(new InputStreamReader(zipFile.getInputStream(jsonFile)));
-            String line;
-            while((line = reader.readLine()) != null) {
-                sb.append(line);
+    public static void upzipApplicationData(final ZipInputStream zipInputStream, final Context applicationContext) throws IOException {
+        final byte buffer[] = new byte[BUFFER];
+        final File dir = applicationContext.getDir("imageDir", Context.MODE_PRIVATE);
+
+        ZipEntry jsonImportFile;
+        ZipEntry entry;
+        while((entry = zipInputStream.getNextEntry()) != null){
+            //split at dots and take last entry for file type
+            String[] fileParts = entry.getName().split("\\.");
+            if(IMAGE_FILETYPES.contains(fileParts[fileParts.length-1].toUpperCase())){
+                File imageFile = new File(dir, entry.getName());
+
+                try(FileOutputStream fos = new FileOutputStream(imageFile);
+                    BufferedOutputStream bos = new BufferedOutputStream(fos, buffer.length)){
+                    int len;
+                    while((len = zipInputStream.read(buffer)) > 0){
+                        bos.write(buffer, 0, len);
+                    }
+                }
+            }else{
+                String jsonString = new BufferedReader(new InputStreamReader(zipInputStream))
+                        .lines().collect(Collectors.joining(""));
+                try {
+                    DataImporter.unserializeFromJson(jsonString);
+                }catch (Exception e){
+
+                }
             }
-
-            //perform data import (into database)
-            DataImporter.unserializeFromJson(sb.toString());
-
-            //copy all images to transfer imageDir directory
-            final ContextWrapper cw = new ContextWrapper(applicationContext);
-            final File dir = cw.getDir("transfer", Context.MODE_PRIVATE);
-
-            zipFile.stream()
-                    .<ZipEntry>filter(entry -> entry.getName() == JSONExportFileName)
-                    .forEach(imageResource -> {
-                        try {
-                            String path = dir.getAbsolutePath() + "\\" + imageResource.getName();
-                            Path storeLocation = Paths.get(path);
-                            Files.copy(zipFile.getInputStream(imageResource), storeLocation);
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    });
-
-        }catch (Exception e){
-
         }
+
+
     }
 
     private static void performZip(final List<String> files, final File zipFile) {
