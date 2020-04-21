@@ -13,6 +13,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
@@ -159,7 +160,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public int getSwipeDirs() {
-                return ItemTouchHelper.LEFT;
+                return ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT;
             }
 
             ShoppingList deletedShoppingList = null;
@@ -198,7 +199,8 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onSwipeRight(@NonNull RecyclerView.ViewHolder viewHolder) {
-
+                Log.d("testYannik", "testYannik");
+                notifyItemChanged(viewHolder.getAdapterPosition());
             }
 
             @Override
