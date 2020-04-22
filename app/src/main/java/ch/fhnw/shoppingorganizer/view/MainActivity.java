@@ -124,7 +124,21 @@ public class MainActivity extends AppCompatActivity {
         btnExport = findViewById(R.id.btnExport);
         btnExport.setOnClickListener(v ->{
             try {
-                Zipper.zipApplicationData(getApplicationContext());
+                Context context = getApplicationContext();
+                Zipper.zipApplicationData(context);
+
+                //get the backup file
+                File dir = context.getDir("transfer", Context.MODE_PRIVATE);
+                File exportFile = new File(dir, Zipper.ExportedShoppingrganizerFileName);
+
+                //create send intent and attach export file
+                Intent intent = new Intent(Intent.ACTION_SEND);
+                intent.setType("text/plain");
+                intent.putExtra(Intent.EXTRA_SUBJECT, "Exported backup of ShoppingOrganizer");
+                intent.putExtra(Intent.EXTRA_TEXT, "Here is my backup file");
+                Uri uri = FileProvider.getUriForFile(context, "ch.fhnw.shoppingorganizer.fileprovider", exportFile);
+                intent.putExtra(Intent.EXTRA_STREAM, uri);
+                startActivity(Intent.createChooser(intent, "Export..."));
             }catch (Exception e){
                 Log.d("Export exception: ", e.getMessage());
             }

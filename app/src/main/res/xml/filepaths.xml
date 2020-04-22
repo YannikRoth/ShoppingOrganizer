@@ -2,6 +2,6 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
     <paths>
         <files-path path="../app_export" name="app_export" />
-        <files-path path="../transfer" name="transfer" />
+        <files-path path="../app_transfer" name="app_transfer" />
     </paths>
 </PreferenceScreen>

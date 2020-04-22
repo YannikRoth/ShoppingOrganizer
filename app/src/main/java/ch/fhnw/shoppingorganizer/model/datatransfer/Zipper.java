@@ -50,6 +50,7 @@ public class Zipper {
 
     public static final String JSONExportFileName = "exportData.json";
     public static final String ExportedShoppingListFileName = "ExportedShoppingList.zip";
+    public static final String ExportedShoppingrganizerFileName = "ShoppingOrganizer.zip";
     private static final Set<String> IMAGE_FILETYPES = new TreeSet<>();
 
     static {
@@ -82,7 +83,7 @@ public class Zipper {
 
         }
 
-        File zipFile = new File(dir, "ShoppingOrganizer.zip");
+        File zipFile = new File(dir, ExportedShoppingrganizerFileName);
 
         performZip(filePaths, zipFile);
     }
