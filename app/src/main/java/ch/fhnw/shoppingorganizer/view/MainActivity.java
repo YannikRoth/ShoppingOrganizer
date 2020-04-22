@@ -199,8 +199,10 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onSwipeRight(@NonNull RecyclerView.ViewHolder viewHolder) {
-                Log.d("testYannik", "testYannik");
                 notifyItemChanged(viewHolder.getAdapterPosition());
+                ShoppingList toExportShoppingList = shoppingLists.get(viewHolder.getAdapterPosition());
+
+                Zipper.zipExportShoppingList(getApplicationContext(), toExportShoppingList);
             }
 
             @Override

@@ -31,17 +31,22 @@ import java.util.Scanner;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
+import ch.fhnw.shoppingorganizer.model.businessobject.ShoppingItem;
+import ch.fhnw.shoppingorganizer.model.businessobject.ShoppingList;
 import ch.fhnw.shoppingorganizer.model.database.RepositoryProvider;
 import ch.fhnw.shoppingorganizer.model.database.ShoppingItemRepository;
+import ch.fhnw.shoppingorganizer.model.database.ShoppingListItemRepository;
 
 public class Zipper {
     private static final int BUFFER = 2048;
     private static final ShoppingItemRepository itemRepository = RepositoryProvider.getShoppingItemRepositoryInstance();
+    private static final ShoppingListItemRepository listItemRepository = RepositoryProvider.getShoppingListItemRepositoryInstance();
 
     public static final String JSONExportFileName = "exportData.json";
     private static final Set<String> IMAGE_FILETYPES = new TreeSet<>();
@@ -60,14 +65,7 @@ public class Zipper {
 
         try {
             //Get all current (used images)
-            filePaths.addAll(
-                    itemRepository.getAllItems()
-                            .stream()
-                            .map(entry -> new File(entry.getImgPath()))
-                            .filter(File::exists)
-                            .map(file -> file.getAbsolutePath())
-                            .collect(Collectors.toList())
-            );
+            filePaths.addAll(getAllFilePaths(itemRepository.getAllItems()));
 
             //add json file
             File file = new File(dir, JSONExportFileName);
@@ -87,6 +85,44 @@ public class Zipper {
 
         performZip(filePaths, zipFile);
     }
+
+    public static void zipExportShoppingList(final Context applicationContext, final ShoppingList shoppingList){
+        final List<String> filePaths = new ArrayList<>();
+        final ContextWrapper cw = new ContextWrapper(applicationContext);
+        final File dir = cw.getDir("export", Context.MODE_PRIVATE);
+        dir.mkdir();
+
+        try {
+            //add used images
+            filePaths.addAll(getAllFilePaths(listItemRepository.getShoppingItems(shoppingList)));
+
+            //add json file
+            File file = new File(dir, JSONExportFileName);
+
+            Writer writer = new OutputStreamWriter(new FileOutputStream(file));
+            writer.write(DataExporter.serializeShoppingListFromDatabase(shoppingList).toString());
+            writer.flush();
+            writer.close();
+
+            //add filePath to zip list
+            filePaths.add(file.getAbsolutePath());
+        }catch (Exception e){
+
+        }
+
+        File exportFile = new File(dir, "ExportedShoppingList.zip");
+        performZip(filePaths, exportFile);
+    }
+
+    private static List<String> getAllFilePaths(List<ShoppingItem> shoppingItems){
+        return shoppingItems
+                .stream()
+                .map(entry -> new File(entry.getImgPath()))
+                .filter(File::exists)
+                .map(file -> file.getAbsolutePath())
+                .collect(Collectors.toList());
+    }
+
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     public static void upzipApplicationData(final ZipInputStream zipInputStream, final Context applicationContext) throws IOException {
