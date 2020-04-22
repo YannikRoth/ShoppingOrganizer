@@ -22,6 +22,17 @@
             android:enabled="true"
             android:exported="false" />
 
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="ch.fhnw.shoppingorganizer.fileprovider"
+            android:grantUriPermissions="true"
+            android:enabled="true"
+            android:exported="false">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/filepaths" />
+        </provider>
+
         <meta-data
             android:name="AA_DB_NAME"
             android:value="ShoppingOrganizer.db" />

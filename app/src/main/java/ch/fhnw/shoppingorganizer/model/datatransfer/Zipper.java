@@ -49,6 +49,7 @@ public class Zipper {
     private static final ShoppingListItemRepository listItemRepository = RepositoryProvider.getShoppingListItemRepositoryInstance();
 
     public static final String JSONExportFileName = "exportData.json";
+    public static final String ExportedShoppingListFileName = "ExportedShoppingList.zip";
     private static final Set<String> IMAGE_FILETYPES = new TreeSet<>();
 
     static {
@@ -110,7 +111,7 @@ public class Zipper {
 
         }
 
-        File exportFile = new File(dir, "ExportedShoppingList.zip");
+        File exportFile = new File(dir, ExportedShoppingListFileName);
         performZip(filePaths, exportFile);
     }
 

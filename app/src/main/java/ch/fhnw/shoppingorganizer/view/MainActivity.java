@@ -1,8 +1,10 @@
 package ch.fhnw.shoppingorganizer.view;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.AssetManager;
 import android.graphics.Canvas;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -22,6 +24,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -33,6 +36,7 @@ import com.google.android.material.snackbar.Snackbar;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Array;
@@ -202,7 +206,22 @@ public class MainActivity extends AppCompatActivity {
                 notifyItemChanged(viewHolder.getAdapterPosition());
                 ShoppingList toExportShoppingList = shoppingLists.get(viewHolder.getAdapterPosition());
 
+                //create export file
                 Zipper.zipExportShoppingList(getApplicationContext(), toExportShoppingList);
+
+                //send export file
+                Context context = getApplicationContext();
+                File dir = context.getDir("export", Context.MODE_PRIVATE);
+                File exportFile = new File(dir, Zipper.ExportedShoppingListFileName);
+
+                //create send intent and attach export file
+                Intent intent = new Intent(Intent.ACTION_SEND);
+                intent.setType("text/plain");
+                intent.putExtra(Intent.EXTRA_SUBJECT, "Exported Shopping List");
+                intent.putExtra(Intent.EXTRA_TEXT, "Please find my exported shopping list attached");
+                Uri uri = FileProvider.getUriForFile(context, "ch.fhnw.shoppingorganizer.fileprovider", exportFile);
+                intent.putExtra(Intent.EXTRA_STREAM, uri);
+                startActivity(Intent.createChooser(intent, "Export..."));
             }
 
             @Override
