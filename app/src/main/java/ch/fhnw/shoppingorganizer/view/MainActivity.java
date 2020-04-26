@@ -103,7 +103,7 @@ public class MainActivity extends AppCompatActivity {
         if(forceCall) {
             SharedPreferences prefs = getApplicationContext().getSharedPreferences(Globals.PREF_TUTORIAL, MODE_PRIVATE);
             SharedPreferences.Editor edit = prefs.edit();
-            deleteSharedPreferences(TutorialType.TUTORIAL_SHOPPING_LIST.toString());
+            edit.remove(TutorialType.TUTORIAL_SHOPPING_LIST.toString());
             edit.apply();
         }
         Intent intentTutorial = new Intent(this, TutorialSliderActivity.class);
@@ -354,6 +354,7 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case R.id.showTutorial:
+                callTutorial(true);
                 break;
             case R.id.exportAll:
                 Toast.makeText(this, "exportAll", Toast.LENGTH_LONG).show();
