@@ -2,6 +2,7 @@ package ch.fhnw.shoppingorganizer.view;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.AssetManager;
 import android.graphics.Canvas;
 import android.net.Uri;
@@ -33,17 +34,11 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
-import org.json.JSONObject;
-
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.lang.reflect.Array;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
 
 import ch.fhnw.shoppingorganizer.R;
@@ -58,8 +53,6 @@ import ch.fhnw.shoppingorganizer.model.database.DbUtils;
 import ch.fhnw.shoppingorganizer.model.database.RepositoryProvider;
 import ch.fhnw.shoppingorganizer.model.database.ShoppingListItemRepository;
 import ch.fhnw.shoppingorganizer.model.database.ShoppingListRepository;
-import ch.fhnw.shoppingorganizer.model.datatransfer.DataExporter;
-import ch.fhnw.shoppingorganizer.model.datatransfer.DataImporter;
 import ch.fhnw.shoppingorganizer.model.datatransfer.Zipper;
 import ch.fhnw.shoppingorganizer.model.masterdata.CSVDataImporter;
 import ch.fhnw.shoppingorganizer.view.Tutorial.TutorialType;
@@ -103,6 +96,16 @@ public class MainActivity extends AppCompatActivity {
 
         initUi();
 
+        callTutorial(false);
+    }
+
+    private void callTutorial(boolean forceCall) {
+        if(forceCall) {
+            SharedPreferences prefs = getApplicationContext().getSharedPreferences(Globals.PREF_TUTORIAL, MODE_PRIVATE);
+            SharedPreferences.Editor edit = prefs.edit();
+            deleteSharedPreferences(TutorialType.TUTORIAL_SHOPPING_LIST.toString());
+            edit.apply();
+        }
         Intent intentTutorial = new Intent(this, TutorialSliderActivity.class);
         intentTutorial.putExtra(Globals.INTENT_TUTORIAL_TYPE, TutorialType.TUTORIAL_SHOPPING_LIST.toString());
         startActivity(intentTutorial);
@@ -325,7 +328,7 @@ public class MainActivity extends AppCompatActivity {
      */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.main_menu, menu);
+        getMenuInflater().inflate(R.menu.shopping_lists_menu, menu);
         MenuItem mSearch = menu.findItem(R.id.appSearchBar);
         SearchView mSearchView = (SearchView) mSearch.getActionView();
         mSearchView.setQueryHint(getString(R.string.toolbar_search_menu));
@@ -343,6 +346,22 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             }
         });
+        MenuItem mMoreDropdown = menu.findItem(R.id.showTutorial);
         return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.showTutorial:
+                break;
+            case R.id.exportAll:
+                Toast.makeText(this, "exportAll", Toast.LENGTH_LONG).show();
+                break;
+            case R.id.importAll:
+                Toast.makeText(this, "importAll", Toast.LENGTH_LONG).show();
+                break;
+        }
+        return super.onOptionsItemSelected(item);
     }
 }

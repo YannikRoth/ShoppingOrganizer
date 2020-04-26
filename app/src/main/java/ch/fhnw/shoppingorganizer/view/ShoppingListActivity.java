@@ -219,7 +219,7 @@ public class ShoppingListActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.main_menu, menu);
+        getMenuInflater().inflate(R.menu.shopping_list_menu, menu);
         MenuItem mSearch = menu.findItem(R.id.appSearchBar);
         SearchView mSearchView = (SearchView) mSearch.getActionView();
         mSearchView.setQueryHint(getString(R.string.toolbar_search_menu));

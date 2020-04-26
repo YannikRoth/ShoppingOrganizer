@@ -2,6 +2,9 @@
     <string name="app_name">ShoppingOrganizer</string>
 
     <string name="toolbar_search_menu">Search</string>
+    <string name="toolbar_tutorial">Show Tutorial again</string>
+    <string name="toolbar_exportAll">Export all Lists</string>
+    <string name="toolbar_importAll">Import all Lists</string>
 
     <string name="shopping_lists_title">Shopping Lists</string>
     <string name="shopping_lists_no_results">There is no lists</string>
