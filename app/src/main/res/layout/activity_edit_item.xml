@@ -125,11 +125,11 @@
     <ImageView
         android:id="@+id/imgItem"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="150dp"
         android:layout_marginTop="30dp"
         android:adjustViewBounds="true"
-        android:maxWidth="100dp"
-        android:maxHeight="100dp"
+        android:minWidth="150dp"
+        android:minHeight="150dp"
         android:scaleType="centerCrop"
         android:src="@drawable/ic_add_image"
         app:layout_constraintLeft_toLeftOf="parent"
@@ -138,8 +138,8 @@
 
     <TextView
         android:id="@+id/textView2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="329dp"
+        android:layout_height="50dp"
         android:layout_marginTop="10dp"
         android:gravity="center"
         android:text="@string/edit_item_image_description"

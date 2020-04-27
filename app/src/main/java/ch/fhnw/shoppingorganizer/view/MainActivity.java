@@ -77,7 +77,7 @@ public class MainActivity extends AppCompatActivity {
     private Toolbar tbSearch;
     private RecyclerView rvShoppingLists;
     private TextView tvNoResults;
-    private FloatingActionButton btnAdd, btnExport, btnImport;
+    private FloatingActionButton btnAdd;
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
@@ -111,7 +111,6 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intentTutorial);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
     private void initUi() {
         // Getting references to the Toolbar, ListView and TextView
         tbSearch = findViewById(R.id.toolbarEditItem);
@@ -121,43 +120,6 @@ public class MainActivity extends AppCompatActivity {
         btnAdd = findViewById(R.id.btnAdd);
         btnAdd.setOnClickListener(v -> {
             showShoppingListDialog(null);
-        });
-
-        //TEMP: Export
-        btnExport = findViewById(R.id.btnExport);
-        btnExport.setOnClickListener(v ->{
-            try {
-                Context context = getApplicationContext();
-                Zipper.zipApplicationData(context);
-
-                //get the backup file
-                File dir = context.getDir("transfer", Context.MODE_PRIVATE);
-                File exportFile = new File(dir, Zipper.ExportedShoppingrganizerFileName);
-
-                //create send intent and attach export file
-                Intent intent = new Intent(Intent.ACTION_SEND);
-                intent.setType("text/plain");
-                intent.putExtra(Intent.EXTRA_SUBJECT, "Exported backup of ShoppingOrganizer");
-                intent.putExtra(Intent.EXTRA_TEXT, "Here is my backup file");
-                Uri uri = FileProvider.getUriForFile(context, "ch.fhnw.shoppingorganizer.fileprovider", exportFile);
-                intent.putExtra(Intent.EXTRA_STREAM, uri);
-                startActivity(Intent.createChooser(intent, "Export..."));
-            }catch (Exception e){
-                Log.d("Export exception: ", e.getMessage());
-            }
-        });
-
-        //TEMP: import
-        btnImport = findViewById(R.id.btnImport);
-        btnImport.setOnClickListener(v -> {
-            try{
-                final AssetManager am = getAssets();
-                ZipInputStream zip = new ZipInputStream(am.open("ShoppingOrganizer.zip"));
-                Zipper.upzipApplicationData(zip, getApplicationContext());
-
-            }catch (Exception e){
-                Log.d("Import exception: ", e.getMessage());
-            }
         });
 
         rvShoppingLists = findViewById(R.id.rvShoppingLists);
@@ -350,6 +312,7 @@ public class MainActivity extends AppCompatActivity {
         return super.onCreateOptionsMenu(menu);
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
@@ -357,10 +320,35 @@ public class MainActivity extends AppCompatActivity {
                 callTutorial(true);
                 break;
             case R.id.exportAll:
-                Toast.makeText(this, "exportAll", Toast.LENGTH_LONG).show();
+                try {
+                    Context context = getApplicationContext();
+                    Zipper.zipApplicationData(context);
+
+                    //get the backup file
+                    File dir = context.getDir("transfer", Context.MODE_PRIVATE);
+                    File exportFile = new File(dir, Zipper.ExportedShoppingrganizerFileName);
+
+                    //create send intent and attach export file
+                    Intent intent = new Intent(Intent.ACTION_SEND);
+                    intent.setType("text/plain");
+                    intent.putExtra(Intent.EXTRA_SUBJECT, "Exported backup of ShoppingOrganizer");
+                    intent.putExtra(Intent.EXTRA_TEXT, "Here is my backup file");
+                    Uri uri = FileProvider.getUriForFile(context, "ch.fhnw.shoppingorganizer.fileprovider", exportFile);
+                    intent.putExtra(Intent.EXTRA_STREAM, uri);
+                    startActivity(Intent.createChooser(intent, "Export..."));
+                }catch (Exception e){
+                    Log.d("Export exception: ", e.getMessage());
+                }
                 break;
             case R.id.importAll:
-                Toast.makeText(this, "importAll", Toast.LENGTH_LONG).show();
+                try{
+                    final AssetManager am = getAssets();
+                    ZipInputStream zip = new ZipInputStream(am.open(Zipper.ExportedShoppingrganizerFileName));
+                    Zipper.upzipApplicationData(zip, getApplicationContext());
+                    adapter.notifyDataSetChanged();
+                }catch (Exception e){
+                    Log.d("Import exception: ", e.getMessage());
+                }
                 break;
         }
         return super.onOptionsItemSelected(item);
