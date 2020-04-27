@@ -26,6 +26,8 @@ public abstract class ShoppingListsAdapter extends RecyclerView.Adapter<Shopping
     private List<ShoppingList> shoppingLists;
     private List<ShoppingList> shoppingListsFull;
 
+    private int highlightPosition = -1;
+
     public ShoppingListsAdapter(Context context, List<ShoppingList> shoppingLists, RecyclerView recyclerView) {
         this.context = context;
         this.shoppingLists = shoppingLists;
@@ -51,6 +53,10 @@ public abstract class ShoppingListsAdapter extends RecyclerView.Adapter<Shopping
             shoppingLists.remove(shoppingList);
             notifyItemRemoved(index);
         }
+    }
+
+    public void setHighlightPOsition(int highlightPosition) {
+        this.highlightPosition = highlightPosition;
     }
 
     public Context getContext() {
@@ -109,6 +115,11 @@ public abstract class ShoppingListsAdapter extends RecyclerView.Adapter<Shopping
 
         holder.shoppingListPrice.setText(context.getString(R.string.shopping_lists_price) + ": " + Globals.NUMBERFORMAT.format(item.getTotalPrice()));
         holder.shoppingListQuantity.setText(context.getString(R.string.shopping_lists_quantity) + ": " + Globals.NUMBERFORMAT.format(item.getTotalQuantity()));
+
+        holder.itemView.setBackgroundColor(highlightPosition == position ? context.getColor(R.color.colorCheck) : context.getColor(R.color.design_default_color_background));
+        if(highlightPosition >= 0 && highlightPosition == position) {
+            highlightPosition = -1;
+        }
     }
 
     /**

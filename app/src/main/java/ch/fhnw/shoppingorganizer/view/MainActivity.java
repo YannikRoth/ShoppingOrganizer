@@ -5,6 +5,8 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.AssetManager;
 import android.graphics.Canvas;
+import android.graphics.ColorFilter;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -19,6 +21,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -37,6 +40,7 @@ import com.google.android.material.snackbar.Snackbar;
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.zip.ZipInputStream;
@@ -345,7 +349,20 @@ public class MainActivity extends AppCompatActivity {
                     final AssetManager am = getAssets();
                     ZipInputStream zip = new ZipInputStream(am.open(Zipper.ExportedShoppingrganizerFileName));
                     Zipper.upzipApplicationData(zip, getApplicationContext());
+                    List<ShoppingList> newLists = shoppingListRepositoryInstance.getAllItems();
+                    ShoppingList newList = null;
+                    for(ShoppingList sl:newLists)
+                        if(!shoppingLists.contains(sl)) {
+                            shoppingLists.add(sl);
+                            newList = sl;
+                        }
+                    Collections.sort(shoppingLists);
                     adapter.notifyDataSetChanged();
+                    if(newList != null) {
+                        int index = shoppingLists.indexOf(newList);
+                        rvShoppingLists.scrollToPosition(index);
+                        adapter.setHighlightPOsition(index);
+                    }
                 }catch (Exception e){
                     Log.d("Import exception: ", e.getMessage());
                 }

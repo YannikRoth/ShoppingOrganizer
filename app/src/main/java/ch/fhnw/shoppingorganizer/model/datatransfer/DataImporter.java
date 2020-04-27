@@ -70,8 +70,11 @@ public class DataImporter {
             String listName = list.getString("listName");
 
             // Check if the item already exists
+            int nr = 1;
             if (listRepository.getByName(listName) != null) {
-                continue;
+                while(listRepository.getByName(listName + " (" + nr + ")") != null)
+                    nr++;
+                listName = listName + " (" + nr + ")";
             }
 
             // Create new item
