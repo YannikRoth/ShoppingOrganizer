@@ -14,20 +14,44 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".view.Tutorial.TutorialSliderActivity"></activity>
+        <activity android:name=".view.Tutorial.TutorialSliderActivity" />
+        <activity
+            android:name=".view.ImportActivity">
+            <!-- Make app able to open from email (https://stackoverflow.com/questions/34300452/android-associate-app-with-custom-file-type) -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+
+                <data android:scheme="content"/>
+                <data android:host="*"/>
+
+                <!--  Required for Gmail and Samsung Email App  -->
+                <data android:mimeType="application/octet-stream"/>
+
+                <!--  Required for Outlook  -->
+                <data android:mimeType="application/sho"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:scheme="file" android:host="*" android:pathPattern=".*\\.sho" android:mimeType="*/*"  />
+            </intent-filter>
+        </activity>
 
         <provider
             android:name="com.activeandroid.content.ContentProvider"
             android:authorities="ch.fhnw.shoppingorganizer"
             android:enabled="true"
             android:exported="false" />
-
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="ch.fhnw.shoppingorganizer.fileprovider"
-            android:grantUriPermissions="true"
             android:enabled="true"
-            android:exported="false">
+            android:exported="false"
+            android:grantUriPermissions="true">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/filepaths" />
@@ -53,6 +77,8 @@
         <activity
             android:name=".view.EditItemActivity"
             android:parentActivityName=".view.ShoppingListActivity" />
+
+
     </application>
 
 </manifest>
