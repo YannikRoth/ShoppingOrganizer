@@ -357,6 +357,7 @@ public class MainActivity extends AppCompatActivity {
                             newList = sl;
                         }
                     Collections.sort(shoppingLists);
+                        adapter.setShoppingListFull(shoppingLists);
                     adapter.notifyDataSetChanged();
                     if(newList != null) {
                         int index = shoppingLists.indexOf(newList);
