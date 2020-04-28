@@ -5,12 +5,14 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Log;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -108,25 +110,19 @@ public class EditItemActivity extends AppCompatActivity {
 
         initUi();
 
+        callTutorial(false);
+    }
+
+    private void callTutorial(boolean forceCall) {
+        if(forceCall) {
+            SharedPreferences prefs = getApplicationContext().getSharedPreferences(Globals.PREF_TUTORIAL, MODE_PRIVATE);
+            SharedPreferences.Editor edit = prefs.edit();
+            edit.remove(TutorialType.TUTORIAL_SHOPPING_ITEM_EDIT.toString());
+            edit.apply();
+        }
         Intent intentTutorial = new Intent(this, TutorialSliderActivity.class);
         intentTutorial.putExtra(Globals.INTENT_TUTORIAL_TYPE, TutorialType.TUTORIAL_SHOPPING_ITEM_EDIT.toString());
         startActivity(intentTutorial);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        int id = item.getItemId();
-
-        if (id == android.R.id.home) {
-            // Return the list name to ShoppingList for the toolbar title
-            Intent intent = new Intent();
-            intent.putExtra(SHOPPING_LIST_NAME, shoppingListName);
-            setResult(RESULT_OK, intent);
-            finish();
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
     }
 
     private void initUi() {
@@ -255,6 +251,28 @@ public class EditItemActivity extends AppCompatActivity {
                 }
             }
         }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.edit_item_menu, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.showTutorial:
+                callTutorial(true);
+                break;
+            case android.R.id.home:
+                Intent intent = new Intent();
+                intent.putExtra(SHOPPING_LIST_NAME, shoppingListName);
+                setResult(RESULT_OK, intent);
+                finish();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     /**

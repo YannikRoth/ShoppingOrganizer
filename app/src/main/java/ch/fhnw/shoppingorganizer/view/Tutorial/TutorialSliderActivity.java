@@ -17,7 +17,6 @@ import static ch.fhnw.shoppingorganizer.view.Tutorial.TutorialType.*;
 
 public class TutorialSliderActivity extends TutorialActivity {
 
-    private final String PREF_TUTORIAL = "UserTutorialSlider";
     private SharedPreferences prefs;
     private TutorialType tutorialType = null;
 
@@ -28,7 +27,7 @@ public class TutorialSliderActivity extends TutorialActivity {
 
         if(intent.hasExtra(Globals.INTENT_TUTORIAL_TYPE) && valueOf(intent.getStringExtra(Globals.INTENT_TUTORIAL_TYPE)).ordinal() >= 0) {
             int type = valueOf(intent.getStringExtra(Globals.INTENT_TUTORIAL_TYPE)).ordinal();
-            prefs = getApplicationContext().getSharedPreferences(PREF_TUTORIAL, MODE_PRIVATE);
+            prefs = getApplicationContext().getSharedPreferences(Globals.PREF_TUTORIAL, MODE_PRIVATE);
             switch(type) {
                 case 0: //TUTORIAL_SHOPPING_LIST
                     if(!prefs.getBoolean(TUTORIAL_SHOPPING_LIST.toString(), false)) {

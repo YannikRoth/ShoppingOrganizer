@@ -8,6 +8,9 @@ import com.activeandroid.Model;
 import com.activeandroid.annotation.Column;
 import com.activeandroid.annotation.Table;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -79,5 +82,16 @@ public class ShoppingList extends Model implements Comparable<ShoppingList> {
     @Override
     public int compareTo(ShoppingList o) {
         return this.getListName().compareTo(o.getListName());
+    }
+
+    public JSONObject toJson(){
+        try {
+            JSONObject json = new JSONObject();
+            json.put("id", getId());
+            json.put("listName", listName);
+            return json;
+        } catch (JSONException e) {
+            return null;
+        }
     }
 }

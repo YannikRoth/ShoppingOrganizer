@@ -23,4 +23,8 @@ public class ShoppingItemRepository extends AbstractRepository{
     public ShoppingItem getShoppingItemById(long id){
         return (ShoppingItem) super.getById(ShoppingItem.class, id);
     }
+
+    public ShoppingItem getByName(String name) {
+        return new Select().from(ShoppingItem.class).where("itemName=?", new Object[]{name}).executeSingle();
+    }
 }

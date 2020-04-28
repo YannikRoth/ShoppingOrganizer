@@ -2,6 +2,9 @@
     <string name="app_name">ShoppingOrganizer</string>
 
     <string name="toolbar_search_menu">Search</string>
+    <string name="toolbar_tutorial">Show tutorial</string>
+    <string name="toolbar_exportAll">Export lists</string>
+    <string name="toolbar_importAll">Import lists</string>
 
     <string name="shopping_lists_title">Shopping Lists</string>
     <string name="shopping_lists_no_results">There is no lists</string>
@@ -22,7 +25,7 @@
     <string name="edit_item_price">Price</string>
     <string name="edit_item_category">Category</string>
     <string name="edit_item_active">Active</string>
-    <string name="edit_item_image_description">Click on Picture: Open\nCamera to take a picture\nor pick a picture from\nphones file-explorer</string>
+    <string name="edit_item_image_description">Click on Picture: Open Camera to take a picture\nor pick a picture from phones file-explorer</string>
     <string name="edit_item_save">Save</string>
 
     <string name="snackbar_undo">Undo</string>

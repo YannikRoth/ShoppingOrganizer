@@ -7,4 +7,16 @@
         android:title="@string/toolbar_search_menu"
         app:actionViewClass="androidx.appcompat.widget.SearchView"
         app:showAsAction="ifRoom|collapseActionView" />
+    <item
+        android:id="@+id/importAll"
+        android:title="@string/toolbar_importAll"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/exportAll"
+        android:title="@string/toolbar_exportAll"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/showTutorial"
+        android:title="@string/toolbar_tutorial"
+        app:showAsAction="never" />
 </menu>

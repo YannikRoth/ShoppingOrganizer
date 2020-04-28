@@ -4,6 +4,9 @@ import com.activeandroid.Model;
 import com.activeandroid.annotation.Column;
 import com.activeandroid.annotation.Table;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.math.BigDecimal;
 
 @Table(name ="ShoppingListItem")
@@ -62,5 +65,19 @@ public class ShoppingListItem extends Model {
     @Override
     public String toString() {
         return shoppingList + " -> ID:" + getId() + "," +  this.getTotalItemPrice() + " CHF," + this.getQuantity() + "x " + this.getShoppingItem();
+    }
+
+    public JSONObject toJson(){
+        try {
+            JSONObject json = new JSONObject();
+            json.put("id", getId());
+            json.put("quantity", quantity);
+            json.put("itemState", itemState);
+            json.put("shoppingItem", shoppingItem.getId());
+            json.put("shoppingList", shoppingList.getId());
+            return json;
+        } catch (JSONException e) {
+            return null;
+        }
     }
 }

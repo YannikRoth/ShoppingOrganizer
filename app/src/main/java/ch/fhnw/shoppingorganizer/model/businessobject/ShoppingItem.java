@@ -4,8 +4,10 @@ import com.activeandroid.Model;
 import com.activeandroid.annotation.Column;
 import com.activeandroid.annotation.Table;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.math.BigDecimal;
-import java.nio.file.Path;
 
 @Table(name="ShoppingItem")
 public class ShoppingItem extends Model {
@@ -72,5 +74,20 @@ public class ShoppingItem extends Model {
     @Override
     public String toString() {
         return this.getItemName() + " [ID:" + this.getId() +"," + this.getCategory() + "," + this.getPrice() + " CHF," + this.getImgPath() + "," + this.isItemActive() + "]";
+    }
+
+    public JSONObject toJson(){
+        try {
+            JSONObject json = new JSONObject();
+            json.put("id", getId());
+            json.put("price", price);
+            json.put("itemName", itemName);
+            json.put("itemActive", itemActive);
+            json.put("imgPath", imgPath);
+            json.put("category", category.toString());
+            return json;
+        } catch (JSONException e) {
+            return null;
+        }
     }
 }

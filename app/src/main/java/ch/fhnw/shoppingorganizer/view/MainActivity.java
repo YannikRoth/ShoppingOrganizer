@@ -1,8 +1,13 @@
 package ch.fhnw.shoppingorganizer.view;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.AssetManager;
 import android.graphics.Canvas;
+import android.graphics.ColorFilter;
+import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -13,14 +18,17 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -29,8 +37,13 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
+import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
 import java.util.List;
+import java.util.zip.ZipInputStream;
 
 import ch.fhnw.shoppingorganizer.R;
 import ch.fhnw.shoppingorganizer.controller.ShoppingListsAdapter;
@@ -44,6 +57,7 @@ import ch.fhnw.shoppingorganizer.model.database.DbUtils;
 import ch.fhnw.shoppingorganizer.model.database.RepositoryProvider;
 import ch.fhnw.shoppingorganizer.model.database.ShoppingListItemRepository;
 import ch.fhnw.shoppingorganizer.model.database.ShoppingListRepository;
+import ch.fhnw.shoppingorganizer.model.datatransfer.Zipper;
 import ch.fhnw.shoppingorganizer.model.masterdata.CSVDataImporter;
 import ch.fhnw.shoppingorganizer.view.Tutorial.TutorialType;
 import ch.fhnw.shoppingorganizer.view.Tutorial.TutorialSliderActivity;
@@ -69,7 +83,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView tvNoResults;
     private FloatingActionButton btnAdd;
 
-    @RequiresApi(api = Build.VERSION_CODES.N)
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -86,6 +100,16 @@ public class MainActivity extends AppCompatActivity {
 
         initUi();
 
+        callTutorial(false);
+    }
+
+    private void callTutorial(boolean forceCall) {
+        if(forceCall) {
+            SharedPreferences prefs = getApplicationContext().getSharedPreferences(Globals.PREF_TUTORIAL, MODE_PRIVATE);
+            SharedPreferences.Editor edit = prefs.edit();
+            edit.remove(TutorialType.TUTORIAL_SHOPPING_LIST.toString());
+            edit.apply();
+        }
         Intent intentTutorial = new Intent(this, TutorialSliderActivity.class);
         intentTutorial.putExtra(Globals.INTENT_TUTORIAL_TYPE, TutorialType.TUTORIAL_SHOPPING_LIST.toString());
         startActivity(intentTutorial);
@@ -101,6 +125,7 @@ public class MainActivity extends AppCompatActivity {
         btnAdd.setOnClickListener(v -> {
             showShoppingListDialog(null);
         });
+
         rvShoppingLists = findViewById(R.id.rvShoppingLists);
         tvNoResults = findViewById(R.id.tvNoResults);
 
@@ -122,7 +147,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public int getSwipeDirs() {
-                return ItemTouchHelper.LEFT;
+                return ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT;
             }
 
             ShoppingList deletedShoppingList = null;
@@ -161,7 +186,25 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onSwipeRight(@NonNull RecyclerView.ViewHolder viewHolder) {
+                notifyItemChanged(viewHolder.getAdapterPosition());
+                ShoppingList toExportShoppingList = shoppingLists.get(viewHolder.getAdapterPosition());
 
+                //create export file
+                Zipper.zipExportShoppingList(getApplicationContext(), toExportShoppingList);
+
+                //send export file
+                Context context = getApplicationContext();
+                File dir = context.getDir("export", Context.MODE_PRIVATE);
+                File exportFile = new File(dir, Zipper.ExportedShoppingListFileName);
+
+                //create send intent and attach export file
+                Intent intent = new Intent(Intent.ACTION_SEND);
+                intent.setType("text/plain");
+                intent.putExtra(Intent.EXTRA_SUBJECT, "Exported Shopping List");
+                intent.putExtra(Intent.EXTRA_TEXT, "Please find my exported shopping list attached");
+                Uri uri = FileProvider.getUriForFile(context, "ch.fhnw.shoppingorganizer.fileprovider", exportFile);
+                intent.putExtra(Intent.EXTRA_STREAM, uri);
+                startActivity(Intent.createChooser(intent, "Export..."));
             }
 
             @Override
@@ -169,8 +212,8 @@ public class MainActivity extends AppCompatActivity {
                 new RecyclerViewSwipeDecorator.Builder(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
                         .addSwipeLeftBackgroundColor(ContextCompat.getColor(this.getContext(), R.color.colorDelete))
                         .addSwipeLeftActionIcon(R.drawable.ic_delete_sweep)
-                        .addSwipeRightBackgroundColor(ContextCompat.getColor(this.getContext(), R.color.colorCheck))
-                        .addSwipeRightActionIcon(R.drawable.ic_check)
+                        .addSwipeRightBackgroundColor(ContextCompat.getColor(this.getContext(), R.color.colorSend))
+                        .addSwipeRightActionIcon(R.drawable.ic_message)
                         .create()
                         .decorate();
             }
@@ -251,7 +294,7 @@ public class MainActivity extends AppCompatActivity {
      */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.main_menu, menu);
+        getMenuInflater().inflate(R.menu.shopping_lists_menu, menu);
         MenuItem mSearch = menu.findItem(R.id.appSearchBar);
         SearchView mSearchView = (SearchView) mSearch.getActionView();
         mSearchView.setQueryHint(getString(R.string.toolbar_search_menu));
@@ -269,6 +312,62 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             }
         });
+        MenuItem mMoreDropdown = menu.findItem(R.id.showTutorial);
         return super.onCreateOptionsMenu(menu);
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.showTutorial:
+                callTutorial(true);
+                break;
+            case R.id.exportAll:
+                try {
+                    Context context = getApplicationContext();
+                    Zipper.zipApplicationData(context);
+
+                    //get the backup file
+                    File dir = context.getDir("transfer", Context.MODE_PRIVATE);
+                    File exportFile = new File(dir, Zipper.ExportedShoppingrganizerFileName);
+
+                    //create send intent and attach export file
+                    Intent intent = new Intent(Intent.ACTION_SEND);
+                    intent.setType("text/plain");
+                    intent.putExtra(Intent.EXTRA_SUBJECT, "Exported backup of ShoppingOrganizer");
+                    intent.putExtra(Intent.EXTRA_TEXT, "Here is my backup file");
+                    Uri uri = FileProvider.getUriForFile(context, "ch.fhnw.shoppingorganizer.fileprovider", exportFile);
+                    intent.putExtra(Intent.EXTRA_STREAM, uri);
+                    startActivity(Intent.createChooser(intent, "Export..."));
+                }catch (Exception e){
+                    Log.d("Export exception: ", e.getMessage());
+                }
+                break;
+            case R.id.importAll:
+                try{
+                    final AssetManager am = getAssets();
+                    ZipInputStream zip = new ZipInputStream(am.open(Zipper.ExportedShoppingrganizerFileName));
+                    Zipper.upzipApplicationData(zip, getApplicationContext());
+                    List<ShoppingList> newLists = shoppingListRepositoryInstance.getAllItems();
+                    ShoppingList newList = null;
+                    for(ShoppingList sl:newLists)
+                        if(!shoppingLists.contains(sl)) {
+                            shoppingLists.add(sl);
+                            newList = sl;
+                        }
+                    Collections.sort(shoppingLists);
+                    adapter.notifyDataSetChanged();
+                    if(newList != null) {
+                        int index = shoppingLists.indexOf(newList);
+                        rvShoppingLists.scrollToPosition(index);
+                        adapter.setHighlightPOsition(index);
+                    }
+                }catch (Exception e){
+                    Log.d("Import exception: ", e.getMessage());
+                }
+                break;
+        }
+        return super.onOptionsItemSelected(item);
     }
 }
