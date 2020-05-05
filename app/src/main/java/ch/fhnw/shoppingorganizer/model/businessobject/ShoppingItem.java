@@ -71,6 +71,10 @@ public class ShoppingItem extends Model {
         this.category = category;
     }
 
+    public String toStringSimple() {
+        return this.getItemName() + (this.isItemActive() ? "":" (Inactive)");
+    }
+
     @Override
     public String toString() {
         return this.getItemName() + " [ID:" + this.getId() +"," + this.getCategory() + "," + this.getPrice() + " CHF," + this.getImgPath() + "," + this.isItemActive() + "]";

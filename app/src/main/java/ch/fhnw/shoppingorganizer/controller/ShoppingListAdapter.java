@@ -80,7 +80,7 @@ public abstract class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingL
         ShoppingItem item = shoppingItem.get(position);
         ShoppingListItem listItem = shoppingList.getShoppingListItem(item);
 
-        holder.itemName.setText( item.getItemName() + (item.isItemActive() ? "":" (" + context.getString(R.string.shopping_list_item_inactive) + ")"));
+        holder.itemName.setText( item.toStringSimple());
         if(listItem != null && listItem.isItemState()) {
             if(defaultPaintFlags == 0)
                 holder.itemName.getPaintFlags();
@@ -297,7 +297,8 @@ public abstract class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingL
             public int getSwipeDirs(RecyclerView recyclerView, RecyclerView.ViewHolder holder) {
                 int position = holder.getAdapterPosition();
                 ShoppingItem item = shoppingItem.get(position);
-                return shoppingList.getShoppingListItem(item) == null ? 0:super.getSwipeDirs(recyclerView, holder);
+                ShoppingListItem sli = shoppingList.getShoppingListItem(item);
+                return sli != null && !sli.isItemState() ? super.getSwipeDirs(recyclerView, holder):ItemTouchHelper.LEFT;
             }
 
             @Override
@@ -320,6 +321,17 @@ public abstract class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingL
         if(!shoppingItemFull.contains(shoppingItem)) {
             shoppingItemFull.add(shoppingItem);
             onRefreshViewOnPull();
+        }
+    }
+
+    public void removeShoppingItem(ShoppingItem shoppingItem) {
+        int position = this.shoppingItem.indexOf(shoppingItem);
+        if(this.shoppingItemFull.contains(shoppingItem)) {
+            this.shoppingItemFull.remove(shoppingItem);
+        }
+        if(position >= 0){
+            this.shoppingItem.remove(shoppingItem);
+            notifyItemRemoved(position);
         }
     }
 

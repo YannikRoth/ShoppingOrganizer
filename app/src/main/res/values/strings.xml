@@ -18,7 +18,6 @@
     <string name="shopping_lists_popup_hint">List Name</string>
 
     <string name="shopping_list_item_name">Name</string>
-    <string name="shopping_list_item_inactive">Inactive</string>
     <string name="shopping_list_item_no_quantity">Item has no quantity, action not possible.</string>
 
     <string name="edit_item_name">Name</string>
@@ -30,8 +29,14 @@
 
     <string name="snackbar_undo">Undo</string>
     <string name="snackbar_list_removed">List removed</string>
+    <string name="snackbar_list_item_removed">Item removed from list</string>
     <string name="snackbar_item_removed">Item removed</string>
-    <string name="snackbar_item_checked">Undo</string>
+    <string name="snackbar_item_checked">Item checked</string>
+
+    <string name="alert_dialog_continue">Continue</string>
+    <string name="alert_dialog_cancel">Cancel</string>
+    <string name="alert_dialog_title_delete_used_item">To delete item is used in lists</string>
+    <string name="alert_dialog_warning_delete_used_item">If you delete this item, it will be removed from every shopping list.</string>
 
     <string name="tutorial_shopping_list_delete_title">Delete list</string>
     <string name="tutorial_shopping_list_delete_content">Swipe left to delete a list</string>

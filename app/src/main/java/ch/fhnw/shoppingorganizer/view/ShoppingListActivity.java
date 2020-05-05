@@ -1,5 +1,6 @@
 package ch.fhnw.shoppingorganizer.view;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Canvas;
@@ -13,6 +14,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
@@ -32,8 +34,10 @@ import ch.fhnw.shoppingorganizer.R;
 import ch.fhnw.shoppingorganizer.controller.ShoppingListAdapter;
 import ch.fhnw.shoppingorganizer.model.Globals;
 import ch.fhnw.shoppingorganizer.model.businessobject.ShoppingItem;
+import ch.fhnw.shoppingorganizer.model.businessobject.ShoppingItemBuilder;
 import ch.fhnw.shoppingorganizer.model.businessobject.ShoppingList;
 import ch.fhnw.shoppingorganizer.model.businessobject.ShoppingListItem;
+import ch.fhnw.shoppingorganizer.model.businessobject.ShoppingListItemBuilder;
 import ch.fhnw.shoppingorganizer.model.database.RepositoryProvider;
 import ch.fhnw.shoppingorganizer.model.database.ShoppingItemRepository;
 import ch.fhnw.shoppingorganizer.model.database.ShoppingListItemRepository;
@@ -152,24 +156,87 @@ public class ShoppingListActivity extends AppCompatActivity {
                 return ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT;
             }
 
-            private ShoppingListItem deletedItem = null;
+            private ShoppingListItem deletedShoppingListItem = null;
+            private List<ShoppingListItem> shoppingListItemsToDelete = null;
+            private ShoppingItem deletedShoppingItem = null;
             @Override
             public void onSwipeLeft(@NonNull RecyclerView.ViewHolder viewHolder) {
                 int position = viewHolder.getAdapterPosition();
                 ShoppingItem item = shoppingItem.get(position);
                 if(shoppingList.getShoppingListItems() == null || shoppingList.getShoppingListItem(item) == null) {
-                    adapter.notifyItemChanged(position);
-                    Toast.makeText(this.getContext(), getContext().getString(R.string.shopping_list_item_no_quantity), Toast.LENGTH_SHORT).show();
+                    deletedShoppingItem = item;
+                    shoppingListItemsToDelete = shoppingListItemRepository.getShoppingListItems(item);
+                    if(!shoppingListItemsToDelete.isEmpty()) {
+                        AlertDialog.Builder alertBuilder = new AlertDialog.Builder(ShoppingListActivity.this);
+                        alertBuilder.setMessage(getContext().getString(R.string.alert_dialog_warning_delete_used_item))
+                                .setCancelable(false)
+                                .setPositiveButton(getContext().getString(R.string.alert_dialog_continue), new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        for (ShoppingListItem sli:shoppingListItemsToDelete) {
+                                            sli.getShoppingList().getShoppingListItems().remove(sli);
+
+                                            shoppingListItemRepository.deleteEntity(sli);
+                                        }
+                                        shoppingItemRepository.deleteEntity(item);
+                                        adapter.removeShoppingItem(item);
+                                        Snackbar.make(rvShoppingLists, getContext().getString(R.string.snackbar_item_removed) + ": " + deletedShoppingItem.toStringSimple(), Snackbar.LENGTH_LONG)
+                                                .setAction(getContext().getString(R.string.snackbar_undo), v -> {
+                                                    ShoppingItem si = new ShoppingItemBuilder()
+                                                            .withItemName(deletedShoppingItem.getItemName())
+                                                            .withPrice(deletedShoppingItem.getPrice())
+                                                            .withItemActive(deletedShoppingItem.isItemActive())
+                                                            .withCategory(deletedShoppingItem.getCategory())
+                                                            .withImgPath(deletedShoppingItem.getImgPath())
+                                                            .build();
+                                                    shoppingItemRepository.saveEntity(si);
+                                                    for (ShoppingListItem sli:shoppingListItemsToDelete) {
+                                                        ShoppingListItem s = new ShoppingListItemBuilder()
+                                                                .withShoppingList(sli.getShoppingList())
+                                                                .withItemState(sli.isItemState())
+                                                                .withQuantity(sli.getQuantity())
+                                                                .withShoppingItem(si)
+                                                                .build();
+                                                        shoppingListItemRepository.saveEntity(s);
+                                                        s.getShoppingList().getShoppingListItems().add(s);
+                                                    }
+                                                    adapter.addShoppingItem(si);
+                                                })
+                                                .show();
+                                    }
+                                })
+                                .setNegativeButton(getContext().getString(R.string.alert_dialog_cancel), new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        adapter.notifyItemChanged(position);
+                                        return;
+                                    }
+                                });
+                        AlertDialog alert = alertBuilder.create();
+                        alert.setTitle(getContext().getString(R.string.alert_dialog_title_delete_used_item));
+                        alert.show();
+                    } else {
+                        deletedShoppingItem = item;
+                        shoppingItemRepository.deleteEntity(item);
+                        adapter.removeShoppingItem(item);
+                        Snackbar.make(rvShoppingLists, getContext().getString(R.string.snackbar_item_removed) + ": " + deletedShoppingItem.toStringSimple(), Snackbar.LENGTH_LONG)
+                                .setAction(getContext().getString(R.string.snackbar_undo), v -> {
+                                    shoppingItemRepository.saveEntity(deletedShoppingItem);
+                                    adapter.addShoppingItem(deletedShoppingItem);
+                                })
+                                .show();
+                    }
+
                     return;
                 }
-                deletedItem = shoppingList.getShoppingListItem(item);
-                shoppingItemRepository.deleteEntity(deletedItem);
-                shoppingList.getShoppingListItems().remove(deletedItem);
+                deletedShoppingListItem = shoppingList.getShoppingListItem(item);
+                shoppingItemRepository.deleteEntity(deletedShoppingListItem);
+                shoppingList.getShoppingListItems().remove(deletedShoppingListItem);
                 adapter.notifyItemChanged(position);
-                Snackbar.make(rvShoppingLists, getContext().getString(R.string.snackbar_item_removed) + ": " + deletedItem.getShoppingItem().getItemName(), Snackbar.LENGTH_LONG)
+                Snackbar.make(rvShoppingLists, getContext().getString(R.string.snackbar_list_item_removed) + ": " + deletedShoppingListItem.getShoppingItem().getItemName(), Snackbar.LENGTH_LONG)
                         .setAction(getContext().getString(R.string.snackbar_undo), v -> {
-                            shoppingItemRepository.saveEntity(deletedItem);
-                            shoppingList.getShoppingListItems().add(position, deletedItem);
+                            shoppingItemRepository.saveEntity(deletedShoppingListItem);
+                            shoppingList.getShoppingListItems().add(position, deletedShoppingListItem);
                             adapter.notifyItemChanged(position);
                         })
                         .show();

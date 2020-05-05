@@ -34,4 +34,13 @@ public class ShoppingListItemRepository extends AbstractRepository{
                 .where("ShoppingListItem.shoppingList=?", new Object[]{shoppingList.getId()})
                 .execute();
     }
+
+    /**
+    * Returns all shopping list Items with the given ShoppingItem
+     */
+    public List<ShoppingListItem> getShoppingListItems(ShoppingItem shoppingItem) {
+        return new Select().from(ShoppingListItem.class)
+                .where("ShoppingListItem.shoppingItem=?", new Object[]{shoppingItem.getId()})
+                .execute();
+    }
 }
