@@ -30,25 +30,16 @@ public class TutorialSliderActivity extends TutorialActivity {
             prefs = getApplicationContext().getSharedPreferences(Globals.PREF_TUTORIAL, MODE_PRIVATE);
             switch(type) {
                 case 0: //TUTORIAL_SHOPPING_LIST
-                    if(!prefs.getBoolean(TUTORIAL_SHOPPING_LIST.toString(), false)) {
-                        tutorialType = TUTORIAL_SHOPPING_LIST;
-                        onCreateShoppingList(savedInstanceState);
-                    } else
-                        finish();
+                    tutorialType = TUTORIAL_SHOPPING_LIST;
+                    onCreateShoppingList(savedInstanceState);
                     break;
                 case 1: //TUTORIAL_SHOPPING_ITEM_LIST
-                    if(!prefs.getBoolean(TUTORIAL_SHOPPING_ITEM_LIST.toString(), false)) {
-                        tutorialType = TUTORIAL_SHOPPING_ITEM_LIST;
-                        onCreateShoppingItemList(savedInstanceState);
-                    } else
-                        finish();
+                    tutorialType = TUTORIAL_SHOPPING_ITEM_LIST;
+                    onCreateShoppingItemList(savedInstanceState);
                     break;
                 case 2: //TUTORIAL_SHOPPING_ITEM_EDIT
-                    if(!prefs.getBoolean(TUTORIAL_SHOPPING_ITEM_EDIT.toString(), false)) {
                         tutorialType = TUTORIAL_SHOPPING_ITEM_EDIT;
                         onCreateShoppingItemEdit(savedInstanceState);
-                    } else
-                        finish();
                     break;
                 default:
                     finish();
@@ -58,12 +49,12 @@ public class TutorialSliderActivity extends TutorialActivity {
             finish();
     }
 
-    private void safePreferences(String preference) {
+    public static void safePreferences(SharedPreferences prefs, TutorialType type) {
         SharedPreferences.Editor edit = prefs.edit();
-        edit.putBoolean(preference, true);
+        edit.putBoolean(type.toString(), true);
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         String time = dateFormat.format(new Date());
-        edit.putString(preference + "Time", time);
+        edit.putString(type.toString() + "Time", time);
         edit.apply();
     }
 
@@ -116,7 +107,6 @@ public class TutorialSliderActivity extends TutorialActivity {
 
     @Override
     public void finishTutorial() {
-        safePreferences(tutorialType.toString());
         finish();
     }
 

@@ -47,6 +47,8 @@ import ch.fhnw.shoppingorganizer.view.Tutorial.TutorialSliderActivity;
 import it.xabaras.android.recyclerview.swipedecorator.RecyclerViewSwipeDecorator;
 
 import static ch.fhnw.shoppingorganizer.view.MainActivity.LIST_ID;
+import static ch.fhnw.shoppingorganizer.view.Tutorial.TutorialType.TUTORIAL_SHOPPING_ITEM_LIST;
+import static ch.fhnw.shoppingorganizer.view.Tutorial.TutorialType.TUTORIAL_SHOPPING_LIST;
 
 public class ShoppingListActivity extends AppCompatActivity {
 
@@ -89,15 +91,13 @@ public class ShoppingListActivity extends AppCompatActivity {
     }
 
     private void callTutorial(boolean forceCall) {
-        if(forceCall) {
-            SharedPreferences prefs = getApplicationContext().getSharedPreferences(Globals.PREF_TUTORIAL, MODE_PRIVATE);
-            SharedPreferences.Editor edit = prefs.edit();
-            edit.remove(TutorialType.TUTORIAL_SHOPPING_ITEM_LIST.toString());
-            edit.apply();
+        SharedPreferences prefs = getApplicationContext().getSharedPreferences(Globals.PREF_TUTORIAL, MODE_PRIVATE);
+        if(forceCall || !prefs.getBoolean(TUTORIAL_SHOPPING_ITEM_LIST.toString(), false)) {
+            Intent intentTutorial = new Intent(this, TutorialSliderActivity.class);
+            intentTutorial.putExtra(Globals.INTENT_TUTORIAL_TYPE, TutorialType.TUTORIAL_SHOPPING_ITEM_LIST.toString());
+            startActivity(intentTutorial);
+            TutorialSliderActivity.safePreferences(prefs, TUTORIAL_SHOPPING_ITEM_LIST);
         }
-        Intent intentTutorial = new Intent(this, TutorialSliderActivity.class);
-        intentTutorial.putExtra(Globals.INTENT_TUTORIAL_TYPE, TutorialType.TUTORIAL_SHOPPING_ITEM_LIST.toString());
-        startActivity(intentTutorial);
     }
 
     private void initUi() {

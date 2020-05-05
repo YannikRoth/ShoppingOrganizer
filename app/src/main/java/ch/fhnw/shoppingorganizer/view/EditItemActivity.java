@@ -55,6 +55,8 @@ import ch.fhnw.shoppingorganizer.view.Tutorial.TutorialSliderActivity;
 
 import static ch.fhnw.shoppingorganizer.view.ShoppingListActivity.SHOPPING_ITEM_ID;
 import static ch.fhnw.shoppingorganizer.view.ShoppingListActivity.SHOPPING_LIST_NAME;
+import static ch.fhnw.shoppingorganizer.view.Tutorial.TutorialType.TUTORIAL_SHOPPING_ITEM_EDIT;
+import static ch.fhnw.shoppingorganizer.view.Tutorial.TutorialType.TUTORIAL_SHOPPING_ITEM_LIST;
 
 public class EditItemActivity extends AppCompatActivity {
 
@@ -114,15 +116,13 @@ public class EditItemActivity extends AppCompatActivity {
     }
 
     private void callTutorial(boolean forceCall) {
-        if(forceCall) {
-            SharedPreferences prefs = getApplicationContext().getSharedPreferences(Globals.PREF_TUTORIAL, MODE_PRIVATE);
-            SharedPreferences.Editor edit = prefs.edit();
-            edit.remove(TutorialType.TUTORIAL_SHOPPING_ITEM_EDIT.toString());
-            edit.apply();
+        SharedPreferences prefs = getApplicationContext().getSharedPreferences(Globals.PREF_TUTORIAL, MODE_PRIVATE);
+        if(forceCall || !prefs.getBoolean(TUTORIAL_SHOPPING_ITEM_EDIT.toString(), false)) {
+            Intent intentTutorial = new Intent(this, TutorialSliderActivity.class);
+            intentTutorial.putExtra(Globals.INTENT_TUTORIAL_TYPE, TutorialType.TUTORIAL_SHOPPING_ITEM_EDIT.toString());
+            startActivity(intentTutorial);
+            TutorialSliderActivity.safePreferences(prefs, TUTORIAL_SHOPPING_ITEM_EDIT);
         }
-        Intent intentTutorial = new Intent(this, TutorialSliderActivity.class);
-        intentTutorial.putExtra(Globals.INTENT_TUTORIAL_TYPE, TutorialType.TUTORIAL_SHOPPING_ITEM_EDIT.toString());
-        startActivity(intentTutorial);
     }
 
     private void initUi() {
