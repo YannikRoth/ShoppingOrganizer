@@ -49,8 +49,8 @@ public abstract class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingL
     private List<ShoppingItem> shoppingItemFull;
     private final String TAG = this.getClass().getSimpleName();
 
-    private final long QUANTITY_MIN_VALUE = 0;
-    private final long QUANTITY_MAX_VALUE = 1000000;
+    private final int QUANTITY_MIN_VALUE = 0;
+    private final int QUANTITY_MAX_VALUE = 1000000;
 
     private ShoppingListItemRepository shoppingListItemRepository = RepositoryProvider.getShoppingListItemRepositoryInstance();
 
@@ -171,7 +171,7 @@ public abstract class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingL
             increaseQuantity = itemView.findViewById(R.id.btnPlus);
             decreaseQuantity = itemView.findViewById(R.id.btnMinus);
             inputQuantity = itemView.findViewById(R.id.edQuantity);
-            inputQuantity.setFilters(new InputFilter[]{ new MinMaxFilter(String.format("%d", QUANTITY_MIN_VALUE), String.format("%d", QUANTITY_MAX_VALUE))});
+            inputQuantity.setFilters(new InputFilter[]{ new MinMaxFilter(QUANTITY_MIN_VALUE, QUANTITY_MAX_VALUE)});
             inputQuantity.addTextChangedListener(new TextWatcher() {
                 @Override
                 public void beforeTextChanged(CharSequence s, int start, int count, int after) {

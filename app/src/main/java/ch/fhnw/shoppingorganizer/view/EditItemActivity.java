@@ -11,6 +11,7 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.text.InputFilter;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -44,6 +45,7 @@ import java.util.Random;
 import java.util.stream.Collectors;
 
 import ch.fhnw.shoppingorganizer.R;
+import ch.fhnw.shoppingorganizer.controller.MinMaxFilter;
 import ch.fhnw.shoppingorganizer.model.Globals;
 import ch.fhnw.shoppingorganizer.model.businessobject.Category;
 import ch.fhnw.shoppingorganizer.model.businessobject.ShoppingItem;
@@ -56,7 +58,6 @@ import ch.fhnw.shoppingorganizer.view.Tutorial.TutorialSliderActivity;
 import static ch.fhnw.shoppingorganizer.view.ShoppingListActivity.SHOPPING_ITEM_ID;
 import static ch.fhnw.shoppingorganizer.view.ShoppingListActivity.SHOPPING_LIST_NAME;
 import static ch.fhnw.shoppingorganizer.view.Tutorial.TutorialType.TUTORIAL_SHOPPING_ITEM_EDIT;
-import static ch.fhnw.shoppingorganizer.view.Tutorial.TutorialType.TUTORIAL_SHOPPING_ITEM_LIST;
 
 public class EditItemActivity extends AppCompatActivity {
 
@@ -74,7 +75,12 @@ public class EditItemActivity extends AppCompatActivity {
 
     private Intent intent;
 
+    boolean newImage = false;
+
     private String TAG = this.getClass().getSimpleName();
+
+    private final int QUANTITY_MIN_VALUE = 0;
+    private final int QUANTITY_MAX_VALUE = 1000000;
 
     private final static ShoppingItemRepository shoppingItemRepository = RepositoryProvider.getShoppingItemRepositoryInstance();
 
@@ -139,7 +145,8 @@ public class EditItemActivity extends AppCompatActivity {
         edtName.setText(shoppingItem.getItemName());
 
         edtPrice = findViewById(R.id.edtPrice);
-        edtPrice.setText(Globals.NUMBERFORMAT.format(shoppingItem.getPrice()));
+        edtPrice.setText(shoppingItem.getPrice().toString());
+        edtPrice.setFilters(new InputFilter[]{ new MinMaxFilter(QUANTITY_MIN_VALUE, QUANTITY_MAX_VALUE)});
         activeSwitch = findViewById(R.id.activeSwitch);
         activeSwitch.setChecked(shoppingItem.isItemActive());
         itemImage = findViewById(R.id.imgItem);
@@ -172,11 +179,15 @@ public class EditItemActivity extends AppCompatActivity {
     }
 
     public void saveShoppingItem(View v){
+        if(this.<EditText>findCastedViewById(R.id.edtName).getText().toString().equals("")) {
+            Toast.makeText(this, "Please enter a name", Toast.LENGTH_LONG).show();
+            return;
+        }
         this.shoppingItem.setItemName(this.<EditText>findCastedViewById(R.id.edtName).getText().toString().trim());
         this.shoppingItem.setCategory(Category.valueOf(this.<Spinner>findCastedViewById(R.id.categoryList).getSelectedItem().toString()));
         this.shoppingItem.setPrice(new BigDecimal(this.<EditText>findCastedViewById(R.id.edtPrice).getText().toString()));
         this.shoppingItem.setItemActive(this.<Switch>findCastedViewById(R.id.activeSwitch).isChecked());
-        if(itemImageFile.getAbsoluteFile().exists())
+        if(itemImageFile.getAbsoluteFile().exists() && newImage)
             this.shoppingItem.setImgPath(itemImageFile.getAbsoluteFile().toString());
         shoppingItemRepository.saveEntity(shoppingItem);
 
@@ -205,6 +216,7 @@ public class EditItemActivity extends AppCompatActivity {
             outputStream.flush();
             outputStream.close();
             Toast.makeText(getApplicationContext(), "Image saved to app" + file.getAbsolutePath(), Toast.LENGTH_LONG).show();
+            this.newImage = true;
             return file;
         } catch (IOException e) {
             Log.e(TAG, "safeImageToFileDirectory: " + e.getMessage());
