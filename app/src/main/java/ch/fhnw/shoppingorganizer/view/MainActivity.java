@@ -57,6 +57,7 @@ import ch.fhnw.shoppingorganizer.model.database.DbUtils;
 import ch.fhnw.shoppingorganizer.model.database.RepositoryProvider;
 import ch.fhnw.shoppingorganizer.model.database.ShoppingListItemRepository;
 import ch.fhnw.shoppingorganizer.model.database.ShoppingListRepository;
+import ch.fhnw.shoppingorganizer.model.datatransfer.DataImporter;
 import ch.fhnw.shoppingorganizer.model.datatransfer.Zipper;
 import ch.fhnw.shoppingorganizer.model.masterdata.CSVDataImporter;
 import ch.fhnw.shoppingorganizer.view.Tutorial.TutorialType;
@@ -94,6 +95,7 @@ public class MainActivity extends AppCompatActivity {
         //import masterdata to database if empty
         if(DbUtils.isEmpty(ShoppingItem.class)) {
             importMasterData();
+            //https://www.woolha.com/tutorials/android-file-picker-example
         }
 
         //display basic values from database (as an example for the GUI guys)
@@ -278,12 +280,13 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.N)
+    @RequiresApi(api = Build.VERSION_CODES.O)
     public void importMasterData(){
         final AssetManager am = getAssets();
         try {
-            CSVDataImporter csvDataImporter = new CSVDataImporter(am.open("masterdata.csv"));
-            csvDataImporter.performImport();
+          //  CSVDataImporter csvDataImporter = new CSVDataImporter(am.open("masterdata.csv"));
+          //  csvDataImporter.performImport();
+            Zipper.upzipApplicationData(new ZipInputStream(am.open("ShoppingOrganizer.sho")), getApplicationContext());
         }catch (Exception e){
 
         }
