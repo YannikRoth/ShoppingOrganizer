@@ -48,11 +48,15 @@
     <string name="tutorial_shopping_list_edit_name_content">Press and hold list to edit list name</string>
     <string name="tutorial_shopping_item_list_check_title">Check item</string>
     <string name="tutorial_shopping_item_list_check_content">Swipe right to check item on list</string>
-    <string name="tutorial_shopping_item_list_delete_title">Delete quantity</string>
-    <string name="tutorial_shopping_item_list_delete_content">Swipe left to remove item quantity from list</string>
+    <string name="tutorial_shopping_list_export_title">Send list</string>
+    <string name="tutorial_shopping_list_export_content">Swipe right to send a shopping list</string>
+    <string name="tutorial_shopping_item_list_delete_title">Delete quantity/item</string>
+    <string name="tutorial_shopping_item_list_delete_content">Swipe left to:\n1. Remove item quantity from list\n2. Remove item from shopping organizer</string>
     <string name="tutorial_shopping_item_list_edit_title">Edit item</string>
     <string name="tutorial_shopping_item_list_edit_content">Press and hold to edit item</string>
     <string name="tutorial_shopping_item_edit_image_title">Choose/change image</string>
     <string name="tutorial_shopping_item_edit_image_content">Press on image to change it</string>
+    <string name="tutorial_shopping_item_edit_tutorial_title">Show tutorial again</string>
+    <string name="tutorial_shopping_item_edit_tutorial_content">On each view you can call the tutorial again over the menubar</string>
 
 </resources>

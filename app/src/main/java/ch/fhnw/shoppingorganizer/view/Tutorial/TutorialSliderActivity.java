@@ -69,6 +69,11 @@ public class TutorialSliderActivity extends TutorialActivity {
                 .setBackgroundColor(R.color.colorAccent) // int background color
                 .setDrawable(R.drawable.shopping_list_open) // int top drawable
                 .build());
+        addFragment(new Step.Builder().setTitle(getString(R.string.tutorial_shopping_list_export_title))
+                .setContent(getString(R.string.tutorial_shopping_list_export_content))
+                .setBackgroundColor(R.color.colorAccent) // int background color
+                .setDrawable(R.drawable.shopping_list_export) // int top drawable
+                .build());
         addFragment(new Step.Builder().setTitle(getString(R.string.tutorial_shopping_list_delete_title))
                 .setContent(getString(R.string.tutorial_shopping_list_delete_content))
                 .setBackgroundColor(R.color.colorAccent) // int background color
@@ -102,6 +107,11 @@ public class TutorialSliderActivity extends TutorialActivity {
                 .setContent(getString(R.string.tutorial_shopping_item_edit_image_content))
                 .setBackgroundColor(R.color.colorAccent) // int background color
                 .setDrawable(R.drawable.shopping_item_edit_image) // int top drawable
+                .build());
+     addFragment(new Step.Builder().setTitle(getString(R.string.tutorial_shopping_item_edit_tutorial_title))
+                .setContent(getString(R.string.tutorial_shopping_item_edit_tutorial_content))
+                .setBackgroundColor(R.color.colorAccent) // int background color
+                .setDrawable(R.drawable.shopping_item_edit_tutorial) // int top drawable
                 .build());
     }
 
