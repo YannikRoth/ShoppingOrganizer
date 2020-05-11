@@ -17,4 +17,5 @@ public class Globals {
     public final static String INTENT_TUTORIAL_TYPE = "SliderType";
 
     public final static String PREF_TUTORIAL = "UserTutorialSlider";
+    public final static String PREF_LIFECYCLE = "LifecyclePrefs";
 }

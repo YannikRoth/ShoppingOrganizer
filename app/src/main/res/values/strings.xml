@@ -40,8 +40,8 @@
 
     <string name="tutorial_shopping_list_delete_title">Delete list</string>
     <string name="tutorial_shopping_list_delete_content">Swipe left to delete a list</string>
-    <string name="tutorial_shopping_list_delete_undo_title">Undo delete</string>
-    <string name="tutorial_shopping_list_delete_undo_content">Press undo on the bottom to undo list delete</string>
+    <string name="tutorial_shopping_list_delete_undo_title">Undo action</string>
+    <string name="tutorial_shopping_list_delete_undo_content">Press undo on the bottom to undo your actions</string>
     <string name="tutorial_shopping_list_open_title">Open list</string>
     <string name="tutorial_shopping_list_open_content">Tab a list to open</string>
     <string name="tutorial_shopping_list_edit_name_title">Edit list name</string>

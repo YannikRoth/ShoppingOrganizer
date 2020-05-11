@@ -49,7 +49,7 @@ public class TutorialSliderActivity extends TutorialActivity {
             finish();
     }
 
-    public static void safePreferences(SharedPreferences prefs, TutorialType type) {
+    public static void savePreferences(SharedPreferences prefs, TutorialType type) {
         SharedPreferences.Editor edit = prefs.edit();
         edit.putBoolean(type.toString(), true);
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");

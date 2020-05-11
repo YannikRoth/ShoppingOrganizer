@@ -96,7 +96,7 @@ public class ShoppingListActivity extends AppCompatActivity {
             Intent intentTutorial = new Intent(this, TutorialSliderActivity.class);
             intentTutorial.putExtra(Globals.INTENT_TUTORIAL_TYPE, TutorialType.TUTORIAL_SHOPPING_ITEM_LIST.toString());
             startActivity(intentTutorial);
-            TutorialSliderActivity.safePreferences(prefs, TUTORIAL_SHOPPING_ITEM_LIST);
+            TutorialSliderActivity.savePreferences(prefs, TUTORIAL_SHOPPING_ITEM_LIST);
         }
     }
 

@@ -127,7 +127,7 @@ public class EditItemActivity extends AppCompatActivity {
             Intent intentTutorial = new Intent(this, TutorialSliderActivity.class);
             intentTutorial.putExtra(Globals.INTENT_TUTORIAL_TYPE, TutorialType.TUTORIAL_SHOPPING_ITEM_EDIT.toString());
             startActivity(intentTutorial);
-            TutorialSliderActivity.safePreferences(prefs, TUTORIAL_SHOPPING_ITEM_EDIT);
+            TutorialSliderActivity.savePreferences(prefs, TUTORIAL_SHOPPING_ITEM_EDIT);
         }
     }
 
@@ -203,7 +203,7 @@ public class EditItemActivity extends AppCompatActivity {
         finish();
     }
 
-    private File safeBitmapToFileDirectory(Bitmap bitmap) {
+    private File saveBitmapToFileDirectory(Bitmap bitmap) {
         ContextWrapper cw = new ContextWrapper(getApplicationContext());
         File dir = cw.getDir("imageDir", Context.MODE_PRIVATE);
         dir.mkdir();
@@ -219,7 +219,7 @@ public class EditItemActivity extends AppCompatActivity {
             this.newImage = true;
             return file;
         } catch (IOException e) {
-            Log.e(TAG, "safeImageToFileDirectory: " + e.getMessage());
+            Log.e(TAG, "saveImageToFileDirectory: " + e.getMessage());
             return null;
         }
     }
@@ -240,7 +240,7 @@ public class EditItemActivity extends AppCompatActivity {
             // Result from the camera intent
             if (data.getExtras() != null) {     // Check if Intent is empty
                 Bitmap photo = (Bitmap) data.getExtras().get("data");
-                File photoFile = safeBitmapToFileDirectory(photo);
+                File photoFile = saveBitmapToFileDirectory(photo);
                 if(photoFile != null)
                     presentFileOnView(photoFile);
                 else
@@ -253,7 +253,7 @@ public class EditItemActivity extends AppCompatActivity {
                     final Uri imageUri = data.getData();
                     final InputStream imageStream = getContentResolver().openInputStream(imageUri);
                     final Bitmap selectedImage = BitmapFactory.decodeStream(imageStream);
-                    File photoFile = safeBitmapToFileDirectory(selectedImage);
+                    File photoFile = saveBitmapToFileDirectory(selectedImage);
                     if(photoFile != null)
                         presentFileOnView(photoFile);
                     else
@@ -285,6 +285,30 @@ public class EditItemActivity extends AppCompatActivity {
                 return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    //Lifecycle
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences(Globals.PREF_LIFECYCLE, MODE_PRIVATE);
+        SharedPreferences.Editor edit = sharedPreferences.edit();
+        edit.putString("itemImageFilePath", this.itemImageFile.getAbsolutePath());
+        edit.putBoolean("newImage", this.newImage);
+        edit.apply();
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences(Globals.PREF_LIFECYCLE, MODE_PRIVATE);
+        String path = sharedPreferences.getString("itemImageFilePath", "");
+        if(path != null)
+            itemImageFile = new File(path);
+        if(itemImageFile != null)
+            presentFileOnView(itemImageFile);
+        if(sharedPreferences.getBoolean("newImage", false))
+            newImage = true;
     }
 
     /**
