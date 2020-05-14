@@ -42,13 +42,12 @@ import ch.fhnw.shoppingorganizer.model.database.RepositoryProvider;
 import ch.fhnw.shoppingorganizer.model.database.ShoppingItemRepository;
 import ch.fhnw.shoppingorganizer.model.database.ShoppingListItemRepository;
 import ch.fhnw.shoppingorganizer.model.database.ShoppingListRepository;
-import ch.fhnw.shoppingorganizer.view.Tutorial.TutorialType;
 import ch.fhnw.shoppingorganizer.view.Tutorial.TutorialSliderActivity;
+import ch.fhnw.shoppingorganizer.view.Tutorial.TutorialType;
 import it.xabaras.android.recyclerview.swipedecorator.RecyclerViewSwipeDecorator;
 
 import static ch.fhnw.shoppingorganizer.view.MainActivity.LIST_ID;
 import static ch.fhnw.shoppingorganizer.view.Tutorial.TutorialType.TUTORIAL_SHOPPING_ITEM_LIST;
-import static ch.fhnw.shoppingorganizer.view.Tutorial.TutorialType.TUTORIAL_SHOPPING_LIST;
 
 public class ShoppingListActivity extends AppCompatActivity {
 
