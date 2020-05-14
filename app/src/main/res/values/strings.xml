@@ -4,7 +4,7 @@
     <string name="toolbar_search_menu">Search</string>
     <string name="toolbar_tutorial">Show tutorial</string>
     <string name="toolbar_exportAll">Export lists</string>
-    <string name="toolbar_importAll">Import lists</string>
+    <string name="toolbar_importAll">Import list</string>
 
     <string name="shopping_lists_title">Shopping Lists</string>
     <string name="shopping_lists_no_results">There is no lists</string>
