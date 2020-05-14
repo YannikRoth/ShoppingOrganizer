@@ -5,8 +5,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.AssetManager;
 import android.graphics.Canvas;
-import android.graphics.ColorFilter;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -18,10 +16,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -38,10 +34,8 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.io.File;
-import java.text.SimpleDateFormat;
+import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.zip.ZipInputStream;
 
@@ -57,11 +51,9 @@ import ch.fhnw.shoppingorganizer.model.database.DbUtils;
 import ch.fhnw.shoppingorganizer.model.database.RepositoryProvider;
 import ch.fhnw.shoppingorganizer.model.database.ShoppingListItemRepository;
 import ch.fhnw.shoppingorganizer.model.database.ShoppingListRepository;
-import ch.fhnw.shoppingorganizer.model.datatransfer.DataImporter;
 import ch.fhnw.shoppingorganizer.model.datatransfer.Zipper;
-import ch.fhnw.shoppingorganizer.model.masterdata.CSVDataImporter;
-import ch.fhnw.shoppingorganizer.view.Tutorial.TutorialType;
 import ch.fhnw.shoppingorganizer.view.Tutorial.TutorialSliderActivity;
+import ch.fhnw.shoppingorganizer.view.Tutorial.TutorialType;
 import it.xabaras.android.recyclerview.swipedecorator.RecyclerViewSwipeDecorator;
 
 import static ch.fhnw.shoppingorganizer.view.Tutorial.TutorialType.TUTORIAL_SHOPPING_LIST;
@@ -93,13 +85,11 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         //import masterdata to database if empty
-        if(DbUtils.isEmpty(ShoppingItem.class)) {
+        if (DbUtils.isEmpty(ShoppingItem.class)) {
             importMasterData();
-            //https://www.woolha.com/tutorials/android-file-picker-example
         }
 
         //display basic values from database (as an example for the GUI guys)
-        // IMPORTATN FOR GUI PEOPLE: always interact with database using the RepositoryProvider for each business object
         shoppingLists = shoppingListRepositoryInstance.getAllItems();
 
         initUi();
@@ -109,7 +99,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void callTutorial(boolean forceCall) {
         SharedPreferences prefs = getApplicationContext().getSharedPreferences(Globals.PREF_TUTORIAL, MODE_PRIVATE);
-        if(forceCall || !prefs.getBoolean(TUTORIAL_SHOPPING_LIST.toString(), false)) {
+        if (forceCall || !prefs.getBoolean(TUTORIAL_SHOPPING_LIST.toString(), false)) {
             Intent intentTutorial = new Intent(this, TutorialSliderActivity.class);
             intentTutorial.putExtra(Globals.INTENT_TUTORIAL_TYPE, TutorialType.TUTORIAL_SHOPPING_LIST.toString());
             startActivity(intentTutorial);
@@ -154,12 +144,13 @@ public class MainActivity extends AppCompatActivity {
 
             ShoppingList deletedShoppingList = null;
             List<ShoppingListItem> deletedShoppingListItems = null;
+
             @Override
             public void onSwipeLeft(@NonNull RecyclerView.ViewHolder viewHolder) {
                 int position = viewHolder.getAdapterPosition();
                 deletedShoppingList = shoppingLists.get(position);
                 deletedShoppingListItems = new ArrayList<>(deletedShoppingList.getShoppingListItems());
-                for(ShoppingListItem item:deletedShoppingListItems) {
+                for (ShoppingListItem item : deletedShoppingListItems) {
                     shoppingListItemRepositoryInstance.deleteEntity(item);
                     deletedShoppingList.getShoppingListItems().remove(item);
                 }
@@ -171,7 +162,7 @@ public class MainActivity extends AppCompatActivity {
                                     .withListName(deletedShoppingList.getListName())
                                     .build();
                             shoppingListRepositoryInstance.saveEntity(deletedShoppingList);
-                            for(ShoppingListItem item:deletedShoppingListItems) {
+                            for (ShoppingListItem item : deletedShoppingListItems) {
                                 item = new ShoppingListItemBuilder()
                                         .withShoppingItem(item.getShoppingItem())
                                         .withItemState(item.isItemState())
@@ -229,7 +220,7 @@ public class MainActivity extends AppCompatActivity {
 
     private AlertDialog alertDialog = null;
 
-    private void showShoppingListDialog(ShoppingList shoppingListBase)  {
+    private void showShoppingListDialog(ShoppingList shoppingListBase) {
         AlertDialog.Builder alert = new AlertDialog.Builder(this);
 
         LayoutInflater inflater = this.getLayoutInflater();
@@ -237,7 +228,7 @@ public class MainActivity extends AppCompatActivity {
         alert.setView(dialogView);
 
         final EditText edittext = dialogView.findViewById(R.id.edCreateNewList);
-        if(shoppingListBase != null)
+        if (shoppingListBase != null)
             edittext.setText(shoppingListBase.getListName());
         Button saveButton = dialogView.findViewById(R.id.buttonSaveNewList);
 
@@ -248,7 +239,7 @@ public class MainActivity extends AppCompatActivity {
             String inputText = edittext.getText().toString().trim();
 
             ShoppingList shoppingList;
-            if(shoppingListBase != null) {
+            if (shoppingListBase != null) {
                 shoppingList = shoppingListBase;
                 shoppingList.setListName(inputText);
             } else {
@@ -258,7 +249,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
             shoppingListRepositoryInstance.saveEntity(shoppingList);
-            if(!shoppingLists.contains(shoppingList)) {
+            if (!shoppingLists.contains(shoppingList)) {
                 adapter.addShoppingList(shoppingList);
                 setEmptyView(shoppingLists);
             } else {
@@ -281,13 +272,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
-    public void importMasterData(){
+    public void importMasterData() {
         final AssetManager am = getAssets();
         try {
-          //  CSVDataImporter csvDataImporter = new CSVDataImporter(am.open("masterdata.csv"));
-          //  csvDataImporter.performImport();
+            //  CSVDataImporter csvDataImporter = new CSVDataImporter(am.open("masterdata.csv"));
+            //  csvDataImporter.performImport();
             Zipper.upzipApplicationData(new ZipInputStream(am.open("ShoppingOrganizer.sho")), getApplicationContext());
-        }catch (Exception e){
+        } catch (Exception e) {
 
         }
     }
@@ -343,35 +334,45 @@ public class MainActivity extends AppCompatActivity {
                     Uri uri = FileProvider.getUriForFile(context, "ch.fhnw.shoppingorganizer.fileprovider", exportFile);
                     intent.putExtra(Intent.EXTRA_STREAM, uri);
                     startActivity(Intent.createChooser(intent, "Export..."));
-                }catch (Exception e){
+                } catch (Exception e) {
                     Log.d("Export exception: ", e.getMessage());
                 }
                 break;
             case R.id.importAll:
-                try{
-                    final AssetManager am = getAssets();
-                    ZipInputStream zip = new ZipInputStream(am.open(Zipper.ExportedShoppingrganizerFileName));
-                    Zipper.upzipApplicationData(zip, getApplicationContext());
-                    List<ShoppingList> newLists = shoppingListRepositoryInstance.getAllItems();
-                    ShoppingList newList = null;
-                    for(ShoppingList sl:newLists)
-                        if(!shoppingLists.contains(sl)) {
-                            shoppingLists.add(sl);
-                            newList = sl;
-                        }
-                    Collections.sort(shoppingLists);
-                        adapter.setShoppingListFull(shoppingLists);
-                    adapter.notifyDataSetChanged();
-                    if(newList != null) {
-                        int index = shoppingLists.indexOf(newList);
-                        rvShoppingLists.scrollToPosition(index);
-                        adapter.setHighlightPOsition(index);
-                    }
-                }catch (Exception e){
-                    Log.d("Import exception: ", e.getMessage());
-                }
+                Intent chooseFile = new Intent(Intent.ACTION_GET_CONTENT);
+                chooseFile.setType("*/*");
+                chooseFile = Intent.createChooser(chooseFile, "Choose a file");
+                startActivityForResult(chooseFile, Globals.IMPORT_ACTIVITY_REQ_IDENTIFIER);
                 break;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        switch (requestCode) {
+            case Globals.IMPORT_ACTIVITY_REQ_IDENTIFIER:
+                if (resultCode == -1) {
+                    Log.d("switch entered", "switch entered");
+                    final Uri fileUri = data.getData();
+                    try {
+                        final InputStream is = getApplicationContext().getContentResolver().openInputStream(fileUri);
+                        Zipper.upzipApplicationData(new ZipInputStream(is), getApplicationContext());
+                    } catch (Exception e) {
+                        Log.d("exception", e.getMessage());
+                    } finally {
+                        //reload Main-Activity
+                        finish();
+                        startActivity(getIntent());
+                    }
+
+                }
+                break;
+
+        }
+
     }
 }
