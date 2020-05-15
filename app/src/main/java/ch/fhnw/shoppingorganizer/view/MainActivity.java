@@ -393,13 +393,14 @@ public class MainActivity extends AppCompatActivity {
         final List<ShoppingList> allLists = shoppingListRepositoryInstance.getAllItems();
         List<ShoppingList> newLists = new ArrayList<>();
         for(ShoppingList sl : allLists){
-            if(!shoppingLists.contains(sl)){
+            if(!adapter.getShoppingListFull().contains(sl)){
+                adapter.getShoppingListFull().add(sl);
                 shoppingLists.add(sl);
                 newLists.add(sl);
             }
         }
         Collections.sort(shoppingLists);
-        adapter.setShoppingListFull(shoppingLists);
+        Collections.sort(adapter.getShoppingListFull());
         adapter.notifyDataSetChanged();
 
         highLightNewImport(newLists);

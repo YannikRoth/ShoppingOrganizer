@@ -36,9 +36,8 @@ public abstract class ShoppingListsAdapter extends RecyclerView.Adapter<Shopping
         this.createShoppingListItemTouchHelper(recyclerView, getSwipeDirs());
     }
 
-    public void setShoppingListFull(List<ShoppingList> list) {
-            shoppingListsFull.clear();
-            shoppingListsFull = list;
+    public List<ShoppingList> getShoppingListFull() {
+        return this.shoppingListsFull;
     }
 
     public void addShoppingList(ShoppingList shoppingList) {
@@ -56,7 +55,7 @@ public abstract class ShoppingListsAdapter extends RecyclerView.Adapter<Shopping
         if(shoppingLists.contains(shoppingList)) {
             int index = shoppingLists.indexOf(shoppingList);
             shoppingLists.remove(shoppingList);
-            notifyItemRemoved(index);
+            this.notifyItemRemoved(index);
         }
     }
 
