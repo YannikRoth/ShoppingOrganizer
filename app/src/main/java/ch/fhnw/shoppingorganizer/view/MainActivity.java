@@ -36,6 +36,7 @@ import com.google.android.material.snackbar.Snackbar;
 import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.zip.ZipInputStream;
 
@@ -361,12 +362,12 @@ public class MainActivity extends AppCompatActivity {
                     try {
                         final InputStream is = getApplicationContext().getContentResolver().openInputStream(fileUri);
                         Zipper.upzipApplicationData(new ZipInputStream(is), getApplicationContext());
+
+                        //highlight new import
+                        this.highLightNewImport();
+
                     } catch (Exception e) {
                         Log.d("exception", e.getMessage());
-                    } finally {
-                        //reload Main-Activity
-                        finish();
-                        startActivity(getIntent());
                     }
 
                 }
@@ -374,5 +375,24 @@ public class MainActivity extends AppCompatActivity {
 
         }
 
+    }
+
+    private void highLightNewImport(){
+        final List<ShoppingList> newLists = shoppingListRepositoryInstance.getAllItems();
+        ShoppingList newList = null;
+        for(ShoppingList sl : newLists){
+            if(!shoppingLists.contains(sl)){
+                shoppingLists.add(sl);
+                newList = sl;
+            }
+        }
+        Collections.sort(shoppingLists);
+        adapter.setShoppingListFull(shoppingLists);
+        adapter.notifyDataSetChanged();
+        if(newList != null){
+            int index = shoppingLists.indexOf(newList);
+            rvShoppingLists.scrollToPosition(index);
+            adapter.setHighlightPOsition(index);
+        }
     }
 }
