@@ -1,0 +1,137 @@
+{
+  "items": {
+    "1": {
+      "id": 1,
+      "price": 20.3,
+      "itemName": "Rind",
+      "itemActive": true,
+      "imgPath": "a\/b\/c",
+      "category": "MEAT"
+    },
+    "2": {
+      "id": 2,
+      "price": 15.2,
+      "itemName": "Schwein",
+      "itemActive": true,
+      "imgPath": "a\/b\/c",
+      "category": "MEAT"
+    },
+    "3": {
+      "id": 3,
+      "price": 11.2,
+      "itemName": "Geflügel",
+      "itemActive": true,
+      "imgPath": "a\/b\/c",
+      "category": "MEAT"
+    },
+    "4": {
+      "id": 4,
+      "price": 5.3,
+      "itemName": "Shampoo",
+      "itemActive": true,
+      "imgPath": "a\/b\/c",
+      "category": "NONFOOD"
+    },
+    "5": {
+      "id": 5,
+      "price": 1.2,
+      "itemName": "WC-Papier",
+      "itemActive": true,
+      "imgPath": "a\/b\/c",
+      "category": "NONFOOD"
+    },
+    "6": {
+      "id": 6,
+      "price": 0.9,
+      "itemName": "Apfel",
+      "itemActive": true,
+      "imgPath": "a\/b\/c",
+      "category": "VEGETABLES"
+    },
+    "7": {
+      "id": 7,
+      "price": 4.2,
+      "itemName": "Erdbeeren",
+      "itemActive": true,
+      "imgPath": "a\/b\/c",
+      "category": "VEGETABLES"
+    },
+    "8": {
+      "id": 8,
+      "price": 2.2,
+      "itemName": "Karrotten",
+      "itemActive": true,
+      "imgPath": "a\/b\/c",
+      "category": "VEGETABLES"
+    },
+    "9": {
+      "id": 9,
+      "price": 1.7,
+      "itemName": "Lauch",
+      "itemActive": true,
+      "imgPath": "a\/b\/c",
+      "category": "VEGETABLES"
+    },
+    "10": {
+      "id": 10,
+      "price": 2.3,
+      "itemName": "Avocado",
+      "itemActive": true,
+      "imgPath": "a\/b\/c",
+      "category": "VEGETABLES"
+    },
+    "11": {
+      "id": 11,
+      "price": 7.6,
+      "itemName": "Forelle",
+      "itemActive": true,
+      "imgPath": "a\/b\/c",
+      "category": "FISH"
+    },
+    "12": {
+      "id": 12,
+      "price": 8,
+      "itemName": "Lachs",
+      "itemActive": true,
+      "imgPath": "a\/b\/c",
+      "category": "FISH"
+    },
+    "13": {
+      "id": 13,
+      "price": 2.75,
+      "itemName": "Barilla",
+      "itemActive": true,
+      "imgPath": "a\/b\/c",
+      "category": "PASTA"
+    }
+  },
+  "listItems": {
+    "1": {
+      "id": 1,
+      "quantity": 3,
+      "itemState": false,
+      "shoppingItem": 2,
+      "shoppingList": 1
+    },
+    "2": {
+      "id": 2,
+      "quantity": 1,
+      "itemState": false,
+      "shoppingItem": 5,
+      "shoppingList": 1
+    },
+    "3": {
+      "id": 3,
+      "quantity": 5,
+      "itemState": false,
+      "shoppingItem": 7,
+      "shoppingList": 1
+    }
+  },
+  "lists": {
+    "1": {
+      "id": 1,
+      "listName": "Einkaufsliste (IMPORTED)"
+    }
+  }
+}

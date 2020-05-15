@@ -1,3 +1,62 @@
 <resources>
     <string name="app_name">ShoppingOrganizer</string>
+
+    <string name="toolbar_search_menu">Search</string>
+    <string name="toolbar_tutorial">Show tutorial</string>
+    <string name="toolbar_exportAll">Export lists</string>
+    <string name="toolbar_importAll">Import list</string>
+
+    <string name="shopping_lists_title">Shopping Lists</string>
+    <string name="shopping_lists_no_results">There is no lists</string>
+    <string name="shopping_lists_price">Price</string>
+    <string name="shopping_lists_quantity">Quantity</string>
+
+    <string name="shopping_lists_popup_title">Shopping List Name</string>
+    <string name="shopping_lists_popup_message">Set Shopping List name</string>
+    <string name="shopping_lists_popup_yes_btn">Set</string>
+    <string name="shopping_lists_popup_no_btn">Cancel</string>
+    <string name="shopping_lists_popup_hint">List Name</string>
+
+    <string name="shopping_list_item_name">Name</string>
+    <string name="shopping_list_item_no_quantity">Item has no quantity, action not possible.</string>
+
+    <string name="edit_item_name">Name</string>
+    <string name="edit_item_price">Price</string>
+    <string name="edit_item_category">Category</string>
+    <string name="edit_item_active">Active</string>
+    <string name="edit_item_image_description">Click on Picture: Open Camera to take a picture\nor pick a picture from phones file-explorer</string>
+    <string name="edit_item_save">Save</string>
+
+    <string name="snackbar_undo">Undo</string>
+    <string name="snackbar_list_removed">List removed</string>
+    <string name="snackbar_list_item_removed">Item removed from list</string>
+    <string name="snackbar_item_removed">Item removed</string>
+    <string name="snackbar_item_checked">Item checked</string>
+
+    <string name="alert_dialog_continue">Continue</string>
+    <string name="alert_dialog_cancel">Cancel</string>
+    <string name="alert_dialog_title_delete_used_item">To delete item is used in lists</string>
+    <string name="alert_dialog_warning_delete_used_item">If you delete this item, it will be removed from every shopping list.</string>
+
+    <string name="tutorial_shopping_list_delete_title">Delete list</string>
+    <string name="tutorial_shopping_list_delete_content">Swipe left to delete a list</string>
+    <string name="tutorial_shopping_list_delete_undo_title">Undo action</string>
+    <string name="tutorial_shopping_list_delete_undo_content">Press undo on the bottom to undo your actions</string>
+    <string name="tutorial_shopping_list_open_title">Open list</string>
+    <string name="tutorial_shopping_list_open_content">Tab a list to open</string>
+    <string name="tutorial_shopping_list_edit_name_title">Edit list name</string>
+    <string name="tutorial_shopping_list_edit_name_content">Press and hold list to edit list name</string>
+    <string name="tutorial_shopping_item_list_check_title">Check item</string>
+    <string name="tutorial_shopping_item_list_check_content">Swipe right to check item on list</string>
+    <string name="tutorial_shopping_list_export_title">Send list</string>
+    <string name="tutorial_shopping_list_export_content">Swipe right to send a shopping list</string>
+    <string name="tutorial_shopping_item_list_delete_title">Delete quantity/item</string>
+    <string name="tutorial_shopping_item_list_delete_content">Swipe left to:\n1. Remove item quantity from list\n2. Remove item from shopping organizer</string>
+    <string name="tutorial_shopping_item_list_edit_title">Edit item</string>
+    <string name="tutorial_shopping_item_list_edit_content">Press and hold to edit item</string>
+    <string name="tutorial_shopping_item_edit_image_title">Choose/change image</string>
+    <string name="tutorial_shopping_item_edit_image_content">Press on image to change it</string>
+    <string name="tutorial_shopping_item_edit_tutorial_title">Show tutorial again</string>
+    <string name="tutorial_shopping_item_edit_tutorial_content">On each view you can call the tutorial again over the menubar</string>
+
 </resources>
