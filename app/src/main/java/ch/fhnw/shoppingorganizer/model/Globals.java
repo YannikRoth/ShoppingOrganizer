@@ -15,6 +15,7 @@ public class Globals {
     //View
     public static final NumberFormat NUMBERFORMAT = NumberFormat.getInstance(new Locale("de", "CH"));
     public final static String INTENT_TUTORIAL_TYPE = "SliderType";
+    public final static String INTENT_NEW_LIST_IDS_EXTRA = "newShoppingListIds";
 
     public final static String PREF_TUTORIAL = "UserTutorialSlider";
     public final static String PREF_LIFECYCLE = "LifecyclePrefs";

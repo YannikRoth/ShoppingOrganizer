@@ -38,6 +38,8 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.zip.ZipInputStream;
 
 import ch.fhnw.shoppingorganizer.R;
@@ -96,6 +98,16 @@ public class MainActivity extends AppCompatActivity {
         initUi();
 
         callTutorial(false);
+
+
+        Intent intent = getIntent();
+        if(intent.hasExtra(Globals.INTENT_NEW_LIST_IDS_EXTRA) && intent.getStringExtra(Globals.INTENT_NEW_LIST_IDS_EXTRA) != "") {
+            List<ShoppingList> list = Stream
+                    .of(intent.getStringExtra(Globals.INTENT_NEW_LIST_IDS_EXTRA).split(","))
+                    .map(e -> shoppingListRepositoryInstance.getShoppingListById(Long.parseLong(e)))
+                    .collect(Collectors.toList());
+            highLightNewImport(list);
+        }
     }
 
     private void callTutorial(boolean forceCall) {
@@ -217,6 +229,7 @@ public class MainActivity extends AppCompatActivity {
         rvShoppingLists.addItemDecoration(dividerItemDecoration);
         rvShoppingLists.setAdapter(adapter);
         setEmptyView(shoppingLists);
+
     }
 
     private AlertDialog alertDialog = null;
@@ -378,21 +391,25 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void highLightNewImport(){
-        final List<ShoppingList> newLists = shoppingListRepositoryInstance.getAllItems();
-        ShoppingList newList = null;
-        for(ShoppingList sl : newLists){
+        final List<ShoppingList> allLists = shoppingListRepositoryInstance.getAllItems();
+        List<ShoppingList> newLists = new ArrayList<ShoppingList>();
+        for(ShoppingList sl : allLists){
             if(!shoppingLists.contains(sl)){
                 shoppingLists.add(sl);
-                newList = sl;
+                newLists.add(sl);
             }
         }
         Collections.sort(shoppingLists);
         adapter.setShoppingListFull(shoppingLists);
         adapter.notifyDataSetChanged();
-        if(newList != null){
-            int index = shoppingLists.indexOf(newList);
-            rvShoppingLists.scrollToPosition(index);
-            adapter.setHighlightPOsition(index);
+
+        highLightNewImport(newLists);
+    }
+    private void highLightNewImport(List<ShoppingList> newShoppingLists){
+        List<Integer> indices = newShoppingLists.stream().map(e -> shoppingLists.indexOf(e)).collect(Collectors.toList());
+        if(!indices.isEmpty()){
+            rvShoppingLists.scrollToPosition(indices.get(indices.size()-1));
+            adapter.setHighlightPositions(indices);
         }
     }
 }

@@ -125,11 +125,13 @@ public class Zipper {
                 .collect(Collectors.toList());
     }
 
-
+    //Returns imported ShoppingLists
     @RequiresApi(api = Build.VERSION_CODES.O)
-    public static void upzipApplicationData(final ZipInputStream zipInputStream, final Context applicationContext) throws IOException {
+    public static List<ShoppingList> upzipApplicationData(final ZipInputStream zipInputStream, final Context applicationContext) throws IOException {
         final byte buffer[] = new byte[BUFFER];
         final File dir = applicationContext.getDir("imageDir", Context.MODE_PRIVATE);
+
+        List<ShoppingList> newShoppingListIds = new ArrayList<ShoppingList>();
 
         ZipEntry jsonImportFile;
         ZipEntry entry;
@@ -150,14 +152,13 @@ public class Zipper {
                 String jsonString = new BufferedReader(new InputStreamReader(zipInputStream))
                         .lines().collect(Collectors.joining(""));
                 try {
-                    DataImporter.unserializeFromJson(jsonString);
+                    newShoppingListIds.addAll(DataImporter.unserializeFromJson(jsonString));
                 }catch (Exception e){
 
                 }
             }
         }
-
-
+        return newShoppingListIds;
     }
 
     private static void performZip(final List<String> files, final File zipFile) {

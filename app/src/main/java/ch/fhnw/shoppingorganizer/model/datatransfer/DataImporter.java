@@ -3,8 +3,11 @@ package ch.fhnw.shoppingorganizer.model.datatransfer;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.lang.reflect.Array;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import ch.fhnw.shoppingorganizer.model.businessobject.Category;
 import ch.fhnw.shoppingorganizer.model.businessobject.ShoppingItem;
@@ -24,8 +27,11 @@ public class DataImporter {
     private static final ShoppingListItemRepository listItemRepository = RepositoryProvider.getShoppingListItemRepositoryInstance();
     private static final ShoppingListRepository listRepository = RepositoryProvider.getShoppingListRepositoryInstance();
 
-    public static void unserializeFromJson(String jsonString) throws JSONException {
+    //Returns imported ShoppingLists
+    public static List<ShoppingList> unserializeFromJson(String jsonString) throws JSONException {
         JSONObject data = new JSONObject(jsonString);
+
+        List<ShoppingList> newShoppingListIds = new ArrayList<ShoppingList>();
 
         // Restore all items (ignoring duplicate names)
         JSONObject itemsInJson = data.getJSONObject("items");
@@ -85,6 +91,8 @@ public class DataImporter {
             // Save new item in database
             listRepository.saveEntity(newItem);
 
+            newShoppingListIds.add(newItem);
+
             // Restore all list items if the list itself was also added
             JSONObject listItemsInJson = data.getJSONObject("listItems");
 
@@ -132,5 +140,6 @@ public class DataImporter {
                 listItemRepository.saveEntity(newItem2);
             }
         }
+        return newShoppingListIds;
     }
 }
