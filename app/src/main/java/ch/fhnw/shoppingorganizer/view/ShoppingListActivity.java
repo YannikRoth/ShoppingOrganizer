@@ -339,6 +339,14 @@ public class ShoppingListActivity extends AppCompatActivity {
                 if(resultCode == RESULT_OK && data != null) {
                     ShoppingItem item = shoppingItemRepository.getShoppingItemById(data.getIntExtra(SHOPPING_ITEM_ID, 0));
                     if (item != null) {
+                        ShoppingListItem sli = new ShoppingListItemBuilder()
+                                .withItemState(Globals.SHOPPING_LIST_ITEM_STATE_UNCHECKED)
+                                .withShoppingList(this.shoppingList)
+                                .withShoppingItem(item)
+                                .withQuantity(1)
+                                .build();
+                        shoppingListItemRepository.saveEntity(sli);
+                        this.shoppingList.getShoppingListItems().add(sli);
                         adapter.addShoppingItem(item);
                     }
                 }
