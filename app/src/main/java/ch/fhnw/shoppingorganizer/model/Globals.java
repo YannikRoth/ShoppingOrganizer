@@ -21,4 +21,6 @@ public class Globals {
     public final static String PREF_LIFECYCLE = "LifecyclePrefs";
 
     public final static int IMPORT_ACTIVITY_REQ_IDENTIFIER = 1;
+
+    public final static String STRING_SEPERATOR = ",";
 }

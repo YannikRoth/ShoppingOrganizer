@@ -101,9 +101,8 @@ public class MainActivity extends AppCompatActivity {
 
 
         Intent intent = getIntent();
-        if(intent.hasExtra(Globals.INTENT_NEW_LIST_IDS_EXTRA) && intent.getStringExtra(Globals.INTENT_NEW_LIST_IDS_EXTRA) != "") {
-            List<ShoppingList> list = Stream
-                    .of(intent.getStringExtra(Globals.INTENT_NEW_LIST_IDS_EXTRA).split(","))
+        if(intent.hasExtra(Globals.INTENT_NEW_LIST_IDS_EXTRA) && intent.getStringExtra(Globals.INTENT_NEW_LIST_IDS_EXTRA) != Globals.EMPTY_STRING) {
+            final List<ShoppingList> list = Stream.of(intent.getStringExtra(Globals.INTENT_NEW_LIST_IDS_EXTRA).split(Globals.STRING_SEPERATOR))
                     .map(e -> shoppingListRepositoryInstance.getShoppingListById(Long.parseLong(e)))
                     .collect(Collectors.toList());
             highLightNewImport(list);
@@ -392,7 +391,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void highLightNewImport(){
         final List<ShoppingList> allLists = shoppingListRepositoryInstance.getAllItems();
-        List<ShoppingList> newLists = new ArrayList<ShoppingList>();
+        List<ShoppingList> newLists = new ArrayList<>();
         for(ShoppingList sl : allLists){
             if(!shoppingLists.contains(sl)){
                 shoppingLists.add(sl);
@@ -406,7 +405,9 @@ public class MainActivity extends AppCompatActivity {
         highLightNewImport(newLists);
     }
     private void highLightNewImport(List<ShoppingList> newShoppingLists){
-        List<Integer> indices = newShoppingLists.stream().map(e -> shoppingLists.indexOf(e)).collect(Collectors.toList());
+        final List<Integer> indices = newShoppingLists.stream()
+                .map(e -> shoppingLists.indexOf(e))
+                .collect(Collectors.toList());
         if(!indices.isEmpty()){
             rvShoppingLists.scrollToPosition(indices.get(indices.size()-1));
             adapter.setHighlightPositions(indices);

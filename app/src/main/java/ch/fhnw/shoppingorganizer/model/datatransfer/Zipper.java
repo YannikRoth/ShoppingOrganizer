@@ -3,11 +3,8 @@ package ch.fhnw.shoppingorganizer.model.datatransfer;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.os.Build;
-import android.util.Log;
 
 import androidx.annotation.RequiresApi;
-
-import org.json.JSONObject;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -16,24 +13,15 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
-import java.nio.Buffer;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
@@ -125,13 +113,13 @@ public class Zipper {
                 .collect(Collectors.toList());
     }
 
-    //Returns imported ShoppingLists
+    //Returns imported ShoppingListIds
     @RequiresApi(api = Build.VERSION_CODES.O)
-    public static List<ShoppingList> upzipApplicationData(final ZipInputStream zipInputStream, final Context applicationContext) throws IOException {
+    public static Set<Long> upzipApplicationData(final ZipInputStream zipInputStream, final Context applicationContext) throws IOException {
         final byte buffer[] = new byte[BUFFER];
         final File dir = applicationContext.getDir("imageDir", Context.MODE_PRIVATE);
 
-        List<ShoppingList> newShoppingListIds = new ArrayList<ShoppingList>();
+        final Set<Long> newShoppingListIds = new TreeSet<>();
 
         ZipEntry jsonImportFile;
         ZipEntry entry;
