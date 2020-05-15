@@ -1,5 +1,6 @@
 package ch.fhnw.shoppingorganizer.view;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -65,6 +66,7 @@ public class MainActivity extends AppCompatActivity {
 
     public static final String LIST_NAME = "ListName";
     public static final String LIST_ID = "pkShoppingList";
+    public static final int CALL_SHOPPING_LIST_INTENT = 4;
     public final String TAG = this.getClass().getSimpleName();
 
     private ShoppingListRepository shoppingListRepositoryInstance = RepositoryProvider.getShoppingListRepositoryInstance();
@@ -141,7 +143,7 @@ public class MainActivity extends AppCompatActivity {
                 Intent intent = new Intent(this.getContext(), ShoppingListActivity.class);
                 intent.putExtra(LIST_NAME, item.getListName());
                 intent.putExtra(LIST_ID, item.getId());
-                startActivity(intent);
+                startActivityForResult(intent, CALL_SHOPPING_LIST_INTENT);
             }
 
             @Override
@@ -384,7 +386,16 @@ public class MainActivity extends AppCompatActivity {
 
                 }
                 break;
-
+            case CALL_SHOPPING_LIST_INTENT:
+                if(resultCode == Activity.RESULT_OK) {
+                    Long shoppingListId = data.getLongExtra(LIST_ID, 0);
+                    ShoppingList list = shoppingListRepositoryInstance.getShoppingListById(shoppingListId);
+                    int position = 0;
+                    if(shoppingLists.contains(list))
+                        position = shoppingLists.indexOf(list);
+                    adapter.notifyItemChanged(position);
+                }
+                break;
         }
 
     }
