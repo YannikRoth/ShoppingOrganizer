@@ -29,6 +29,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -210,12 +211,27 @@ public class EditItemActivity extends AppCompatActivity {
         Timestamp ts = new Timestamp(new Date().getTime());
         File file = new File(dir, shoppingItem.getItemName() + ts + ".png");
         OutputStream outputStream;
+        ByteArrayOutputStream byteArrayOutputStream;
         try {
             outputStream = new FileOutputStream(file);
-            bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
+            byteArrayOutputStream = new ByteArrayOutputStream();
+            int maxByteSize = 180000;
+            int currQuality = 100;
+            bitmap.compress(Bitmap.CompressFormat.JPEG, currQuality, byteArrayOutputStream);
+            int currByte = byteArrayOutputStream.toByteArray().length;
+            while(currByte >= maxByteSize && currQuality > 0) {
+                if(currQuality > 5)
+                    currQuality -= 5;
+                else
+                    currQuality -= 1;
+                byteArrayOutputStream = new ByteArrayOutputStream();
+                bitmap.compress(Bitmap.CompressFormat.JPEG, currQuality, byteArrayOutputStream);
+                currByte = byteArrayOutputStream.toByteArray().length;
+            }
+            bitmap.compress(Bitmap.CompressFormat.JPEG, currQuality, outputStream);
             outputStream.flush();
             outputStream.close();
-            Toast.makeText(getApplicationContext(), "Image saved to app" + file.getAbsolutePath(), Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), "Image saved to app", Toast.LENGTH_SHORT).show();
             this.newImage = true;
             return file;
         } catch (IOException e) {

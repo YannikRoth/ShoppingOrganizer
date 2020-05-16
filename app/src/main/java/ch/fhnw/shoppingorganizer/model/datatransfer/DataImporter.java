@@ -5,6 +5,8 @@ import org.json.JSONObject;
 
 import java.math.BigDecimal;
 import java.util.Iterator;
+import java.util.Set;
+import java.util.TreeSet;
 
 import ch.fhnw.shoppingorganizer.model.businessobject.Category;
 import ch.fhnw.shoppingorganizer.model.businessobject.ShoppingItem;
@@ -24,8 +26,11 @@ public class DataImporter {
     private static final ShoppingListItemRepository listItemRepository = RepositoryProvider.getShoppingListItemRepositoryInstance();
     private static final ShoppingListRepository listRepository = RepositoryProvider.getShoppingListRepositoryInstance();
 
-    public static void unserializeFromJson(String jsonString) throws JSONException {
+    //Returns imported ShoppingListIds
+    public static Set<Long> unserializeFromJson(final String jsonString) throws JSONException {
         JSONObject data = new JSONObject(jsonString);
+
+        final Set<Long> newShoppingListIds = new TreeSet<Long>();
 
         // Restore all items (ignoring duplicate names)
         JSONObject itemsInJson = data.getJSONObject("items");
@@ -85,6 +90,9 @@ public class DataImporter {
             // Save new item in database
             listRepository.saveEntity(newItem);
 
+            //add new list id to return set (used for highlighting)
+            newShoppingListIds.add(newItem.getId());
+
             // Restore all list items if the list itself was also added
             JSONObject listItemsInJson = data.getJSONObject("listItems");
 
@@ -132,5 +140,6 @@ public class DataImporter {
                 listItemRepository.saveEntity(newItem2);
             }
         }
+        return newShoppingListIds;
     }
 }

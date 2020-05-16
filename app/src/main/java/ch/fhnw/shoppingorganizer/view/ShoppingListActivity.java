@@ -1,5 +1,6 @@
 package ch.fhnw.shoppingorganizer.view;
 
+import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -74,13 +75,15 @@ public class ShoppingListActivity extends AppCompatActivity {
     private ShoppingListRepository shoppingListRepository = RepositoryProvider.getShoppingListRepositoryInstance();
     private ShoppingListItemRepository shoppingListItemRepository = RepositoryProvider.getShoppingListItemRepositoryInstance();
 
+    private Intent intent;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_shopping_list);
 
         this.shoppingItem = shoppingItemRepository.getAllItems();
-        Intent intent = getIntent();
+        this.intent = getIntent();
         if(intent.hasExtra(LIST_ID) && intent.getLongExtra(LIST_ID, 0) > 0) {
             this.shoppingList = shoppingListRepository.getShoppingListById(intent.getLongExtra(LIST_ID, 0));
         }
@@ -339,11 +342,27 @@ public class ShoppingListActivity extends AppCompatActivity {
                 if(resultCode == RESULT_OK && data != null) {
                     ShoppingItem item = shoppingItemRepository.getShoppingItemById(data.getIntExtra(SHOPPING_ITEM_ID, 0));
                     if (item != null) {
+                        ShoppingListItem sli = new ShoppingListItemBuilder()
+                                .withItemState(Globals.SHOPPING_LIST_ITEM_STATE_UNCHECKED)
+                                .withShoppingList(this.shoppingList)
+                                .withShoppingItem(item)
+                                .withQuantity(1)
+                                .build();
+                        shoppingListItemRepository.saveEntity(sli);
+                        this.shoppingList.getShoppingListItems().add(sli);
                         adapter.addShoppingItem(item);
                     }
                 }
                 break;
         }
+    }
+
+    @Override
+    public void finish() {
+        Intent result = new Intent();
+        result.putExtra(LIST_ID, shoppingList.getId());
+        setResult(Activity.RESULT_OK, result);
+        super.finish();
     }
 
     @Override

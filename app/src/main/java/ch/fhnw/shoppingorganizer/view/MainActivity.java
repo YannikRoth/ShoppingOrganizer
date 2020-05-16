@@ -1,5 +1,6 @@
 package ch.fhnw.shoppingorganizer.view;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -36,7 +37,10 @@ import com.google.android.material.snackbar.Snackbar;
 import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.zip.ZipInputStream;
 
 import ch.fhnw.shoppingorganizer.R;
@@ -62,6 +66,7 @@ public class MainActivity extends AppCompatActivity {
 
     public static final String LIST_NAME = "ListName";
     public static final String LIST_ID = "pkShoppingList";
+    public static final int CALL_SHOPPING_LIST_INTENT = 4;
     public final String TAG = this.getClass().getSimpleName();
 
     private ShoppingListRepository shoppingListRepositoryInstance = RepositoryProvider.getShoppingListRepositoryInstance();
@@ -95,6 +100,15 @@ public class MainActivity extends AppCompatActivity {
         initUi();
 
         callTutorial(false);
+
+
+        Intent intent = getIntent();
+        if(intent.hasExtra(Globals.INTENT_NEW_LIST_IDS_EXTRA) && intent.getStringExtra(Globals.INTENT_NEW_LIST_IDS_EXTRA) != Globals.EMPTY_STRING) {
+            final List<ShoppingList> list = Stream.of(intent.getStringExtra(Globals.INTENT_NEW_LIST_IDS_EXTRA).split(Globals.STRING_SEPERATOR))
+                    .map(e -> shoppingListRepositoryInstance.getShoppingListById(Long.parseLong(e)))
+                    .collect(Collectors.toList());
+            highLightNewImport(list);
+        }
     }
 
     private void callTutorial(boolean forceCall) {
@@ -129,7 +143,7 @@ public class MainActivity extends AppCompatActivity {
                 Intent intent = new Intent(this.getContext(), ShoppingListActivity.class);
                 intent.putExtra(LIST_NAME, item.getListName());
                 intent.putExtra(LIST_ID, item.getId());
-                startActivity(intent);
+                startActivityForResult(intent, CALL_SHOPPING_LIST_INTENT);
             }
 
             @Override
@@ -216,6 +230,7 @@ public class MainActivity extends AppCompatActivity {
         rvShoppingLists.addItemDecoration(dividerItemDecoration);
         rvShoppingLists.setAdapter(adapter);
         setEmptyView(shoppingLists);
+
     }
 
     private AlertDialog alertDialog = null;
@@ -361,18 +376,53 @@ public class MainActivity extends AppCompatActivity {
                     try {
                         final InputStream is = getApplicationContext().getContentResolver().openInputStream(fileUri);
                         Zipper.upzipApplicationData(new ZipInputStream(is), getApplicationContext());
+
+                        //highlight new import
+                        this.highLightNewImport();
+
                     } catch (Exception e) {
                         Log.d("exception", e.getMessage());
-                    } finally {
-                        //reload Main-Activity
-                        finish();
-                        startActivity(getIntent());
                     }
 
                 }
                 break;
-
+            case CALL_SHOPPING_LIST_INTENT:
+                if(resultCode == Activity.RESULT_OK) {
+                    Long shoppingListId = data.getLongExtra(LIST_ID, 0);
+                    ShoppingList list = shoppingListRepositoryInstance.getShoppingListById(shoppingListId);
+                    int position = 0;
+                    if(shoppingLists.contains(list))
+                        position = shoppingLists.indexOf(list);
+                    adapter.notifyItemChanged(position);
+                }
+                break;
         }
 
+    }
+
+    private void highLightNewImport(){
+        final List<ShoppingList> allLists = shoppingListRepositoryInstance.getAllItems();
+        List<ShoppingList> newLists = new ArrayList<>();
+        for(ShoppingList sl : allLists){
+            if(!adapter.getShoppingListFull().contains(sl)){
+                adapter.getShoppingListFull().add(sl);
+                shoppingLists.add(sl);
+                newLists.add(sl);
+            }
+        }
+        Collections.sort(shoppingLists);
+        Collections.sort(adapter.getShoppingListFull());
+        adapter.notifyDataSetChanged();
+
+        highLightNewImport(newLists);
+    }
+    private void highLightNewImport(List<ShoppingList> newShoppingLists){
+        final List<Integer> indices = newShoppingLists.stream()
+                .map(e -> shoppingLists.indexOf(e))
+                .collect(Collectors.toList());
+        if(!indices.isEmpty()){
+            rvShoppingLists.scrollToPosition(indices.get(indices.size()-1));
+            adapter.setHighlightPositions(indices);
+        }
     }
 }
